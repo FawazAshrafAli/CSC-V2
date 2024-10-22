@@ -1,0 +1,476 @@
+{% load static %}
+
+<!DOCTYPE html>
+<head>
+
+<!-- Basic Page Needs
+================================================== -->
+<title>{% block title_prefix %}{% endblock title_prefix %} - List of Common Service Centres (CSC) in India</title>
+
+<meta name="description" content={% block meta_description %}{% endblock meta_description %} />
+
+<meta name="keywords" content={% block meta_keywords %}{% endblock meta_keywords %} />
+
+<meta name="author" content="CSCIndia.info" />
+
+<meta name="robots" content="index, follow">
+
+<meta name="p:domain_verify" content="3ff725468cbfbe20793d4cab9d4175c9"/>
+<meta name="yandex-verification" content="77774333f73d2cc9" />
+<meta name="msvalidate.01" content="4D196FD7BB898D60AE3855BA5DB31BFB" />
+<meta name="google-site-verification" content="qVaJ_bnkTCxTSOm_I-G8sqiMYWMkDPIQXlNCJcLhFiQ" />
+
+<meta property="og:site_name" content="Common Service Centres (CSC) in India" />
+
+<meta property="og:title" content="{% block og_title_prefix %}{% endblock og_title_prefix %} - List of Common Service Centres (CSC) in India"/>
+
+<meta property="og:image" content="https://cscindia.info/static/images/logo.png" /> 
+
+<meta property="og:description" content={% block og_description %}{% endblock og_description %} />
+
+<meta property="og:url" content="https://{{request.get_host}}{{request.path}}" />
+
+<link rel="canonical" href="https://{{request.get_host}}{{request.path}}" />
+
+{% block meta_tags %}{% endblock meta_tags %}
+
+{% block schema_markup %}{% endblock schema_markup %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/main-color.css' %}" id="colors">
+
+<link rel="shortcut icon" href="{% static 'images/Favicon.png' %}">
+
+<!-- W3 -->
+<style>
+	#message-div ul {
+		padding: 0;
+	}
+	#message-div ul li {
+		list-style: none;
+		text-align: center;	
+	}
+	.alert {
+		z-index: 1500;
+		padding: 10px;
+	}
+	.alert-success {
+		background-color: #4CAF50;
+		color: #fff;		
+	}
+	.alert-danger {
+		background-color: darkred;
+		color: #fff;		
+	}
+	.alert-warning {
+		background-color: orange;
+		color: #fff;		
+	}
+</style>
+{% block styles %}{% endblock styles %}
+<link rel="stylesheet" href="{% static 'w3/base/css/product_pop_up.css' %}">
+</head>
+
+<body>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header Container
+================================================== -->
+<header id="header-container" class="no-shadow">
+
+	<!-- Header -->
+	<div id="header">
+		<div class="container">
+			
+			<!-- Left Side Content -->
+			<div class="left-side">
+				
+				<!-- Logo -->
+				<div id="logo">
+					<a href="{% url 'home:view' %}"><img src="{% static 'images/logo.png' %}" alt="CSC Centers in India"></a>
+				</div>
+
+				<!-- Mobile Navigation -->
+				<div class="mmenu-trigger">
+					<button class="hamburger hamburger--collapse" type="button">
+						<span class="hamburger-box">
+							<span class="hamburger-inner"></span>
+						</span>
+					</button>
+				</div>
+
+				<!-- Main Navigation -->
+				 <nav id="navigation" class="style-1" itemscope="" itemtype="http://www.schema.org/SiteNavigationElement">
+					<ul id="responsive">
+
+						<li itemprop="name"><a itemprop="url" {% if home_page %} class="current" {% endif %} href="{% url 'home:view' %}">Home</a></li>
+
+						<li itemprop="name"><a itemprop="url" {% if about_us_page %} class="current" {% endif %} href="{% url 'about_us:view' %}">About Us</a>
+							<ul>
+								<li itemprop="name"><a itemprop="url" href="{% url 'about_us:view' %}">About Us</a></li>
+								<li itemprop="name"><a itemprop="url" href="{% url 'blog:blogs' %}">Blog</a></li>
+							</ul>
+						</li>
+
+
+						<li itemprop="name"><a itemprop="url" {% if service_page %} class="current" {% endif %} href="{% url 'services:services' %}">Services</a>
+							<div class="mega-menu mobile-styles {% if service_group_1 and service_group_2 and service_group_3 %} three-columns {% elif service_group_1 and service_group_2 %} two-columns {% elif service_group_1 %} one-columns {% endif %} ">
+									{% if services|length > 0 %}
+									<div class="mega-menu-section">
+										<ul>
+											{% for service in services|slice:'0:6' %}
+											<li itemprop="name"><a itemprop="url" href="{% url 'services:service' service.slug %}">{{service.name}}</a></li>
+											{% endfor %}
+										</ul>
+									</div>
+									{% endif %}
+		
+									{% if services|length > 6 %}
+									<div class="mega-menu-section">
+										<ul>
+											{% for service in services|slice:'6:12' %}
+											<li itemprop="name"><a itemprop="url" href="{% url 'services:service' service.slug %}">{{service.name}}</a></li>
+											{% endfor %}
+										</ul>
+									</div>
+									{% endif %}
+
+									{% if services|length > 6 %}
+									<div class="mega-menu-section">
+										<ul>
+											{% for service in services|slice:'12:18' %}
+											<li itemprop="name"><a itemprop="url" href="{% url 'services:service' service.slug %}">{{service.name}}</a></li>
+											{% endfor %}
+										</ul>
+									</div>
+									{% endif %}
+									
+							</div>
+						</li>
+
+						<li itemprop="name"><a itemprop="url" {% if product_page %} class="current" {% endif %} href="{% url 'products:products' %}">Products</a></li>
+						<li itemprop="name"><a itemprop="url" {% if contact_us_page %} class="current" {% endif %} href="{% url 'contact_us:view' %}">Contact Us</a></li>
+                        
+                        
+						
+					</ul>
+				</nav>
+
+				<div class="clearfix"></div>
+				<!-- Main Navigation / End -->
+				
+			</div>
+			<!-- Left Side Content / End -->
+
+
+			<!-- Right Side Content / End -->
+			<div class="right-side">
+				<!-- Header Widget -->
+				<div class="header-widget">
+					{% if not username %}
+					<style>
+						.user-name span::after {
+							display: none;
+						}
+					</style>
+					{% endif %}
+
+					<!-- User Menu -->
+					<div class="user-menu">
+                     <a href="{% url 'authentication:login' %}" class="user-name"><span><img src="{% if request.user.image %} {{request.user.image.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="" style="min-width:35px; min-height:35px; max-width:35px; max-height:35px; object-fit: cover; object-position: top;"></span>{% if user_center %} {{user_center.name|slice:':7'}} {% elif username %} {{username|slice:':7'}} {% else %} Login {% endif %}</a> 
+                    
+                    <!--  
+                     <div class="user-name"><span><img src="{% static 'images/dashboard-avatar.jpg' %}" alt=""></span>CSC Name</div>
+						<ul>
+							<li><a href="dashboard.html"><i class="sl sl-icon-settings"></i> Dashboard</a></li>
+							<li><a href="dashboard-messages.html"><i class="sl sl-icon-envelope-open"></i> Messages</a></li>
+							<li><a href="dashboard-bookings.html"><i class="fa fa-calendar-check-o"></i> Bookings</a></li>
+							<li><a href="index.html"><i class="sl sl-icon-power"></i> Logout</a></li>
+					 </ul> -->
+                        
+					</div>
+
+						<a target="_blank" href="{% url 'csc_center:add_csc' %}" class="button border with-icon">ADD CSC CENTER <i class="sl sl-icon-plus"></i></a>
+				</div>
+				<!-- Header Widget / End -->
+			</div>
+			<!-- Right Side Content / End -->
+            
+            
+            
+
+			
+
+		</div>
+	</div>
+	<!-- Header / End -->
+
+</header>
+<div class="clearfix"></div>
+<!-- Header Container / End -->
+
+{% comment %} ******************** {% endcomment %}
+
+<div id="product-pop-up-box">
+	<div id="product-pop-up-heading-div">
+	  <div class="close-btn">
+		<button type="button">X</button>
+	  </div>
+	  <h4>ORDER NOW</h4>
+	</div>
+
+	<form class="with-forms  margin-top-0" method="post" action="#">
+				{% csrf_token %}					
+
+	  <div class="row">
+		<div class="col-lg-6 col-md-6">
+		  <input type="text" placeholder="Name:" name="name" required>
+		</div>
+		<div class="col-lg-6 col-md-6">
+		  <input type="text" placeholder="E-Mail ID:" name="email" required>
+		</div>
+	  </div>
+
+	  <div class="row">
+		<div class="col-lg-6 col-md-6">
+		  <input type="text" placeholder="Phone No:" name="phone" pattern="[+0-9]{7,13}" required>
+		</div>
+		<div class="col-lg-6 col-md-6">
+		  <input type="text" placeholder="Location" name="location" required>
+		</div>
+	  </div>          
+	  <div class="row">
+		<div class="col-lg-12 col-md-12">
+		  <textarea id="message-input" cols="10" rows="2" name="message" placeholder="Message" required></textarea>
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="col-lg-12 col-md-12">
+		  <button type="submit" class="button book-now fullwidth margin-top-5">SUBMIT</button>
+		</div>
+	  </div>
+			</form>
+  </div>
+
+{% block content %}{% endblock content %}
+
+<!-- Footer
+================================================== -->
+
+
+<section class="foot_loc_list">
+    <div class="container">
+		<div class="row">
+
+
+<div class="col-md-3">
+	<ul class="list-1">	
+		{% for state in states|slice:':9' %}
+		<li><a href="{% url 'home:csc_centers' %}?state={{state.state}}">CSC Centers in {{state.state}}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+
+
+<div class="col-md-3">
+	<ul class="list-1">
+		{% for state in states|slice:'9:18' %}
+		<li><a href="{% url 'home:csc_centers' %}?state={{state.state}}">CSC Centers in {{state.state}}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+
+
+<div class="col-md-3">
+	<ul class="list-1">
+		{% for state in states|slice:'18:27' %}
+		<li><a href="{% url 'home:csc_centers' %}?state={{state.state}}">CSC Centers in {{state.state}}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+
+<div class="col-md-3">
+	<ul class="list-1">
+		{% for state in states|slice:'27:36' %}
+		<li><a href="{% url 'home:csc_centers' %}?state={{state.state}}">CSC Centers in {{state.state}}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+
+
+            
+</div>
+</div>
+</section>
+
+<div id="footer" class="sticky-footer">
+	<!-- Main -->
+	<div class="container">
+		<div class="row">
+			<div class="col-md-5 col-sm-6">
+				<img class="footer-logo" src="{% static 'images/logo.png' %}" alt="CSC Centers in India">
+				<br><br>
+				<p>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and IT (MeitY), Government of India. CSCs are easy access points for delivery of various digital services to rural and urban people in India, thereby contributing to a digitally and financially inclusive society.In rural India.</p>
+			</div>
+
+			<div class="col-md-4 col-sm-6 ">
+				<h4>Helpful Links</h4>
+				<ul class="footer-links">
+					<li><a href="{% url 'home:view' %}">Home</a></li>
+					<li><a href="{% url 'authentication:login' %}">Login</a></li>
+					<li><a href="{% url 'csc_center:add_csc' %}">Add CSC Centers</a></li>
+					<li><a href="{% url 'services:services' %}">Services</a></li>
+				</ul>
+
+				<ul class="footer-links">
+					<li><a href="{% url 'faq:faqs' %}">FAQ</a></li>
+<li><a href="{% if request.user.is_superuser %}{% url 'csc_admin:my_profile' %}{% else %}{% url 'users:my_profile' %}{% endif %}">Profile</a></li>
+<li><a href="{% url 'blog:blogs' %}">Blog</a></li>
+<li><a href="{% url 'contact_us:view' %}">Contact</a></li>
+				</ul>
+				<div class="clearfix"></div>
+			</div>		
+
+			<div class="col-md-3  col-sm-12">
+				<h4>Contact Us</h4>
+				<div class="text-widget">
+					<span>SY.NO.195/2, Kallubalu Road, Jigani, Bangalore, Karnataka – 560105, India</span> <br>
+					E-Mail:<span> <a href="mailto:support@cscindia.info">support@cscindia.info</a> </span><br>
+				</div>
+
+				<ul class="social-icons margin-top-20" itemscope="" itemtype="https://schema.org/Organization">
+<link itemprop="url" href="https://cscindia.info/">
+<li><a itemprop="sameAs" class="facebook" href="https://www.facebook.com/cscindia.info" target="_blank"><i class="icon-facebook"></i></a></li>
+<li><a itemprop="sameAs" class="instagram" href="https://www.instagram.com/cscindia.info/" target="_blank"><i class="icon-instagram"></i></a></li>
+<li><a itemprop="sameAs" class="youtube" href="https://www.youtube.com/channel/UCt9oq2Nd-lwINvszT5J4gIw?sub_confirmation=1" target="_blank"><i class="icon-youtube"></i></a></li>
+<li><a itemprop="sameAs" class="linkedin" href="https://www.linkedin.com/company/csc-india/" target="_blank"><i class="icon-linkedin"></i></a></li>
+<li><a itemprop="sameAs" class="pinterest" href="https://in.pinterest.com/cscindia_info/" target="_blank"><i class="icon-pinterest"></i></a></li>
+<li><a itemprop="sameAs" class="tumblr" href="https://www.tumblr.com/cscindia" target="_blank"><i class="icon-tumblr"></i></a></li>
+</ul>
+
+			</div>
+
+		</div>
+
+			<div class="row">
+				<div style="font-size:12px; text-align:center; display:block; padding-bottom:10px; width:100%;">
+					<a href="{% url 'home:privacy_policy' %}">Privacy Policy</a><span style="color:#fff; padding:0 6px;">|</span><a href="{% url 'home:terms_and_conditions' %}">Terms &amp; Conditions</a><span style="color:#fff; padding:0 6px;">|</span><a href="{% url 'home:shipping_and_delivery_policy' %}">Shipping &amp; Delivery Policy</a><span style="color:#fff; padding:0 6px;">|</span><a href="{% url 'home:cancellation_and_refund_policy' %}">Cancellation &amp; Refund Policy</a> 
+			  	</div>
+			</div>
+		
+		<!-- Copyright -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+<!-- Footer / End -->
+
+
+<!-- Back To Top Button -->
+<div id="backtotop"><a href="#"></a></div>
+
+
+</div>
+<!-- Wrapper / End -->
+
+
+<!-- Scripts
+================================================== -->
+<script type="text/javascript" src="{% static 'scripts/jquery-3.6.0.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-migrate-3.3.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/mmenu.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/chosen.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/slick.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/rangeslider.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/waypoints.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/counterup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-ui.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/tooltips.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/custom.js' %}"></script>
+
+
+{% comment %} <!-- Leaflet // Docs: https://leafletjs.com/ -->
+<script src="{% static 'scripts/leaflet.min.js' %}"></script>
+
+<!-- Leaflet Maps Scripts -->
+<script src="{% static 'scripts/leaflet-markercluster.min.js' %}"></script>
+<script src="{% static 'scripts/leaflet-gesture-handling.min.js' %}"></script>
+<script src="{% static 'scripts/leaflet-listeo.js' %}"></script>
+
+<!-- Leaflet Geocoder + Search Autocomplete // Docs: https://github.com/perliedman/leaflet-control-geocoder -->
+<script src="{% static 'scripts/leaflet-autocomplete.js' %}"></script>
+<script src="{% static 'scripts/leaflet-control-geocoder.js' %}"></script> {% endcomment %}
+
+
+
+<!-- Typed Script -->
+{% comment %} <script type="text/javascript" src="{% static 'scripts/typed.js' %}"></script> {% endcomment %}
+{% comment %} <script>
+var typed = new Typed('.typed-words', {
+strings: ["FSSAI Registration","MSME Registration","Passport Registration","Trademark Registration"],
+	typeSpeed: 80,
+	backSpeed: 80,
+	backDelay: 4000,
+	startDelay: 1000,
+	loop: true,
+	showCursor: true
+});
+</script> {% endcomment %}
+
+
+
+<!-- Home Search Scripts -->
+<script>
+    $(window).on('load', function() { $('.msps-shapes').addClass('shapes-animation'); });
+</script>
+ 
+{% comment %} <script src="{% static 'scripts/parallax.min.js' %}"></script> {% endcomment %}
+<script>
+{% comment %} const parent = document.getElementById('scene');
+const parallax = new Parallax(parent, {
+  limitX: 50,
+  limitY: 50,  
+}); {% endcomment %}
+ 
+ 
+$('.msps-slider').slick({
+    infinite: true,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    dots: true,
+    arrows: false,
+    autoplay: true,
+    autoplaySpeed: 5000,
+    speed: 1000,
+    fade: true,
+    cssEase: 'linear'
+});
+
+</script>
+
+<script>
+	$(document).ready(() => {
+		setTimeout(() => {
+			$('#message-div').hide();
+		} , 3000)
+	})
+</script>
+
+<!-- Toggle product pop up box -->
+<script src="{% static 'w3/base/js/productPopUp.js' %}"></script>
+{% block scripts %}{% endblock scripts %}
+</body>
+</html>

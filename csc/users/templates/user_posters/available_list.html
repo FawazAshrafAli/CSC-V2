@@ -1,0 +1,460 @@
+{% extends "user_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Available Posters {% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_service/css/admin_service.css' %}">
+
+<!-- Table Styles -->
+<style>
+    #poster-table {
+        min-width: 100%;
+        background-color: #fff;
+    }
+    #poster-table tr {
+        border-bottom: 1px solid silver;
+    }
+    #poster-table tbody tr{
+        cursor: pointer;
+    }
+    #poster-table tbody tr:hover {
+        color: blue;
+    }
+    #poster-table td:first-child,
+    #poster-table th:first-child,
+    #td-image,
+    #th-image {
+        text-align: center;
+    }
+    #poster-table img {
+        padding: 3px 0;
+        height: 50px;
+    }
+    #poster-table button {
+        height: 0;
+        padding: 0 10px;
+    }
+    #poster-table tbody tr:hover button {
+        height: 100%;
+        padding: 5px 10px;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+
+	<!-- Titlebar -->
+	<div id="titlebar">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Available Posters</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+						<li>Available Available Posters</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		{% if messages %}
+		<div id="message-div">
+			<ul class="messages">
+				{% for message in messages %}
+				<li {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+
+<div id="poster-content">
+  <h3>Loading . . .</h3>  
+</div>
+
+<div class="row">
+  <!-- Copyrights -->
+  <div class="col-md-12">
+    <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+	function toggleServiceDeletion(posterId, posterTitle) {
+		$('#delete-confirmation-box form').prop('action', `/admin/delete_poster/${posterId}`);
+		$('#poster-name').html(posterTitle);
+		$('#delete-confirmation-box').show();
+	}	
+	
+	$('#cancel-deletion-btn').click(() => {
+		$('#delete-confirmation-box').hide();		
+	})
+</script>
+
+<script>
+  function defaultPosterView(response = undefined) {
+    $('#poster-content').html(`
+      <div class="row">
+        <!-- Listings -->
+        <div class="col-lg-12 col-md-12">
+          <div class="dashboard-list-box margin-top-0" id="validity-message" style="background-color: #fff;">
+            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12">
+          <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
+            <div class="row">
+              <div class="col-lg-3">
+                <h4>Available Posters</h4>
+              </div>
+              <div class="col-lg-9" style="padding: 0; dis">
+                <!-- Sort by -->
+                <div class="sort-by">
+                    <div class="sort-by-select" style="width: 340px;">
+                        <select data-placeholder="List By Service" class="chosen-select-no-single" id="service-dropdown" style="background: #fff; border: 1px solid silver; margin-bottom: 25px;">
+                            <option value="" hidden disabled selected>List By Service</option>
+                            {% for service in services %}
+                            <option value="{{service.slug}}">{{service.first_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <!-- Sort by / End -->
+              </div>
+              </div>
+
+            <div class="row">
+              <div class="col-md-12" style="display: flex; justify-content: flex-end;">
+                <form method="#" id="poster-search-form" class="search-poster-input" style="height: 35px; padding: 0 10px; width: 360px;">                  
+                  <input style="height: 35px; margin-bottom: 0; border-radius: 50px;" class="search-field" type="text" placeholder="Search Posters" name="q" id="search-input" value="{{query}}" />		
+                </form>
+              </div>
+            </div>
+
+            <br>
+            <table id="poster-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th id="th-image">Image</th>
+                  <th style="text-align:center">Title</th>
+                  <th style="text-align:center">Service</th>
+                  <th></th>
+                </tr>
+              </thead>          
+              <tbody id="poster-tbody">
+                {% for poster in posters %}
+                <tr class="row-items" onclick="window.location='#'">
+                  <td>{{ forloop.counter }}</td>
+                  <td id="td-image">
+                    <img src="{% if poster.poster %} {{poster.poster.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Product Image">
+                  </td>
+                  <td style="text-align:center">{{ poster.title }}</td>
+                  <td style="text-align:center">{{ poster.service.first_name }}</td>
+                  <td style="text-align: right; padding-right: 10px;"><a href="{% url 'users:create_poster' poster.slug %}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>                        				
+          </div>
+          <!-- Pagination -->
+          <div class="clearfix"></div>
+          <div class="row" id="pagination-row">
+            <div class="col-md-12">
+            <!-- Pagination -->
+            <div class="pagination-container margin-top-20 margin-bottom-40">
+              <nav class="pagination" id="pagination-nav">
+              <ul>
+                <li>
+                <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+                </li>                
+                <li><a href="#" id="first-page">1</a></li>
+                <li><a href="#" id="second-page">2</a></li>
+                <li><a href="#" id="third-page" >3</a></li>
+                <li>
+                <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+              </ul>
+              </nav>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `)
+  }
+
+    $(document).ready(function () {
+      function getAvalablePosters(center) {
+        $.ajax({
+          type: 'GET',
+          url: `/users/available_posters/`,
+          dataType: 'json',
+          data: {'center_slug': center},
+          success: response => {
+            if (response) {              
+              defaultPosterView(response);
+              if (response.posters) {
+                response.posters.forEach((poster, index) => {
+                  $('#poster-tbody').append(`
+                    <tr class="row-items">
+                      <td>${ index + 1 }</td>
+                      <td id="td-image">
+                        <img src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}" alt="Product Image">
+                      </td>
+                      <td style="text-align:center">${ poster.title }</td>
+                      <td style="text-align:center">${ poster.service }</td>
+                      <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
+                    </tr>
+                  `);
+                })
+              } 
+            } else {
+              $('#poster-content').html(`<h3 style="color:red;">Your current csc center is not yet activated.</h3>`);
+            }
+            paginator();
+          },
+          error: error => {
+            console.error('Error: ', error);
+            defaultPosterView();
+          },
+        });
+      };
+
+      const center = localStorage.getItem('centerSlug');
+      const user = localStorage.getItem('cscUser');
+
+      if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+        getAvalablePosters(center);
+      } else {
+        getAvalablePosters(`{{csc_center.slug}}`);
+      }
+
+      // Filtering using service
+      function fetchFilteredPosters(center) {
+        const serviceSlug = $('#service-dropdown').val();
+        $.ajax({
+          type: 'GET',
+          url: '/users/available_posters/',
+          dataType: 'json',
+          data: {
+            'center_slug': center,
+            'service_slug': serviceSlug
+          },
+          success: response => {
+            $('#validity-message').html(`
+              ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+            `)
+            if (response.posters) {
+              $('#poster-tbody').empty();
+              $.each(response.posters, (index, poster) => {
+                const html = `<tr class="row-items">
+                  <td>${ index + 1 }</td>
+                  <td id="td-image">
+                    <img src="${ poster.poster ? poster.poster : 'static/w3/images/no_image.png' }" alt="Poster Image">
+                  </td>
+                  <td style="text-align:center">${ poster.title }</td>
+                  <td style="text-align:center">${ poster.service }</td>
+                  <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
+                </tr>`;
+                $('#poster-tbody').append(html);
+              })
+            } else {
+              $('#poster-tbody').html('<tr><td colspan="5" style="color: red">Posters are unavailable for the selected service</td></tr>')
+            }
+            paginator();
+          },
+          error: error => console.error("Error: ", error),
+        });
+      }
+      
+      $(document).on('change', '#service-dropdown', function () {
+        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+          fetchFilteredPosters(center);
+        } else {
+          fetchFilteredPosters(`{{csc_center.slug}}`)
+        }
+
+      });
+
+      // Search Functionality Start
+      function searchPosters(center) {
+        const query = $('#search-input').val();
+        console.log(query)
+        $.ajax({
+          type: 'GET',
+          url: '/users/available_posters/',
+          dataType: 'json',
+          data: {
+            'center_slug': center,
+            'query': query
+          },
+          success: response => {
+            if (response.posters) {
+              $('#poster-tbody').empty();
+              $.each(response.posters, (index, poster) => {
+                const html = `<tr class="row-items">
+                  <td>${ index + 1 }</td>
+                  <td id="td-image">
+                    <img src="${ poster.poster ? poster.poster : 'static/w3/images/no_image.png' }" alt="Poster Image">
+                  </td>
+                  <td style="text-align:center">${ poster.title }</td>
+                  <td style="text-align:center">${ poster.service }</td>
+                  <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
+                </tr>`;
+                $('#poster-tbody').append(html);
+              })
+            } else {
+              $('#poster-tbody').html(`<tr><td colspan="5" style="color: red">No posters for query: '${query}'</td></tr>`)
+            }
+            paginator();
+          },
+          error: error => console.error("Error: ", error),
+        });
+      }
+
+      
+      $(document).on('submit', '#poster-search-form', function (e) {
+        e.preventDefault();
+        
+        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+          searchPosters(center);
+        } else {
+          searchPosters(`{{center.slug}}`);
+        }
+      })
+
+      $(document).on('input', '#search-input', function (e) {
+        e.preventDefault();
+        
+        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+          searchPosters(center);
+        } else {
+          searchPosters(`{{center.slug}}`);
+        }
+      })
+      // Search Functionality End
+
+      // Filtering End
+
+      // Pagination
+      function paginator () {
+        let itemsPerPage = 10;
+        let currentPage = 1;
+        let totalItems = $('.row-items').length;
+        let totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+        $('.prev-page').hide();      
+  
+        function paginationBtnVisibility() {
+          $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+          $('.next-page').hide();
+          $('.prev-page').hide();
+          
+          if (currentPage == totalPages) {          
+            $('.next-page').hide();
+            
+            if (totalPages == 1) {
+              $('#first-page').html(currentPage).addClass('current-page').show();                       
+              
+            } else if (totalPages == 2) {
+              $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+              $('#second-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();
+              
+            } else if (totalPages == 3) {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('#prev-page').show();
+  
+            } else {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();            
+            };
+  
+          } else if (currentPage > 1) {          
+            $('.prev-page').show();
+            $('.next-page').show();
+            $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#second-page').html(currentPage).addClass('current-page').show();
+            $('#third-page').html(currentPage + 1).addClass('next-page').show();
+  
+          } else if (currentPage == 1 && totalPages > 0) {          
+            $('.next-page').show();
+            $('#first-page').html(currentPage).addClass('current-page').show();
+            $('#second-page').html(currentPage + 1).addClass('next-page').show();
+  
+            if (totalPages >= 3) {          
+              $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+            }
+          }          
+        };
+  
+        paginationBtnVisibility();
+  
+        function renderPage(page) {
+            $('.row-items').hide();
+            $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            $('#pagination a').removeClass('active');
+            $('#pagination a').eq(page).addClass('active');
+            $('.prev-page').toggleClass('disabled', page === 1);
+            $('.next-page').toggleClass('disabled', page === totalPages);
+        }
+  
+        $(document).on('click', '.next-page', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.upcoming-page', function() {
+            if (currentPage < totalPages - 1) {
+                currentPage += 2;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.prev-page', function() {
+          if (currentPage > 1) {
+              currentPage--;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        $(document).on('click', '.earlier-page', function() {
+          if (currentPage > 2) {
+              currentPage -= 2;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        // Initialize the first page
+        renderPage(currentPage);
+      };
+      
+      paginator();
+
+    });
+
+
+    $('#service-dropdown').chosen();
+</script>
+{% endblock scripts %}

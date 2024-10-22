@@ -1,0 +1,104 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Contact Us{% endblock title_prefix %}
+
+{% block og_title_prefix %}Contact Us{% endblock og_title_prefix %}
+
+{% block content %}
+
+<!-- Content
+================================================== -->
+
+<!-- Map Container -->
+<div class="contact-map margin-bottom-60">
+
+	<!-- Google Maps -->
+	<div id="singleListingMap-container">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31127.499021759362!2d77.59188007431639!3d12.78257680000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae693cf494f4bd%3A0xeb98d767845bdfc!2skallubalu!5e0!3m2!1sen!2sin!4v1719482443595!5m2!1sen!2sin" style="width: 100%; height: 450px; border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+	</div>
+	<!-- Google Maps / End -->
+ 
+</div>
+<div class="clearfix"></div>
+<!-- Map Container / End -->
+
+
+<!-- Container / Start -->
+<div class="container">
+
+	<div class="row">
+		{% include "components/message.html" %}
+		<!-- Contact Details -->
+		<div class="col-md-4">
+
+			<h4 class="headline margin-bottom-30">Find Us There</h4>
+
+			<!-- Contact Details -->
+			<div class="sidebar-textbox">
+				<p>SY.NO.195/2, Kallubalu Road,</br>
+					Jigani, Bangalore, Karnataka – 560105, India</p>
+
+				<ul class="contact-details">
+					<li><i class="im im-icon-Globe"></i> <strong>Web:</strong> <span><a href="https://cscindia.info/">www.cscindia.info</a></span></li>
+					<li><i class="im im-icon-Envelope"></i> <strong>E-Mail:</strong> <span><a href="#">support@cscindia.info</a></span></li>
+				</ul>
+			</div>
+
+		</div>
+
+		<!-- Contact Form -->
+		<div class="col-md-8">
+
+			<section id="contact">
+				<h4 class="headline margin-bottom-35">Contact Form</h4>
+
+				<div id="contact-message"></div> 
+
+					<form method="post" action="{% url 'contact_us:submit_enquiry' %}" autocomplete="on">
+						{% csrf_token %}
+
+						<div class="row">
+							<div class="col-md-6">
+								<div>
+									<input name="name" type="text" id="name" placeholder="Your Name" required />
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<div>
+									<input name="email" type="email" id="email" placeholder="Email Address" pattern="^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$" required />
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div>
+									<input name="phone" type="tel" id="phone" placeholder="Contact Number" pattern="[0-9]+" maxlength="10"  required />
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<div>
+									<input name="location" type="text" id="location" placeholder="Location" required />
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<textarea name="message" cols="40" rows="3" id="comments" placeholder="Message" spellcheck="true" required></textarea>
+						</div>
+
+						<button type="submit" class="submit button">Submit Message</button>
+					</form>
+					<br>
+			</section>
+		</div>
+		<!-- Contact Form / End -->
+
+	</div>
+
+</div>
+<!-- Container / End -->
+
+{% endblock content %}

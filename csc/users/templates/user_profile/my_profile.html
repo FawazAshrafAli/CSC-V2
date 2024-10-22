@@ -1,0 +1,164 @@
+{% extends "user_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} My Profile {% endblock title_prefix %}
+
+{% block content %} 
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>My Profile</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'users:home' %}">Home</a></li>
+                    <li>My Profile</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% include "components/message.html" %}
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12">
+        <div class="dashboard-list-box margin-top-0" id="payment-content">
+
+        </div>
+    </div>
+
+
+    <!-- Profile -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box margin-top-0">
+            <h4 class="gray">Profile Details</h4>
+            <form class="dashboard-list-box-static" method="post" action="{% url 'users:update_profile' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Avatar -->
+                <div class="edit-profile-photo">
+                    <img src="{% if user.image %} {{user.image.url}} {% else %} {% static 'images/user-avatar.jpg' %} {% endif %}" id="dp" alt="Profile Picture">
+                    <div class="change-photo-btn">
+                        <div class="photoUpload">
+                            <span><i class="fa fa-upload"></i> Upload Photo</span>
+                            <input type="file" class="upload" name='image' id="upload-dp"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="my-profile">
+
+                    <label>Your Name</label>
+                    <input value="{% if user.full_name %}{{user.full_name}}{% endif %}" type="text" name="name" placeholder="Your Name" required>
+
+                    <label>Phone</label>
+                    <input value="{% if user.phone %}{{user.phone}}{% endif %}" type="text" name="phone" placeholder="Phone Number" required>
+
+                    <label>Email</label>
+                    <input value="{% if user.email %}{{user.email}}{% endif %}" type="text" name="email" id="email-input" placeholder="tom@example.com" required>
+
+                    <label>Notes</label>
+                    <textarea name="notes" id="notes" cols="30" rows="10" name="notes" placeholder="Notes">{% if user.notes %} {{user.notes}} {% endif %}</textarea>
+
+                    <label><i class="fa fa-twitter"></i> Twitter</label>
+                    <input value="{% if user.twitter %}{{user.twitter}}{% endif %}" name="twitter" placeholder="https://www.twitter.com/" type="text">
+
+                    <label><i class="fa fa-facebook-square"></i> Facebook</label>
+                    <input value="{% if user.facebook %}{{user.facebook}}{% endif %}" name="facebook" placeholder="https://www.facebook.com/" type="text">
+
+                    <label><i class="fa fa-google-plus"></i> Google+</label>
+                    <input value="{% if user.google %}{{user.google}}{% endif %}" name="google" placeholder="https://www.google.com/" type="text">
+                </div>
+
+                <button class="button margin-top-15" type="submit" id="profile-form-submit-btn">Save Changes</button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box margin-top-0">
+            <h4 class="gray">Change Password</h4>
+            <div class="dashboard-list-box-static">
+
+                <!-- Change Password -->
+                <form class="my-profile" method="post" action="{% url 'users:change_password' %}">
+                    {% csrf_token %}
+                    <label class="margin-top-0">Current Password</label>
+                    <input type="password" name="current_password" placeholder="Current Password" required>
+
+                    <label>New Password</label>
+                    <input type="password" name="new_password" placeholder="New Password" required>
+
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+
+                    <button class="button margin-top-15" type="submit">Change Password</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+    </div>
+
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(() => {
+        // Update dp preview and enable submit button
+        $('#upload-dp').on('change', function () {
+            $('#profile-form-submit-btn').css('pointer-events', 'auto');
+
+            const file = this.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    $('#dp').prop('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function checkPayment(center) {
+            $.ajax({
+              type: 'GET',
+              url: `/users/my_profile/`,
+              dataType: 'json',
+              data: {'center_slug': center},
+              success: response => {
+                if (response) {
+    
+                  $('#payment-content').prepend(`
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                  `)
+                }
+              },
+              error: error => console.error("Error: ", error),
+            })
+          };
+    
+          const center =  localStorage.getItem('centerSlug');
+          const user = localStorage.getItem('cscUser');
+    
+          if (user == `{{request.user.username}}` && center) {      
+            checkPayment(center);
+          } else {
+            checkPayment(`{{center.slug}}`);        
+          }
+    });
+
+</script>
+{% endblock scripts %}

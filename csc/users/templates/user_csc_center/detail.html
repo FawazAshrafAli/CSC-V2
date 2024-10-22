@@ -1,0 +1,235 @@
+{% extends "user_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}
+{{center_obj.name}}
+{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_csc_center/css/admin_csc_center.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<style>
+    #csc-detail-table {
+        margin-top: 15px;
+        min-width: fit-content;
+    }        
+    #csc-detail-table th {
+        width: 150px;
+    }
+    #csc-detail-table td {
+        padding-left: 50px;
+    }
+
+    #csc-summary-table, #csc-content-table {
+        min-width: 100%;
+        margin-top: 15px;
+        margin-bottom: 35px;
+        border: 1px solid silver;
+        padding: 0 3px;
+    }
+    #csc-summary-table th, #csc-content-table th {
+        text-align: center;
+        color: #fff;
+        background-color: #777;
+    }
+    #csc-summary-table td, #csc-content-table td {
+        border-top: 1px solid silver;
+        padding: 0 3px;
+    }
+</style>
+
+
+	<!-- Titlebar -->
+	<div id="titlebar">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>{{csc.title}}</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'users:home' %}">Home</a></li>
+                        <li><a href="{% url 'users:csc_centers' %}">CSC Centers</a></li>
+						<li>{{center_obj.full_name}}</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+        <div id="delete-toggle-div" style="display: flex; align-items: center;">
+            <a href="{% url 'users:update_csc' center_obj.slug %}" id="update-toggle-btn">UPDATE<a></button>
+            <button type="button" title="Options" id="csc-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
+        </div>
+        {% include "admin_components/message.html" %}
+	</div>    
+    
+    <div class="row">
+        <div class="col-lg-12 col-md-12" id="payment-content">
+        </div>
+    </div>
+    <div class="row">		        
+		<!-- Listings -->
+		<div class="col-lg-12 col-md-12" id="csc-card-col">
+			<div class="dashboard-list-box margin-top-0">
+				<div class="row">                
+                    <div class="col-lg-4 col-md-6">
+                        <div class="product-grid">
+                            <div class="product-image">
+                                <div class="image">
+                                    <img class="pic-1" src="{% if center.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                    <img class="pic-2" src="{% if center.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                </div>                                                    
+                            </div>
+                            <div class="product-content">
+                                <h3 class="Name">{{center_obj.full_name}}</h3>					
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8" id="csc-description-div">
+                        <div style="display: flex; justify-content: right;">
+                            {% if center_obj.qr_code_image %}
+                            <img src="{{center_obj.qr_code_image.url}}" alt="QR code of {{center_obj.name}}" style="width: 90px;"> 
+                            {% endif %}                        
+                        </div>                 
+                        <table id="csc-detail-table">
+                            <tr>
+                                <th>Title</th>
+                                <td>:</td>
+                                <td>{{center_obj.full_name}}</td>
+                            </tr>
+                            {% if center.website %}
+                            <tr>
+                                <th>Website</th>
+                                <td>:</td>
+                                <td>{{center_obj.website}}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>&nbsp;</th>                               
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>:</td>
+                                <td>{{center_obj.email}}</td>
+                            </tr>
+                            <tr>
+                                <th>Contact Number</th>
+                                <td>:</td>
+                                <td>{{center_obj.contact_number}}</td>
+                            </tr>
+                            <tr>
+                                <th>Mobile Number</th>
+                                <td>:</td>
+                                <td>{{center_obj.mobile_number}}</td>
+                            </tr>
+                            <tr>
+                                <th>WhatsApp Number</th>
+                                <td>:</td>
+                                <td>{{center_obj.whatsapp_number}}</td>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>                               
+                            </tr>                         
+                            <tr>
+                                <th>Location</th>
+                                <td>:</td>
+                                <td>{{center_obj.full_address}}</td>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>                               
+                            </tr>
+                            <tr>
+                                <th>Services</th>
+                                <td>:</td>
+                                <td style="display: flex; flex-wrap: wrap;">
+                                    {% for service in center_obj.get_services %}
+                                    <div style="box-shadow: 0px 0px 1px #777; border-radius: 50px; background-color: #fff; padding: 0 5px; margin: 3px 3px">{{service}}</div>
+                                    {% endfor %}
+                                </td>
+                            </tr>                            
+                            <tr>
+                                <th>&nbsp;</th>                               
+                            </tr>
+                            <tr>
+                                <th>Tags</th>
+                                <td>:</td>
+                                <td style="display: flex; flex-wrap: wrap;">
+                                    {% for keyword in center_obj.get_keywords %}
+                                    <div style="box-shadow: 0px 0px 1px #777; border-radius: 50px; background-color: #fff; padding: 0 5px; margin: 3px 3px">{{keyword}}</div>
+                                    {% endfor %}
+                                </td>
+                            </tr>                                                                        
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <table id="csc-summary-table" >
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{center_obj.description}}</td>
+                    </tr>        
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(() => {
+        $('#csc-more-option-btn').click(() => {            
+            $('#update-toggle-btn').show();
+            setTimeout(() => {
+                $('#update-toggle-btn').hide();
+            }, 5000)
+        });
+
+        $('#cancel-deletion-btn').click(() => {
+            $('#delete-confirmation-box').hide();
+        });
+
+        // Check Payment
+        function checkPayment(center) {
+            $.ajax({
+              type: 'GET',
+              url: `/users/check_payment/`,
+              dataType: 'json',
+              data: {'center_slug': center},
+              success: response => {
+                if (response) {
+    
+                  $('#payment-content').html(`
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                  `)
+                }
+              },
+              error: error => console.error("Error: ", error),
+            })
+        };
+    
+        const center =  localStorage.getItem('centerSlug');
+        const user = localStorage.getItem('cscUser');
+
+        if (user == `{{request.user.username}}` && center) {      
+        checkPayment(center);
+        } else {
+        checkPayment(`{{center.slug}}`);        
+        }
+    })
+
+</script>
+{% endblock scripts %}

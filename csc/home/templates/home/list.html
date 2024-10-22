@@ -1,0 +1,612 @@
+{% extends "base/base.html" %} {% load static %} {% load crispy_forms_tags%}
+
+{% block title_prefix %}CSC Centers{% endblock title_prefix %}
+
+{% block meta_description %}"List of Common Service Centres (CSC) in India"{% endblock meta_description %}
+
+{% block meta_keywords %}"CSC Centers in India, Common Service Centres, List of CSC Centers, Find CSC Centers"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}CSC Centers{% endblock og_title_prefix %}
+
+{% block og_description %}"List of Common Service Centres (CSC) in India"{% endblock og_description %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "url": "https://cscindia.info",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://{{request.get_host}}{{request.path}}?pincode={{pincode}}&state={{meta_state}}&district={{meta_district}}&block={{meta_block}}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "mainEntity": {
+    "@type": "CreativeWork",
+    "name": "Keyphrases",
+    "about": [
+      {
+      "@type": "Thing",
+      "name": "CSC Centers in India"
+      },
+      {
+      "@type": "Thing",
+      "name": "Common Service Centres"
+      },
+      {
+      "@type": "Thing",
+      "name": "List of CSC Centers"
+      },
+      {
+      "@type": "Thing",
+      "name": "Find CSC Centers"
+      }
+    ]
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "CollectionPage",
+    "name": "Tags Page",
+    "description": "A page listing various tags for categorizing content.",
+    "url": "https://{{request.get_host}}/tags/",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": [
+      {% for keyword in keywords %}
+      {				
+        "@type": "ListItem",
+        "position": {{forloop.counter}},
+        "url": "https://{{request.get_host}}{% url 'home:tags' keyword.slug %}",
+        "name": "{{keyword.keyword}}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}			
+      ]
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+    {% for service in services|slice:':18' %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "item": {
+          "@type": "Service",
+          "provider": {
+            "@type": "Organization",
+            "name": "CSC Locator",
+            "url": "https://{{ request.get_host }}",
+            "logo": "https://{{ request.get_host }}{% static 'images/logo.png' %}"
+          },
+          "name": "{{ service.name }}",
+          "description": "Access fast and reliable {{ service.name }} at your nearest Common Service Center. Get expert assistance and hassle-free solutions tailored to your needs."
+        }
+      }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    ]
+  }
+</script>
+
+
+{% endblock schema_markup %}
+
+{% block content %}
+<style>
+  .centered-heading {
+    text-align: center;
+  }
+  .current-page {
+    pointer-events: none;
+  }
+</style>
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h2>CSC Listing</h2>
+        {% if pincode %}
+        <span>CSC Centers for pincode {{pincode}}</span>
+        {% else %}
+        <span>CSC Centers in {{location}}</span>
+        {% endif %}
+        <!-- Breadcrumbs -->
+        <nav id="breadcrumbs">
+          <ul>
+            <li><a href="{% url 'home:view' %}">Home</a></li>
+            <li>CSC Listing</li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Content
+================================================== -->
+<div class="container">
+  <div class="row">
+    {% include "admin_components/message.html" %}
+    <!-- Search -->
+    <div class="col-md-12">
+      <form method="get" action="{% url 'home:csc_centers' %}">
+
+        <div class="add-listing-headline" style="background-color: inherit; display: flex; justify-content: space-between; align-items: center; width: 320px; margin-bottom: 0;">
+          <h3> Pincode Search</h3>
+          <!-- Switcher -->
+          <label class="switch"><input type="checkbox" id="pincode-checkbox-btn" {% if pincode %} checked {% endif %}><span
+              class="slider round"></span></label>
+        </div>
+
+        <div class="main-search-input gray-style margin-top-0 margin-bottom-10">
+          <div class="main-search-input-item" id="pincode-input-div" style="display: none;">
+            <input type="text" placeholder="Pincode" name="pincode" value="{{pincode}}" />
+          </div>
+          <div class="main-search-input-item" id="state-input-div">
+            <select class="chosen-select" data-placeholder="Select State" id="state-dropdown" name="state">
+              <option label="Select State"></option>
+              {% for state in states %}
+              <option value="{{state.state}}" {% if state.state == state_obj.state %} selected {% endif %} >{{state.state}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="main-search-input-item" id="district-input-div">
+            <select class="chosen-select" data-placeholder="Select District" id="district-dropdown" value="{{district_id}}" name="district">
+              <option label="Select District"></option>
+              {% for district in districts %}
+              <option value="{{district.district}}" {% if district.district == district_obj.district %} selected {% endif %}>{{district.district}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="main-search-input-item" id="block-input-div">
+            <select class="chosen-select" data-placeholder="Select Block" id="block-dropdown" name="block">
+              <option label="Select Block"></option>
+              {% for block in blocks %}                
+              <option value="{{block.block}}" {% if block.block == block_obj.block %} selected {% endif %} >{{block.block}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button
+            class="button"
+            type="submit"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+    </div>
+    <!-- Search Section / End -->
+
+    <div class="col-md-12">
+      {% if centers %}
+      <!-- Sorting - Filtering Section -->
+      <div class="row margin-bottom-25 margin-top-30">
+        <div class="col-md-12">
+          <div class="fullwidth-filters">
+            <!-- Panel Dropdown -->
+            <div class="panel-dropdown wide float-right">
+              <a href="#">List By Service</a>
+              <div class="panel-dropdown-content checkboxes">
+                <!-- Checkboxes -->
+                <div class="row" id="list-by-services">
+                  {% if services|length > 0 %}
+                  <div class="col-md-6">
+                    {% for service in services|slice:':4' %}
+                    <input class="service" id="check-{{service.first_name}}" type="checkbox" name="check" value="{{service.slug}}" />
+                    <label for="check-{{service.first_name}}">{{service.first_name}}</label>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                  {% if services|length > 4 %}
+                  <div class="col-md-6">
+                    {% for service in services|slice:'4:8' %}
+                    <input class="service" id="check-{{service.first_name}}" type="checkbox" name="check" value="{{service.slug}}" />
+                    <label for="check-{{service.first_name}}">{{service.first_name}}</label>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- Buttons -->
+                <div class="panel-buttons">
+                  <button type="button" class="panel-cancel">Cancel</button>
+                  <button type="button" class="panel-apply" id="sort-btn">Apply</button>
+                </div>
+              </div>
+            </div>
+            <!-- Panel Dropdown / End -->              
+              
+
+            <!-- Sort by -->
+            <div class="sort-by">
+              <div class="sort-by-select">
+                <select
+                  data-placeholder="List By Name"
+                  class="chosen-select-no-single"
+                  id="sort-dropdown"
+                >
+                  <option value="name" selected>List By Name</option>
+                  <option value="state">List By State</option>
+                  <option value="district">List By District</option>
+                  <option value="block">List By Block</option>
+                </select>
+              </div>
+            </div>
+            <!-- Sort by / End -->
+          </div>
+        </div>
+      </div>
+      <!-- Sorting - Filtering Section / End -->
+      {% endif %}
+
+      <div class="row" id="center-listing">
+        {% if not centers %}
+        <div>
+          {% if pincode %}
+          <h3 class="centered-heading">No CSC centers found for pincode: {{pincode}}</h3>
+          {% else %}
+          <h3 class="centered-heading">No CSC centers found for location: {{location}}</h3>
+          {% endif %}
+          <br>
+        </div>
+        {% endif %}
+        {% for center in centers %}
+        <!-- Listing Item -->
+        <div class="col-lg-4 col-md-6 row-items" data-name="{{center.name}}" data-slug="{{center.slug}}" data-image="{% if center.logo %}{{center.logo.url}}{% endif %}">
+          <a
+            href="{{center.get_absolute_url}}"
+            class="listing-item-container compact"
+          >
+            <div class="listing-item">
+              <img src="{% static 'w3/images/csc_banner.png' %}" alt="" style="object-fit: cover; object-position: left;"/>
+
+              <div class="listing-item-content">
+                <div class="listing_csc_logo">
+                  <img src="{% if center.logo %} {{center.logo.url}} {% else %} {% static 'w3/images/csc_default.jpeg' %} {% endif %}" alt="" />
+                </div>
+                <h3>{{center.full_name}}</h3>
+                <p>CSC ID : {{center.pk}}</p>
+                <span
+                  ><i class="fa fa-map-marker" aria-hidden="true"></i> {{center.partial_address}}</span
+                >
+              </div>
+            </div>
+          </a>
+        </div>
+        <!-- Listing Item / End -->
+        {% endfor %}         
+      </div>
+
+      <!-- Pagination -->
+      <div class="clearfix"></div>
+      <div class="row" id="pagination-row">
+        <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+              <ul>
+                <li>
+                  <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+                </li>                
+                <li><a href="#" id="first-page">1</a></li>
+                <li><a href="#" id="second-page">2</a></li>
+                <li><a href="#" id="third-page" >3</a></li>
+                <li>
+                  <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <!-- Pagination / End -->      
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script>
+<script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
+
+<script>
+  $(document).ready(() => {
+    function filterAndSortCenters() {
+      const services = []
+      $('.service:checked').each(function () {
+        let service = $(this).val();
+        services.push(service);
+      });
+
+      const state = $('#state-dropdown').val();
+      const district = $('#district-dropdown').val();
+      const block = $('#block-dropdown').val();
+      const listing = $('#sort-dropdown').val();
+
+      $.ajax({
+        type: 'GET',
+        url: '/filter_and_sort_centers/',
+        dataType: 'json',
+        data: {
+          'services': services,
+          'state': state,
+          'district': district,
+          'block': block,
+          'listing': listing,
+        },
+
+        success: function (response) {
+          $('#center-listing').html('');
+
+          if (response.centers.length == 0) {
+            $('#center-listing').html(`<h3 class="centered-heading">No CSC centers in {{location}} with the given services.</h3><br>`)
+          }
+
+          response.centers.forEach(center => {
+            let html = `<div class="col-lg-4 col-md-6 row-items">
+                          <a
+                            href="${center.absolute_url}"
+                            class="listing-item-container compact"
+                          >
+                            <div class="listing-item">
+                              <img src="{% static 'w3/images/csc_banner.png' %}" alt="" />
+
+                              <div class="listing-item-content">
+                                <div class="listing_csc_logo">
+                                  <img src="${center.logo ? center.logo : '/static/images/EGATE-e1651050883359.jpg' }" alt="CSC Center Logo" />
+                                </div>
+                                <h3>${center.full_name}</h3>
+                                <p>CSC ID : ${center.pk}</p>
+                                <span
+                                  ><i class="fa fa-map-marker" aria-hidden="true"></i> ${center.partial_address}</span
+                                >
+                              </div>
+                            </div>
+                          </a>
+                        </div>`
+            $('#center-listing').append(html);
+          });
+          paginator();
+
+        },
+
+        error: error => console.error("Error:", error),
+      })
+    }
+
+    $('#sort-dropdown').on('change', filterAndSortCenters);
+
+    $('#sort-btn').click(filterAndSortCenters);
+
+    // Pagination
+    function paginator () {
+      let itemsPerPage = 9;
+      let currentPage = 1;
+      let totalItems = $('.row-items').length;
+      let totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      $('.prev-page').hide();      
+
+      function paginationBtnVisibility() {
+        $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+        $('.next-page').hide();
+        $('.prev-page').hide();
+        
+        if (currentPage == totalPages) {          
+          $('.next-page').hide();
+          
+          if (totalPages == 1) {
+            $('#first-page').html(currentPage).addClass('current-page').show();            
+            
+          } else if (totalPages == 2) {
+            $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+            $('#second-page').html(currentPage).addClass('current-page').show();
+            $('.prev-page').show();
+            
+          } else if (totalPages == 3) {
+            $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+            $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#third-page').html(currentPage).addClass('current-page').show();
+
+          } else {
+            $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+            $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#third-page').html(currentPage).addClass('current-page').show();
+            $('.prev-page').show();            
+          };
+
+        } else if (currentPage > 1) {          
+          $('.prev-page').show();
+          $('.next-page').show();
+          $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+          $('#second-page').html(currentPage).addClass('current-page').show();
+          $('#third-page').html(currentPage + 1).addClass('next-page').show();
+
+        } else if (currentPage == 1 && totalPages > 0) {          
+          $('.next-page').show();
+          $('#first-page').html(currentPage).addClass('current-page').show();
+          $('#second-page').html(currentPage + 1).addClass('next-page').show();
+
+          if (totalPages >= 3) {          
+            $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+          }
+        }          
+      };
+
+      paginationBtnVisibility();
+
+      function renderPage(page) {
+          $('.row-items').hide();
+          $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+          $('#pagination a').removeClass('active');
+          $('#pagination a').eq(page).addClass('active');
+          $('.prev-page').toggleClass('disabled', page === 1);
+          $('.next-page').toggleClass('disabled', page === totalPages);
+      }
+
+      $(document).on('click', '.next-page', function() {
+          if (currentPage < totalPages) {
+              currentPage++;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+      });
+
+      $(document).on('click', '.upcoming-page', function() {
+          if (currentPage < totalPages - 1) {
+              currentPage += 2;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+      });
+
+      $(document).on('click', '.prev-page', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            $('#current-page').html(currentPage);
+            paginationBtnVisibility();
+            renderPage(currentPage);
+        }
+      });
+
+      $(document).on('click', '.earlier-page', function() {
+        if (currentPage > 2) {
+            currentPage -= 2;
+            $('#current-page').html(currentPage);
+            paginationBtnVisibility();
+            renderPage(currentPage);
+        }
+      });
+
+      // Initialize the first page
+      renderPage(currentPage);
+    };
+
+    paginator();
+
+  });
+
+</script>
+<script>
+  $(document).ready(function () {
+
+    function pincodeSelected() {
+      $('#pincode-input-div').show();
+      $('#pincode-input-div input').prop({'required': true, 'disabled': false});
+      $('#state-input-div select').prop({'required': false, 'disabled': true});
+      $('#state-input-div, #district-input-div, #block-input-div').hide();
+    }
+
+    function pincodeUnselected() {
+      $('#pincode-input-div').hide();
+      $('#pincode-input-div input').prop({'required': false, 'disabled': true});
+      $('#state-input-div select').prop({'required': true, 'disabled': false});
+      $('#state-input-div, #district-input-div, #block-input-div').show();
+    }
+
+
+    // Pincode Search Toggle
+		$('#pincode-checkbox-btn').click((e) => {
+			if (e.target.checked == true) {
+				pincodeSelected();
+			} else {
+				pincodeUnselected();
+			}
+		});
+
+    if(`{{pincode}}`) {
+      pincodeSelected();
+    };
+
+
+
+    // Generate schema for centers on the current page
+    // Remove any existing schema script
+    function removeExistingSchema() {
+        const centerSchemaScript = document.getElementById('center-schema');
+        if (centerSchemaScript) {
+          centerSchemaScript.remove();
+        }
+      }
+
+	  function generateSchema() {
+
+      // Collect the centers currently visible in the #list-centers container
+      const centers = document.querySelectorAll('.row-items');
+      const centerList = [];
+    
+      centers.forEach((center, index) => {
+        // Check if the center is visible
+        if (getComputedStyle(center).display !== 'none') {
+          const centerData = {
+            "@type": "ListItem",
+            "position": centerList.length + 1,
+            "item": {
+              "@type": "Organization",
+              "name": center.getAttribute('data-name'),
+              "url": `https://{{request.get_host}}/csc_center/${center.getAttribute('data-slug')}`,
+              "logo": `https://{{request.get_host}}/${center.getAttribute('data-image')}`,
+              "description": `${center.getAttribute('data-name')} provides top-notch government registration services to individuals and businesses.`
+            }
+          };
+          centerList.push(centerData);
+        }
+      });
+
+      // Create the JSON-LD object
+      const schemaData = {
+        "@context": "http://schema.org",
+        "@type": "ItemList",
+        "itemListElement": centerList
+      };
+  
+      removeExistingSchema();
+    
+        // Inject new JSON-LD schema
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.id = 'center-schema';
+        script.textContent = JSON.stringify(schemaData);
+        document.head.appendChild(script);
+      }
+  
+      // Call the function when the page loads or when pagination is applied
+      generateSchema();
+      
+      // Optional: Hook this function to pagination changes if applicable
+      $(document).on('click', '.next-page, .prev-page, .upcoming-page, .earlier-page', function() {
+        removeExistingSchema();
+        generateSchema();
+      });
+
+
+      var currentUrl = window.location.href;
+      var updatedUrl = currentUrl.replace(/\+/g, '%20');
+
+      if (currentUrl != updatedUrl) {
+        window.history.replaceState(null, '', updatedUrl);
+      };
+  })
+</script>
+{% endblock scripts %}

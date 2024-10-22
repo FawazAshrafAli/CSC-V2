@@ -1,0 +1,211 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Register {% endblock title_prefix %}
+
+{% block styles %}
+<style>
+	#message-div ul {
+		padding: 0;
+	}
+	#message-div ul li {
+		list-style: none;		
+	}
+	.alert {
+		z-index: 1500;
+		padding: 10px;
+	}
+	.alert-success {
+		background-color: #4CAF50;
+		color: #fff;		
+	}
+	.alert-danger {
+		background-color: darkred;
+		color: #fff;		
+	}
+	.alert-warning {
+		background-color: orange;
+		color: #fff;		
+	}
+
+    #pop-up-box {
+        display: none;
+        position:fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;                
+        background: #f7f7f7;
+        box-shadow: 0 0 5px;
+        min-width: 390px;
+    }
+
+    #pop-up-box-heading {
+        text-transform: uppercase;
+        background-color: #fff;
+        padding: 10px;
+        margin: 0 0 10px 0;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 5px; 
+        right: 5px;
+        font-size: 24px;
+        color: red;
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 0 1px #777;
+        padding: 0 7px;        
+    }
+
+    .close-btn:hover {
+        color: #fff;
+        background-color: rgba(255, 0, 0, 0.485);
+    }
+
+    #pop-up-form {
+        padding: 0 10px;
+        padding-bottom: 5px;
+    }
+
+    #pop-up-add-btn-div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #pop-up-submit-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+        border: none;
+        margin-bottom: 5px;
+    }            
+
+    #pop-up-add-btn:hover {
+        background: linear-gradient(to bottom, lime, green, darkgreen);
+    }
+
+    #pop-up-cancel-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkblue, blue, darkblue);
+        border: none;
+        margin-bottom: 5px;
+    }
+
+    #pop-up-cancel-btn:hover {
+        background: linear-gradient(to bottom, steelblue, blue, darkblue);
+    }
+
+    #pop-up-dropdown {                
+        min-height: 150px;                
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>CSC User Registration</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url "home:view" %}">Home</a></li>
+						<li>CSC User Registration</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div style="padding: 0 10px">
+	{% include "components/message.html" %}
+</div>
+<!-- Pricing Tables
+================================================== -->
+
+<div id="sign-in-dialog">
+	<div class="tabs-container alt">
+		<!-- User Creation -->
+		<div class="tab-content" id="tab1">	
+			<h3>User Creation</h3>		
+			<form method="post" action="{% url 'authentication:user_registration' email %}" class="login">
+				{% csrf_token %}
+				<p class="form-row form-row-wide">
+					<label for="username">Username:
+						<i class="im im-icon-Male"></i>
+						<input type="text" class="input-text" name="username" id="username" value="{{email}}" readonly placeholder="Your Email Address" required />
+					</label>
+				</p>
+				<p class="form-row form-row-wide">
+					<label for="password">Password:
+						<i class="im im-icon-Lock-2"></i>
+						<input class="input-text" type="password" name="password" id="password" placeholder="Password" required />
+					</label>
+				</p>
+                <p class="form-row form-row-wide">
+					<label for="password">Repeat Password:
+						<i class="im im-icon-Lock-2"></i>
+						<input class="input-text" type="password" name="repeat_password" id="repeat_password" placeholder="Repeat Password" required />
+					</label>
+				</p>
+				<div class="form-row">				
+					<button type="submit" class="button border margin-top-5" name="login" id="login-btn" value="Create">Create</button>
+					<div class="checkboxes margin-top-10">
+						<input id="remember-me" type="checkbox" name="check">
+					</div>
+				</div>				
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+	$(document).ready(() => {
+		function loginFormValidation() {
+			let username = $('#username').val();
+			let password = $('#password').val();
+
+			if (username == '' || password == '') {
+				$('#login-btn').prop('disabled', true).css('pointer-events', 'none');							
+			} else {
+				$('#login-btn').prop('disabled', false).css('pointer-events', 'auto');
+			}
+		};
+
+		$('#username, #password').on('input', loginFormValidation);
+
+		loginFormValidation();
+	})
+</script>
+
+<!-- POP UP BOX -->
+<script>
+	$(document).ready(() => {
+		$('#otp-email').on('input', () => {
+			if ($('#otp-email').html != '') {
+				$('#pop-up-submit-btn').prop('disabled', false);
+			}
+		});
+
+		$('#close-btn #pop-up-cancel-btn').click($('pop-up-box').hide());
+
+		$('#forgot-password').click((e) => {
+			e.preventDefault();
+			$('#pop-up-box').show();
+		});
+	})
+</script>
+{% endblock scripts %}

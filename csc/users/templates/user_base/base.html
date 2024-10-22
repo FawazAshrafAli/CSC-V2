@@ -1,0 +1,383 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+
+<!-- Basic Page Needs
+================================================== -->
+<title>{% block title_prefix %}{% endblock title_prefix %} - Common Service Centres (CSC) in India</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/main-color.css' %}" id="colors">
+
+<link rel="shortcut icon" href="{% static 'images/Favicon.png' %}">
+
+<!-- W3 -->
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+	#cke_id_content {
+		width: 75vw !important;										
+	}
+</style>
+<style>
+	#message-div ul {
+		padding: 0;
+	}
+	#message-div ul li {
+		list-style: none;			
+	}
+	.alert {
+		z-index: 1500;
+		padding: 10px;
+	}
+	.alert-success {
+		background-color: #4CAF50;
+		color: #fff;		
+	}
+	.alert-danger {
+		background-color: darkred;
+		color: #fff;		
+	}
+	.alert-warning {
+		background-color: orange;
+		color: #fff;		
+	}
+
+    #pop-up-box {
+        display: none;
+        position:fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;                
+        background: #f7f7f7;
+        box-shadow: 0 0 5px;
+        min-width: 390px;
+    }
+
+    #pop-up-box-heading {
+        text-transform: uppercase;
+        background-color: #fff;
+        padding: 10px;
+        margin: 0 0 10px 0;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 5px; 
+        right: 5px;
+        font-size: 24px;
+        color: red;
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 0 1px #777;
+        padding: 0 7px;        
+    }
+
+    .close-btn:hover {
+        color: #fff;
+        background-color: rgba(255, 0, 0, 0.485);
+    }
+
+    #pop-up-form {
+        padding: 0 10px;
+        padding-bottom: 5px;
+    }
+
+    #pop-up-add-btn-div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #pop-up-add-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+        border: none;
+        margin-bottom: 5px;
+    }            
+
+    #pop-up-add-btn:hover {
+        background: linear-gradient(to bottom, lime, green, darkgreen);
+    }
+
+    #pop-up-cancel-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkblue, blue, darkblue);
+        border: none;
+        margin-bottom: 5px;
+    }
+
+    #pop-up-cancel-btn:hover {
+        background: linear-gradient(to bottom, steelblue, blue, darkblue);
+    }
+
+    #pop-up-dropdown {                
+        min-height: 150px;                
+    }
+</style>
+
+{% block styles %}{% endblock styles %}
+</head>
+
+<body>
+<!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header Container
+================================================== -->
+<header id="header-container" class="fixed fullwidth dashboard">
+
+	<!-- Header -->
+	<div id="header" class="not-sticky">
+		<div class="container">
+			
+			<!-- Left Side Content -->
+			<div class="left-side">
+				
+				<!-- Logo -->
+				<div id="logo">
+					<a href="{% url 'home:view' %}"><img src="{% static 'images/logo.png' %}" alt="CSC Centers in India"></a>
+					<a href="{% url 'home:view' %}" class="dashboard-logo"><img src="{% static 'images/logo2.png' %}" alt=""></a>
+				</div>
+
+				<!-- Mobile Navigation -->
+				<div class="mmenu-trigger">
+					<button class="hamburger hamburger--collapse" type="button">
+						<span class="hamburger-box">
+							<span class="hamburger-inner"></span>
+						</span>
+					</button>
+				</div>
+
+				<!-- Main Navigation -->
+				 <nav id="navigation" class="style-1" itemscope="" itemtype="http://www.schema.org/SiteNavigationElement">
+					<ul id="responsive">
+
+						<li><a href="{% url 'users:home' %}" {% if home_page %} class="current" {% endif %}>Home</a></li>
+
+						<li><a href="{% url 'users:csc_centers' %}" {% if center_page %} class="current" {% endif %}>CSC Centers</a></li>
+
+						<li><a href="{% url 'users:my_posters' %}" {% if poster_page %} class="current" {% endif %}>Posters</a></li>
+						
+						<li><a href="{% url 'users:service_enquiries' %}" {% if service_page %} class="current" {% endif %}>Service Enquiries</a></li>
+
+						<li><a href="{% url 'users:product_enquiries' %}" {% if product_page %} class="current" {% endif %}>Product Enquiries</a></li>
+
+						<li><a href="{% url 'users:order_histories' %}" {% if order_page %} class="current" {% endif %}>Order History</a></li>
+
+					</ul>
+				</nav>
+				<div class="clearfix"></div>
+				<!-- Main Navigation / End -->
+				
+			</div>
+			<!-- Left Side Content / End -->
+
+			<!-- Right Side Content / End -->
+			<div class="right-side">
+				<!-- Header Widget -->
+				<div class="header-widget">
+					
+					<!-- User Menu -->
+					<div class="user-menu">
+						<div class="user-name" id="current-csc-center"><span><img src="{% static 'w3/images/no_image.png' %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> Loading . . .</div>
+						<ul>
+							<li><a href="#" id="switch-csc-btn"><i class="fa fa-exchange-alt"></i> Switch Center</a></li>							
+							<li><a href="{% url 'users:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>
+							<li><a href="{% url 'authentication:logout' %}"><i class="sl sl-icon-power"></i> Logout</a></li>
+						</ul>
+					</div>
+					
+					<a href="{% url 'users:add_csc' %}" class="button border with-icon">ADD CSC CENTER <i class="sl sl-icon-plus"></i></a>
+				</div>
+				<!-- Header Widget / End -->
+			</div>
+			<!-- Right Side Content / End -->
+
+		</div>
+	</div>
+	<!-- Header / End -->
+
+</header>
+<div class="clearfix"></div>
+<!-- Header Container / End -->
+
+
+<!-- Dashboard -->
+<div id="dashboard">
+
+	<!-- Navigation
+	================================================== -->
+
+	<!-- Responsive Navigation Trigger -->
+	<a href="#" class="dashboard-responsive-nav-trigger"><i class="fa fa-reorder"></i> Dashboard Navigation</a>
+
+	<div class="dashboard-nav">
+		<div class="dashboard-nav-inner">
+
+			<ul data-submenu-title="Main">
+				<li {% if home_page %} class="active" {% endif %}><a href="{% url 'users:home' %}"><i class="sl sl-icon-home"></i> Home</a></li>
+
+				<li {% if center_page %} class="active" {% endif %} ><a><i class="fa fa-building"></i> CSC Centers</a>
+					<ul>
+						<li><a href="{% url 'users:csc_centers' %}">List CSC Centers</a></li>
+						<li><a href="{% url 'users:add_csc' %}" >Add CSC Center</a></li>
+					</ul>	
+				</li>
+
+				<li {% if poster_page %} class="active" {% endif %} ><a><i class="fa fa-image"></i> Posters</a>
+					<ul>
+						<li><a href="{% url 'users:my_posters' %}">My Posters</a></li>
+						<li><a href="{% url 'users:available_posters' %}">Available Posters</a></li>					
+					</ul>	
+				</li>
+
+				<li {% if service_page %} class="active" {% endif %}><a href="{% url 'users:service_enquiries' %}"><i class="fa fa-handshake"></i> Service Enquiries</a></li>				
+
+				<li {% if product_page %} class="active" {% endif %}><a href="{% url 'users:product_enquiries' %}"><i class="fa fa-box"></i> Product Enquiries</a></li>
+
+				<li {% if order_page %} class="active" {% endif %}><a href="{% url 'users:order_histories' %}"><i class="fa fa-history"></i> Order History</a></li>
+
+			</ul>					
+
+			<ul data-submenu-title="Account">
+				<li><a href="{% url 'users:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>
+				<li><a href="{% url 'authentication:logout' %}"><i class="sl sl-icon-power"></i> Logout</a></li>
+			</ul>
+			
+		</div>
+	</div>
+	<!-- Navigation / End -->
+    <div class="dashboard-content">
+        {% block content %}
+        {% endblock content %}	
+        <div id="pop-up-box">
+            <h4 id="pop-up-box-heading" class="text-center"></h4>
+            <button class="close-btn" aria-label="Close" title="Close">&times;</button>
+            <form id="pop-up-form" method="post" action="#">
+                {% csrf_token %}
+                <select name="services" id="pop-up-dropdown" multiple required>
+                </select>
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-add-btn" type="submit" disabled></button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+<!-- Dashboard / End -->
+
+
+</div>
+<!-- Wrapper / End -->
+
+
+<!-- Scripts
+================================================== -->
+<script type="text/javascript" src="{% static 'scripts/jquery-3.6.0.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-migrate-3.3.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/mmenu.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/chosen.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/slick.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/rangeslider.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/waypoints.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/counterup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-ui.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/tooltips.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/custom.js' %}"></script>
+
+
+<!-- w3 -->
+<script>
+	$(document).ready(() => {
+		setTimeout(() => {
+			$('#message-div').hide();
+		}, 3000);
+	})
+</script>
+
+<script>
+	$(document).ready(() => {
+		// Close | Cancel add service pop up box
+		$('#pop-up-cancel-btn, .close-btn').click(() => $('#pop-up-box').hide())
+
+		// Switch CSC Center
+		$('#switch-csc-btn').click(() => {
+			
+			$('#pop-up-form').prop('action', "{% url 'users:home' %}").prop('method', 'get');
+			$('#pop-up-box-heading').html('Select CSC Center');
+			$('#pop-up-dropdown').html(`
+			{% for center in user_csc_centers %}
+			<option value="{{center.slug}}">{{center.full_name}}</option>
+			{% endfor %}
+			`).prop('name', 'center_slug');
+			$('#pop-up-add-btn').html('Select Center');
+			$('#pop-up-box').show();						
+		})
+
+		$('#pop-up-dropdown').on('change', () => {
+			$('#pop-up-add-btn').prop('disabled', false);
+		})
+
+		// Save the current csc name along with user when switched
+		$('#pop-up-form').on('submit', () => {
+			if ($('#pop-up-box-heading').html() == 'Select CSC Center') {
+					const center = $('#pop-up-dropdown').val();
+					localStorage.setItem('centerSlug', center);
+					localStorage.setItem('cscUser', `{{request.user.username}}`);					
+			}
+		})
+
+		function defaultCurrentCsc() {
+			$('#current-csc-center').html(`<span><img src="{% if center.logo %} {{center.logo.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> {{center.name}}`);
+		}
+
+		// Get the logo and name of the current center
+		function getCurrentCsc(centerSlug) {
+			$.ajax({
+				type: 'get',
+				url: '/users/get_current_csc/',
+				dataType: 'json',
+				data: {'center_slug': centerSlug},
+				success: response => {
+					if (response) {
+						$('#current-csc-center').html(`<span><img src="${response.current_center_logo ? response.current_center_logo : '/static/images/dashboard-avatar.jpg'}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> ${response.current_center_name}`);
+					} else {
+						defaultCurrentCsc();
+					}
+				},
+				error: error => {
+					console.error('Error: ', error);
+					defaultCurrentCsc();
+				},				
+			});
+		};
+
+		if (localStorage.getItem('cscUser') == `{{request.user.username}}` && localStorage.getItem('centerSlug')) {
+			const centerSlug = localStorage.getItem('centerSlug');
+			getCurrentCsc(centerSlug);
+		} else {
+			defaultCurrentCsc();
+			getCurrentCsc(`{{csc_center.slug}}`)			
+		}
+	});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+{% block scripts %}{% endblock scripts %}
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}{{product.name}}{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_product/css/admin_product.css' %}">
+
+{% endblock styles %}
+
+{% block content %}
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- <h2>{{product.name}}</h2> -->
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                    <li><a href="{% url 'csc_admin:services' %}">Products</a></li>
+                    <li>{% if product.name|length > 25 %} {{product.name|slice:':25'}} . . . {% else %} {{product.name}} {% endif %}</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div id="delete-toggle-div" style="background-color: inherit;">
+        <a href="{% url 'csc_admin:update_product' product.slug %}" id="update-toggle-btn">Update<a>
+        <button type="button" id="delete-toggle-btn">DELETE<button>
+        <button type="button" id="product-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
+    </div>
+    {% if messages %}
+    <div id="message-div">
+        <ul class="messages">
+            {% for message in messages %}
+            <li {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box" style="display: none;">
+    <div class="modal-content">            
+        <h4><span>Deleting</span> Product '{{product.name}}' . . .</h4>
+        <h5>Are you sure?</h5>                        
+    </div>
+    <br>
+    <form method="GET" action="{% url 'csc_admin:delete_product' product.slug %}">
+        <button type="submit" id="confirm-deletion-btn">Delete</button>
+        <button type="button" id="cancel-deletion-btn">Cancel</button>
+    </form>
+</div>
+<!-- Delete Confirmation Box Start-->
+
+<div class="row">		
+    <!-- Listings -->
+    <div class="col-lg-12 col-md-12" id="product-card-col">
+        <div class="dashboard-list-box margin-top-0">
+            <div class="row" style="background-color: #fff;">
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-grid">
+                        <div class="product-image">
+                            <div class="image">
+                                <img class="pic-1" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                <img class="pic-2" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                            </div>                                                    
+                        </div>
+                        <div class="product-content">
+                            <h3 class="title">{{product.name}}</h3>					
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8" id="product-description-div">
+                    <h3>Details</h3>                     
+                    <hr>
+                    <table>
+                        <tr>
+                            <th>Category</th>
+                            <th>:</th>
+                            <td>{{product.category}}</td>
+                        </tr>
+                        <tr>
+                            <th>Price</th>
+                            <th>:</th>
+                            <td>&#8377; {{product.price}}</td>
+                        </tr>                            
+                        <tr>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td colspan="3">{{product.description}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>    
+        $('#product-more-option-btn').click(() => {
+            $('#delete-toggle-btn').show();
+            $('#update-toggle-btn').show();
+            setTimeout(() => {
+                $('#delete-toggle-btn').hide();
+                $('#update-toggle-btn').hide();
+            }, 5000)
+        });
+
+        $('#delete-toggle-btn').click(() => {
+            $('#delete-confirmation-box').show();
+            $('#delete-toggle-btn').hide()
+            $('#update-toggle-btn').hide()
+        });
+
+        $('#cancel-deletion-btn').click(() => {
+            $('#delete-confirmation-box').hide();            
+        });
+
+</script>
+{% endblock scripts %}

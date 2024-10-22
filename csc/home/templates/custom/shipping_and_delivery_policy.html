@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% block title_prefix %}Shipping &amp; Delivery Policy{% endblock title_prefix %}
+{% block content %}
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+
+				<h2>Shipping &amp; Delivery Policy</h2>
+
+
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+						<li>Shipping &amp; Delivery Policy</li>
+					</ul>
+				</nav>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="container">
+
+	<div class="row">
+		<div class="col-md-12">
+            <div class="content-container"><p class="content-text">Shipping is not applicable for business.</p>
+                <p>Contact: support@cscindia.info</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

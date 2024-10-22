@@ -1,0 +1,155 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}
+{{blog.title}}
+{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_blog/css/detail.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{blog.title}}</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                    <li><a href="{% url 'csc_admin:blogs' %}">Blogs</a></li>
+                    <li>{{blog.title}}</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div id="delete-toggle-div">
+        <a href="{% url 'csc_admin:update_blog' blog.slug %}" id="update-toggle-btn">UPDATE<a></button>
+        <button type="button" id="delete-toggle-btn">DELETE<button>
+        <button type="button" title="Options" id="blog-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
+    </div>
+    {% if messages %}
+    <div id="message-div">
+        <ul class="messages">
+            {% for message in messages %}
+            <li {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box">
+    <div class="modal-content">            
+        <h4><span>Deleting</span> Blog '{{blog.name}}' . . .</h4>
+        <h5>Are you sure?</h5>                        
+    </div>
+    <br>
+    <form method="GET" action="{% url 'csc_admin:delete_blog' blog.pk %}">
+        <button type="submit" id="confirm-deletion-btn">Delete</button>
+        <button type="button" id="cancel-deletion-btn">Cancel</button>
+    </form>
+</div>
+<!-- Delete Confirmation Box Start-->
+
+<div class="row">		
+    <!-- Listings -->
+    <div class="col-lg-12 col-md-12" id="blog-card-col">
+        <div class="dashboard-list-box margin-top-0">
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-grid">
+                        <div class="product-image">
+                            <div class="image">
+                                <img class="pic-1" src="{% if blog.image %} {{blog.image.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                <img class="pic-2" src="{% if blog.image %} {{blog.image.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                            </div>                                                    
+                        </div>
+                        <div class="product-content">
+                            <h3 class="title">{{blog.name}}</h3>					
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8" id="blog-description-div">                        
+                    <table id="blog-detail-table">
+                        <tr>
+                            <th>Title</th>
+                            <td>:</td>
+                            <td>{{blog.title}}</td>
+                        </tr>
+                        <tr>
+                            <th>Category</th>
+                            <td>:</td>
+                            <td>{{blog.category.name}}</td>
+                        </tr>
+                        <tr>
+                            <th>Tags</th>
+                            <td>:</td>
+                            <td>{{blog.get_tags}}</td>
+                        </tr>
+                        <tr>
+                            <th>Author</th>
+                            <td>:</td>
+                            <td>{{blog.author}}</td>
+                        </tr>
+                        <tr>
+                            <th>Created at</th>
+                            <td>:</td>
+                            <td>{{blog.created_at}}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Updated</th>
+                            <td>:</td>
+                            <td>{{blog.updated_at}}</td>
+                        </tr>                                                
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <table id="blog-summary-table" >
+            <thead>
+                <tr>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{blog.summary}}</td>
+                </tr>        
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <table id="blog-content-table">
+            <thead>
+                <tr>
+                    <th>Content</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="blog-content">{{blog.content|safe}}</td>
+                </tr>        
+            </tbody>                                
+        </table>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/admin_blog/js/detail.js' %}"></script>
+{% endblock scripts %}

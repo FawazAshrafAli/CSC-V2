@@ -1,0 +1,54 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Payment {% endblock title_prefix %}
+
+{% block styles %}
+<script src="https://js.stripe.com/v3/"></script>
+
+<link rel="stylesheet" href="{% static 'w3/payment/css/payment.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<div class="main-search-container plain-color">
+	<div class="main-search-inner">
+
+		<div class="container">            
+			<div class="row">
+				{% include "components/message.html" %}
+				<div class="col-md-12">
+                    <div class="payment-form">
+                        <h4>Payment</h4>
+                        <hr>
+                        <table>                       
+                            <tr>
+                                <th>Amount</th>
+                                <th>&nbsp;:&nbsp;</th>
+                                <td>{{amount}} INR</td>                                
+                            </tr>                            
+                        </table>
+                        
+                        <br>                       
+                        <form action="{% url 'payment:success' %}" method="POST">
+                            <script
+                                src="https://checkout.razorpay.com/v1/checkout.js"
+                                data-key="{{ razorpay_key_id }}"  <!-- Razorpay API Key -->
+                                data-amount="{{ amount|floatformat:2 }}"  <!-- INR amount -->
+                                data-currency="{{ currency }}"  <!-- INR currency -->
+                                data-order_id="{{ razorpay_order_id }}"  <!-- Razorpay Order ID -->
+                                data-buttontext="Pay with Razorpay"
+                                data-name="Your Test Store"
+                                data-description="Payment for Test Order"
+                                data-theme.color="#F37254">
+                            </script>
+                            <input type="hidden" name="razorpay_order_id" value="{{razorpay_order_id}}">
+                            <input type="hidden" name="csc_center" value="{{csc_center.slug}}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        </form>
+                    </div>            
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

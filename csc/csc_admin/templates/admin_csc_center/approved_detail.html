@@ -1,0 +1,313 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}
+{{csc_center.name}}
+{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_csc_center/css/admin_csc_center.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<style>
+    #csc-detail-table {
+        margin-top: 15px;
+        min-width: fit-content;
+    }        
+    #csc-detail-table th {
+        width: 150px;
+    }
+    #csc-detail-table td {
+        padding-left: 50px;
+    }
+
+    #csc-summary-table, #csc-content-table {
+        min-width: 100%;
+        margin-top: 15px;
+        margin-bottom: 35px;
+        border: 1px solid silver;
+        padding: 0 3px;
+    }
+    #csc-summary-table th, #csc-content-table th {
+        text-align: csc_center;
+        color: #fff;
+        background-color: #777;
+    }
+    #csc-summary-table td, #csc-content-table td {
+        border-top: 1px solid silver;
+        padding: 0 3px;
+    }
+</style>
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{csc.title}}</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                    <li><a href="{% url 'csc_admin:approved_csc_centers' %}">Approved CSC Center Requests</a></li>
+                    <li>{{csc_center.full_name}}</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div id="delete-toggle-div" style="display: flex; align-items: center;">
+        <a href="{% url 'csc_admin:update_csc' csc_center.slug %}" id="update-toggle-btn">UPDATE<a></button>
+        <button type="button" id="delete-toggle-btn">DELETE<button>
+        <button type="button" title="Options" id="csc-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
+    </div>
+    {% include "admin_components/message.html" %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box" style="display: none;">
+    <div class="modal-content">            
+        <h4><span>Deleting</span> CSC Center '{{csc_center.full_name}}' . . .</h4>
+        <h5>Are you sure?</h5>                        
+    </div>
+    <br>
+    <form method="GET" action="{% url 'csc_admin:delete_csc' csc_center.slug %}">
+        <button type="submit" id="confirm-deletion-btn">Delete</button>
+        <button type="button" class="cancel-btn">Cancel</button>
+    </form>
+</div>
+<!-- Delete Confirmation Box End-->
+
+<style>
+    #action-confirmation-box {
+        display: none;
+        position: fixed;
+        z-index: 99;
+
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%);
+
+        min-width: 320px;
+        padding: 10px;
+        box-shadow: 0 0 5px #777;
+
+        background-color: #fff;
+
+    }
+    #action-box-btns {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #cancel-approval-btn {
+        text-transform: uppercase;
+    }
+
+    #confirm-cancel-approval, .cancel-btn {
+        border: none;
+        box-shadow: 0 0 2px #777;
+        color: #fff;
+        text-transform: uppercase;
+        width: 75px;
+    }
+    #confirm-cancel-approval {
+        background: linear-gradient(to bottom, orangered, orange, orangered);
+    }
+    #confirm-cancel-approval:hover {
+        background: linear-gradient(to bottom, orange, orange, orangered);
+    }
+    .cancel-btn {
+        background: linear-gradient(to bottom, indigo, blue, indigo);
+    }
+    .cancel-btn:hover {
+        background: linear-gradient(to bottom, blue, blue, indigo);
+    }
+    
+</style>
+
+<!-- Action Box Start-->
+<div id="action-confirmation-box">
+    <form method="GET" action="#">
+        <div class="modal-content" id="action-content">            
+            
+        </div>
+        <br>
+        <div id="action-box-btns">
+            <button type="submit" class="action-submit-btn"></button>
+            <button type="button" class="cancel-btn" style="text-transform: uppercase;">Cancel</button>
+        </div>
+    </form>
+</div>
+<!-- Action Box End-->
+
+<div class="row">		
+    <!-- Listings -->
+    <div class="col-lg-12 col-md-12" id="csc-card-col">
+        <div class="dashboard-list-box margin-top-0">
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-grid">
+                        <div class="product-image">
+                            <div class="image">
+                                <img class="pic-1" src="{% if csc_center.logo %} {{csc_center.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                <img class="pic-2" src="{% if csc_center.logo %} {{csc_center.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                            </div>                                                    
+                        </div>
+                        <div class="product-content">
+                            <h3 class="Name">{{csc_center.full_name}}</h3>					
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8" id="csc-description-div">                        
+                    <table id="csc-detail-table">
+                        <tr>
+                            <th>Title</th>
+                            <td>:</td>
+                            <td>{{csc_center.full_name}}</td>
+                        </tr>
+                        {% if csc_center.website %}
+                        <tr>
+                            <th>Website</th>
+                            <td>:</td>
+                            <td>{{csc_center.website}}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>&nbsp;</th>                               
+                        </tr>
+                        <tr>
+                            <th>Owner</th>
+                            <td>:</td>
+                            <td>{{csc_center.owner}}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>:</td>
+                            <td>{{csc_center.email}}</td>
+                        </tr>
+                        <tr>
+                            <th>Contact Number</th>
+                            <td>:</td>
+                            <td>{{csc_center.contact_number}}</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile Number</th>
+                            <td>:</td>
+                            <td>{{csc_center.mobile_number}}</td>
+                        </tr>
+                        <tr>
+                            <th>WhatsApp Number</th>
+                            <td>:</td>
+                            <td>{{csc_center.whatsapp_number}}</td>
+                        </tr>
+                        <tr>
+                            <th>&nbsp;</th>                               
+                        </tr>                         
+                        <tr>
+                            <th>Location</th>
+                            <td>:</td>
+                            <td>{{csc_center.full_address}}</td>
+                        </tr>
+                        <tr>
+                            <th>&nbsp;</th>                               
+                        </tr>
+                        <tr>
+                            <th>Services</th>
+                            <td>:</td>
+                            <td style="display: flex; flex-wrap: wrap;">
+                                {% for service in csc_center.get_services %}
+                                <div style="box-shadow: 0px 0px 1px #777; border-radius: 50px; background-color: #fff; padding: 0 5px; margin: 3px 3px">{{service}}</div>
+                                {% endfor %}
+                            </td>
+                        </tr>                            
+                        <tr>
+                            <th>&nbsp;</th>                               
+                        </tr>
+                        <tr>
+                            <th>Tags</th>
+                            <td>:</td>
+                            <td style="display: flex; flex-wrap: wrap;">
+                                {% for keyword in csc_center.get_keywords %}
+                                <div style="box-shadow: 0px 0px 1px #777; border-radius: 50px; background-color: #fff; padding: 0 5px; margin: 3px 3px">{{keyword}}</div>
+                                {% endfor %}
+                            </td>
+                        </tr>                                                                        
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <table id="csc-summary-table" >
+            <thead>
+                <tr>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{csc_center.description}}</td>
+                </tr>        
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    #action-btns-row {
+        text-align:center;
+    }   
+    </style>
+    <div class="row" id="action-btns-row">
+        <div class="col-md-12">
+            <button type="button" class="button" id="cancel-approval-btn">Cancel Approval</button>
+        </div>
+    </div>
+    <br>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $('#cancel-approval-btn').click(() => {
+            $('#action-confirmation-box form').prop('action', `{% url 'csc_admin:cancel_csc_center_approval' csc_center.slug %}`).prop('method', 'post');
+            $('#action-confirmation-box form').prepend(`{% csrf_token %}`);
+            $('#action-content').html(`
+                <h4><span style="color:orangered;">Canceling</span> Approval . . .</h4>
+                <hr>
+                <h5>Are you sure?</h5>
+            `)
+            $('.action-submit-btn').prop('id', 'confirm-cancel-approval').html('Yes');
+            $('#action-confirmation-box').show();
+        });
+    });
+</script>
+
+<script>    
+        $('#csc-more-option-btn').click(() => {            
+            $('#delete-toggle-btn').show();
+            $('#update-toggle-btn').show();
+            setTimeout(() => {
+                $('#delete-toggle-btn').hide();
+                $('#update-toggle-btn').hide();
+            }, 5000)
+        });
+
+        $('#delete-toggle-btn').click(() => {
+            $('#delete-confirmation-box').show();
+            $('#delete-toggle-btn').hide();
+            $('#update-toggle-btn').hide();
+        });
+
+        $('.cancel-btn').click(() => {
+            $('#delete-confirmation-box, #action-confirmation-box').hide();
+        });
+
+</script>
+{% endblock scripts %}

@@ -1,0 +1,223 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} FAQs {% endblock title_prefix %}
+
+{% block content %}
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>FAQs</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+						<li>FAQs</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<!-- Listing Item -->
+				<section class="fullwidth margin-top-70 padding-top-75 padding-bottom-70" data-background-color="#f1f1f1" style="background: #f1f1f1;">
+                    <!-- Info Section -->
+                    <div class="container">
+                
+                        {% if faqs %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3 class="headline centered"> Frequently Asked Questions (FAQ)	</h3>
+                                
+                   
+                            <!-- Toggles Container -->
+                            <div class="style-2">
+                                {% for faq in faqs|slice:':5' %}
+                                <!-- Toggle {{forloop.counter}} -->
+                                <div class="toggle-wrap row-items">
+                                    <span class="trigger"><a href="#">{{faq.question}} <i class="sl sl-icon-plus"></i></a></span>
+                                    <div class="toggle-container" style="display: none;">
+                                        <p>{{faq.answer}} </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                
+                            </div>
+                
+                            <!-- Toggles Container / End -->
+      
+                
+                            </div>
+                        </div>
+                        {% endif %}
+                
+                    </div>
+                    <!-- Info Section / End -->
+                 
+                
+                </section>
+				<!-- Listing Item / End -->
+			</div>
+ 
+ 
+
+			<!-- Pagination -->
+      <div class="clearfix"></div>
+        <div class="row" id="pagination-row">
+          <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+            <ul>
+              <li>
+              <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+              </li>                
+              <li><a href="#" id="first-page">1</a></li>
+              <li><a href="#" id="second-page">2</a></li>
+              <li><a href="#" id="third-page" >3</a></li>
+              <li>
+              <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+              </li>
+            </ul>
+            </nav>
+          </div>
+          </div>
+        </div>
+      </div>
+			<!-- Pagination / End -->
+
+            
+
+		</div>
+
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(() => {
+        // Pagination
+      function paginator () {
+        let itemsPerPage = 10;
+        let currentPage = 1;
+        let totalItems = $('.row-items').length;
+        let totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+        $('.prev-page').hide();      
+  
+        function paginationBtnVisibility() {
+          $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+          $('.next-page').hide();
+          $('.prev-page').hide();
+          
+          if (currentPage == totalPages) {          
+            $('.next-page').hide();
+            
+            if (totalPages == 1) {
+              $('#first-page').html(currentPage).addClass('current-page').show();                       
+              
+            } else if (totalPages == 2) {
+              $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+              $('#second-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();
+              
+            } else if (totalPages == 3) {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('#prev-page').show();
+  
+            } else {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();            
+            };
+  
+          } else if (currentPage > 1) {          
+            $('.prev-page').show();
+            $('.next-page').show();
+            $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#second-page').html(currentPage).addClass('current-page').show();
+            $('#third-page').html(currentPage + 1).addClass('next-page').show();
+  
+          } else if (currentPage == 1 && totalPages > 0) {          
+            $('.next-page').show();
+            $('#first-page').html(currentPage).addClass('current-page').show();
+            $('#second-page').html(currentPage + 1).addClass('next-page').show();
+  
+            if (totalPages >= 3) {          
+              $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+            }
+          }          
+        };
+  
+        paginationBtnVisibility();
+  
+        function renderPage(page) {
+            $('.row-items').hide();
+            $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            $('#pagination a').removeClass('active');
+            $('#pagination a').eq(page).addClass('active');
+            $('.prev-page').toggleClass('disabled', page === 1);
+            $('.next-page').toggleClass('disabled', page === totalPages);
+        }
+  
+        $(document).on('click', '.next-page', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.upcoming-page', function() {
+            if (currentPage < totalPages - 1) {
+                currentPage += 2;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.prev-page', function() {
+          if (currentPage > 1) {
+              currentPage--;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        $(document).on('click', '.earlier-page', function() {
+          if (currentPage > 2) {
+              currentPage -= 2;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        // Initialize the first page
+        renderPage(currentPage);
+      };
+  
+      paginator();
+    })
+</script>
+{% endblock scripts %}

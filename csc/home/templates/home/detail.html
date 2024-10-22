@@ -1,0 +1,889 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}{{center.name}}{% endblock title_prefix %}
+
+{% block meta_description %}"{{center.name}} provides top-notch government registration services to individuals and businesses."{% endblock meta_description %}
+
+{% block meta_keywords %}"{{center.get_keywords_as_string}}"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}{{center.name}}{% endblock og_title_prefix %}
+
+{% block og_description %}"{{center.name}} provides top-notch government registration services to individuals and businesses."{% endblock og_description %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+	{
+	  "@context": "http://schema.org",
+	  "@type": "BreadcrumbList",
+	  "itemListElement": [
+		{
+		  "@type": "ListItem",
+		  "position": 1,
+		  "name": "Home",
+		  "item": "https://{{request.get_host}}"
+		},
+		{
+		  "@type": "ListItem",
+		  "position": 2,
+		  "name": "Category",
+		  "item": "https://{{request.get_host}}/csc_centers"
+		},
+		{
+		  "@type": "ListItem",
+		  "position": 3,
+		  "name": "Subcategory",
+		  "item": "https://{{request.get_host}}{{request.path}}"
+		}
+	  ]
+	}
+</script>
+
+<script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebPage",
+      "mainEntity": {
+        "@type": "CreativeWork",
+        "name": "Keyphrases",
+        "about": [
+        {% for keyword in center.keywords.all %}
+          {
+            "@type": "Thing",
+            "name": "{{keyword.keyword}}"
+          }{% if not forloop.last %},{% endif %}
+          {% endfor %}          
+        ]
+      }
+    }
+</script>
+
+<script type="application/ld+json">
+    {
+    "@context": "http://schema.org",
+    "@type": "CollectionPage",
+    "name": "Tags Page",
+    "description": "A page listing various tags for categorizing content.",
+    "url": "https://{{request.get_host}}/services",
+    "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+    {% for service in center.services.all %}
+    {
+    "@type": "ListItem",
+    "position": {{forloop.counter}},
+    "url": "https://{{request.get_host}}/service/{{service.slug}}",
+    "name": "{{service.name}}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    ]
+    }
+    }
+</script>
+
+<script type="application/ld+json">
+	{
+	  "@context": "https://schema.org",
+	  "@type": "LocalBusiness",
+	  "name": "{{center.full_name}}",
+	  "url": "https://{{request.get_host}}{{request.path}}",
+	  "logo": "https://{{request.get_host}}{% if center.logo %}{{center.logo.url}}{% else %}{% static 'w3/images/no_image.png' %}{% endif %}",
+	  "description": "{{center.name}} provides top-notch government registration services to individuals and businesses.",
+	  "telephone": "{{center.get_contact_number}}",
+	  "priceRange": "₹",
+	  "address": {
+		"@type": "PostalAddress",
+		"streetAddress": "{{center.location}}",
+		"addressLocality": "{{center.block.block}}, {{center.district.district}}",
+		"addressRegion": "{{center.state.state}}",
+		"postalCode": "{{center.zipcode}}",
+		"addressCountry": "IN"
+	  },
+	  "geo": {
+		"@type": "GeoCoordinates",
+		"latitude": {{center.latitude}},
+		"longitude": {{center.longitude}}
+	  },
+	  "openingHoursSpecification": [
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Monday",
+		  "opens": "{% if center.mon_opening_time %}{{center.mon_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.mon_closing_time %}{{center.mon_closing_time|date:'H:i'}}{% else %}17:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Tuesday",
+		  "opens": "{% if center.tue_opening_time %}{{center.tue_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.tue_closing_time %}{{center.tue_closing_time|date:'H:i'}}{% else %}17:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Wednesday",
+		  "opens": "{% if center.wed_opening_time %}{{center.wed_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.wed_closing_time %}{{center.wed_closing_time|date:'H:i'}}{% else %}17:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Thursday",
+		  "opens": "{% if center.thu_opening_time %}{{center.thu_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.thu_closing_time %}{{center.thu_closing_time|date:'H:i'}}{% else %}17:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Friday",
+		  "opens": "{% if center.fri_opening_time %}{{center.fri_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.fri_closing_time %}{{center.fri_closing_time|date:'H:i'}}{% else %}17:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Saturday",
+		  "opens": "{% if center.sat_opening_time %}{{center.sat_opening_time|date:'H:i'}}{% else %}09:00{% endif %}",
+		  "closes": "{% if center.sat_closing_time %}{{center.sat_closing_time|date:'H:i'}}{% else %}15:00{% endif %}"
+		},
+		{
+		  "@type": "OpeningHoursSpecification",
+		  "dayOfWeek": "https://schema.org/Sunday",
+		  "opens": "{% if center.sun_opening_time %}{{center.sun_opening_time|date:'H:i'}}{% else %}Closed{% endif %}",
+		  "closes": "{% if center.sun_closing_time %}{{center.sun_closing_time|date:'H:i'}}{% else %}Closed{% endif %}"
+		}
+	  ]
+	}
+	</script>
+
+    <script type="application/ld+json">
+        {
+          "@context": "http://schema.org",
+          "@type": "ItemList",
+          "itemListElement": [
+          {% for service in center.services.all %}
+            {
+              "@type": "ListItem",
+              "position": {{forloop.counter}},
+              "item": {
+                "@type": "Service",
+                "provider": {
+                  "@type": "Organization",
+                  "name": "CSC Locator",
+                  "url": "https://{{request.get_host}}{{request.path}}",
+                  "logo": "https://{{request.get_host}}{% if center.logo %}{{center.logo.url}}{% else %}{% static 'w3/images/no_image.png' %}{% endif %}"
+                },
+                "name": "{{service.name}}",
+                "description": "Access fast and reliable {{service.first_name}} at your nearest Common Service Center. Get expert assistance and hassle-free solutions tailored to your needs."
+              }
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}           
+            // Add more products and services provided by companies as needed
+          ]
+        }
+        </script>
+
+        <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {% for faq in faqs %}
+                {
+                  "@type": "Question",
+                  "name": "{{faq.question}}",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "{{faq.answer}}"
+                  }
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}                
+              ]
+            }
+            </script>
+
+            <script type="application/ld+json">
+                {
+                  "@context": "http://schema.org",
+                  "@type": "ItemList",
+                  "name": "Table of Contents",
+                  "numberOfItems": "6",
+                  "itemListElement": [
+                    {
+                      "@type": "ListItem",
+                      "position": 1,
+                      "item": {
+                        "@type": "CreativeWork",
+                        "name": "Info",
+                        "url": "https://{{request.get_host}}{{request.path}}#csc-overview"
+                      }
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "item": {
+                        "@type": "CreativeWork",
+                        "name": "About Us",
+                        "url": "https://{{request.get_host}}{{request.path}}#about-csc"
+                      }
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 3,
+                      "item": {
+                        "@type": "CreativeWork",
+                        "name": "Services",
+                        "url": "https://{{request.get_host}}{{request.path}}#csc-services"
+                      }
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "item": {
+                          "@type": "CreativeWork",
+                          "name": "Faq's",
+                          "url": "https://{{request.get_host}}{{request.path}}#csc-faqs"
+                        }
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "item": {
+                          "@type": "CreativeWork",
+                          "name": "Contact Us",
+                          "url": "https://{{request.get_host}}{{request.path}}#csc-contact"
+                        }
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "item": {
+                          "@type": "CreativeWork",
+                          "name": "Apply Now",
+                          "url": "https://{{request.get_host}}{{request.path}}#apply-registration"
+                        }
+                      }
+                    // Add more chapters as needed
+                  ]
+                }
+              </script>
+{% endblock schema_markup %}
+
+{% block content %}
+<style>
+    #pop-up-box {
+        display: none;
+        position:fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;                
+        background: #f7f7f7;
+        box-shadow: 0 0 5px;
+        min-width: 390px;
+    }
+
+    #pop-up-box-heading {
+        text-transform: uppercase;
+        background-color: #fff;
+        padding: 10px;
+        margin: 0 0 10px 0;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 5px; 
+        right: 5px;
+        font-size: 24px;
+        color: red;
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 0 1px #777;
+        padding: 0 7px;        
+    }
+
+    .close-btn:hover {
+        color: #fff;
+        background-color: rgba(255, 0, 0, 0.485);
+    }
+
+    #pop-up-form {
+        padding: 0 10px;
+        padding-bottom: 5px;
+    }
+
+    #pop-up-submit-btn-div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #pop-up-submit-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+        border: none;
+        margin-bottom: 5px;
+    }            
+
+    #pop-up-submit-btn:hover {
+        background: linear-gradient(to bottom, lime, green, darkgreen);
+    }
+
+    #pop-up-cancel-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkblue, blue, darkblue);
+        border: none;
+        margin-bottom: 5px;
+    }
+
+    #pop-up-cancel-btn:hover {
+        background: linear-gradient(to bottom, steelblue, blue, darkblue);
+    }
+</style>
+
+<style>
+    .product-grid {
+        height: 450px;
+        max-height: 450px;
+        width: 271px;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+    }
+
+    .product-image {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+
+</style>
+
+<!-- Slider
+================================================== -->
+
+<section style="padding: 0; margin: 0; bottom: 0; position: relative; top: 0px; ">
+
+    <div class="listing-slider mfp-gallery-container margin-bottom-0">
+        {% if center.banners.all|length > 0 %}
+        {% for banner in center.banners.all %}
+        <a href="{{banner.banner_image.url}}" data-background-image="{{banner.banner_image.url}}"
+            class="item mfp-gallery" title="{{center.name}} banner image {{forloop.counter}}"></a>
+        {% endfor %}
+        {% else %}
+        <a href="{% static 'images/single-listing-01.jpg' %}" data-background-image="{% static 'images/single-listing-01.jpg' %}"
+            class="item mfp-gallery" title="Title 1"></a>
+        <a href="{% static 'images/single-listing-02.jpg' %}" data-background-image="{% static 'images/single-listing-02.jpg' %}"
+            class="item mfp-gallery" title="Title 3"></a>
+        <a href="{% static 'images/single-listing-03.jpg' %}" data-background-image="{% static 'images/single-listing-03.jpg' %}"
+            class="item mfp-gallery" title="Title 2"></a>
+        <a href="{% static 'images/single-listing-04.jpg' %}" data-background-image="{% static 'images/single-listing-04.jpg' %}"
+            class="item mfp-gallery" title="Title 4"></a>
+        {% endif %}
+    </div>
+
+
+
+
+    <div class="container">
+        <div class="row csc_detail_main">
+
+            <div class="col-md-12 csc_detail_sub">
+                <img src="{% if center.logo %} {{center.logo.url}} {% else %} {% static 'w3/images/csc_default.jpeg' %} {% endif %}" alt="">
+
+                <h1>
+                    {{center.full_name}}<br><span
+                        style="display: block; font-size: 14px; padding: 15px 0 5px 0;"><b>CSC ID:</b>
+                        {{center.id}}</span>
+                </h1>
+
+                <div class="csc_head_contact">
+
+
+                    <ul class="listing-links contact-links">
+                        <li><a href="tel:{{center.get_contact_number}}" class="fa fa-phone"> Call Us</a></li>
+                        <li><a href="https://api.whatsapp.com/send?phone={{center.get_whatsapp_number}}" class="fa fa-whatsapp">
+                                WhatsApp</a></li>
+                        <li><a href="sms:{{center.get_mobile_number}}" class="fa fa-comments"> Text Us</a> </li>
+                        <li><a href="mailto:{{center.email}}" class="fa fa-envelope-o"> Mail Us</a> </li>
+
+                    </ul>
+
+                    <div class="clearfix"></div>
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <!-- Listing Nav -->
+
+
+
+        </div>
+
+        <div style="background: #00000075; position: relative;">
+            <div id="listing-nav" class="listing-nav-container">
+                <ul class="listing-nav">
+                    <li><a href="#csc-overview">Info</a></li>
+                    <li><a href="#about-csc">About Us</a></li>
+                    <li><a href="#csc-services">Services</a></li>
+                    <li><a href="#csc-faqs">Faq's</a></li>
+                    <li><a href="#csc-contact">Contact Us</a></li>
+                    <li><a href="#apply-registration">Apply Now</a></li>
+
+                </ul>
+
+            </div>
+        </div>
+
+</section>
+
+
+
+<!-- Listings -->
+<div class="container margin-top-70">
+    <div class="row">
+        <div id="pop-up-box">
+            <h4 id="pop-up-box-heading" class="text-center">Product Enquiry</h4>
+            <button class="close-btn" aria-label="Close" title="Close">&times;</button>
+            <form id="pop-up-form" method="post" action="#">
+                {% csrf_token %}
+                <input type="text" placeholder="Name" id="product-applicant-name" name="applicant_name" required>
+                <input type="email" placeholder="E-Mail ID" id="product-applicant-email" name="applicant_email" required>
+                <input type="text" placeholder="Phone No" id="product-applicant-phone" name="applicant_phone" pattern="\d{10}" required>
+                <select class="chosen-select" data-placeholder="Select Product" id="pop-up-dropdown" name="product" disabled required>
+                    <option label="Select Product"></option>
+                    {% for product in center.products.all %}
+                    <option value="{{product.slug}}" >{{product.name}}</option>
+                    {% endfor %}
+                </select>
+                <textarea name="message" id="" cols="10" rows="2" placeholder="Message" required style="margin-top: 15px;"></textarea>
+                <div id="pop-up-submit-btn-div">
+                    <button id="pop-up-submit-btn" type="button" disabled>Submit</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        {% include "components/message.html" %}      
+        <div class="col-md-12" style="display: flex; justify-content: center;">
+            <img src="{{center.qr_code_image.url}}" alt="" style="width: 95px;">        
+        </div>
+        <div class="col-md-12">
+            <h3 class="headline centered margin-bottom-45">
+                <strong class="headline-with-separator">Our Services</strong>
+                <span>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and
+                    IT (MeitY), Government of India.</span>
+            </h3>
+        </div>
+
+        {% if center.services.all|length > 0 %}
+        <div class="col-md-12">
+            <div class="simple-slick-carousel dots-nav">
+                {% for service in center.services.all|slice:':12' %}
+                <!-- Listing Item -->
+                <div class="carousel-item">
+                    <a href="{{service.get_absolute_url}}" class="listing-item-container">
+                        <div class="listing-item">
+                            <img src="{% if service.image %}{{service.image.url}}{% else %}{% static 'w3/images/no_image.png' %}{% endif %}" alt="{{service.name}}">
+                            <div class="listing-item-content">
+                                <h3>{{service.name}}</h3>
+                                {% if service.description %}<span>{{service.description|safe|slice:':20'}}</span>{% endif %}
+                            </div>
+                        </div>
+
+                    </a>
+                </div>
+                <!-- Listing Item / End -->
+                {% endfor %}            
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+<!-- Listings / End -->
+
+
+
+{% if center.products.all|length > 0 %}
+<!-- Fullwidth Section -->
+<section class="fullwidth padding-top-75 padding-bottom-70" data-background-color="#f8f8f8">
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-12">
+                <h3 class="headline centered margin-bottom-45">
+                    Shop Now
+                    <span>Online Shopping </span>
+                </h3>
+            </div>
+            <div class="col-md-12">
+                <!-- Carousel / Start -->
+                <div class="simple-slick-carousel dots-nav">
+
+                    {% for product in center.products.all|slice:':15' %}
+                    <!-- Listing Item -->
+                    <div class="carousel-item" style="display:flex; justify-content: center;">
+                        <div class="product-grid">
+                            <div class="product-image">
+                                <a href="#" class="image" onclick="event.preventDefault(); orderProduct('{{product.slug}}', '{{center.slug}}')">
+                                    <img class="pic-1" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}">
+                                    <img class="pic-2" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}">
+                                </a>
+                                <span class="product-sale-label">sale!</span>
+
+                                <div class="product-rating">
+
+                                    <a class="add-to-cart" href="#" onclick="event.preventDefault(); orderProduct('{{product.slug}}', '{{center.slug}}')"> ORDER NOW </a>
+                                </div>
+                            </div>
+                            <div class="product-content">
+                                <h3 class="title"><a href="#" onclick="event.preventDefault(); orderProduct('{{product.slug}}', '{{center.slug}}')">{{product.name}}</a></h3>
+                                <div class="price">₹{{product.price}}</div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Listing Item / End -->
+                    {% endfor %}
+
+                </div>
+                <!-- Carousel / End -->
+            </div>
+        </div>
+    </div>
+
+    
+
+
+</section>
+<!-- Fullwidth Section / End -->
+{% endif %}
+
+
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+    <div class="row sticky-wrapper">
+        <div class="col-lg-8 col-md-8 padding-right-30">
+
+            <!-- Titlebar -->
+            <div id="titlebar" class="listing-titlebar">
+                <div class="listing-titlebar-title">
+                    <h2>{{center.full_name}}</h2>
+                    <span>
+                        <a href="#listing-location" class="listing-address">
+                            <i class="fa fa-map-marker"></i>
+                            {{center.partial_address}}
+                        </a>
+                    </span>
+
+                </div>
+            </div>
+
+
+
+            <!-- Overview -->
+            <div id="csc-overview" class="listing-section">
+                
+                <!-- Description -->
+                
+                <p>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and IT (MeitY), Government of India. CSCs are easy access points for delivery of various digital services to rural and urban people in India, thereby contributing to a digitally and financially inclusive society. In rural India, CSCs are not just service delivery points, but changing agents too, promoting rural entrepreneurship and building rural capacities and livelihoods. {{center.full_name}} is part of CSC digital India, located in {{center.street}}, {{center.block.block}}, {{center.district.district}} district, {{center.state.state}}, India and it's helping to local people's on their needs related to the government services or other online services, and  {{center.name}} provides various services
+                {% if center.services.all|length > 0 %}
+                    like  
+                {% for service in center.services.all %} <a href="{% url 'services:service' service.slug %}" style="color:blue; ">{{service.name}}</a>, {% endfor %}  etc. </p>
+                {% else %}
+                . 
+                {% endif %}
+                {% if center.products.all|length > 0 %}
+                {{center.full_name}} also offers products such as {% for product in center.products.all|slice:":10" %}{{product.name}}, {% endfor %}etc.
+                {% endif %}
+                
+                {% if center.description %}
+                <p>{{center.description}}</p>
+                {% endif %}                    
+                
+                
+            </div>
+
+            {% if center.services.all|length > 0 %}
+            <!-- Service Menu -->
+            <div id="csc-services" class="listing-section">
+                <h3 class="listing-desc-headline margin-top-10 margin-bottom-30">Our Services</h3>
+                <div class="show-more">
+                    <div class="pricing-list-container">
+                        <!-- Service List -->
+                        <ul class="listing-features checkboxes margin-top-0">
+                            {% for service in center.services.all %}
+                            <li><a href="{{service.get_absolute_url}}">{{service.first_name}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <a href="#" class="show-more-button" data-more-title="Show More" data-less-title="Show Less"><i
+                        class="fa fa-angle-down"></i></a>
+            </div>
+            <!-- Service Menu / End -->
+            {% endif %}
+
+
+
+            <!-- AddToAny BEGIN -->
+            <div class="a2a_kit a2a_kit_size_32 a2a_default_style" data-a2a-url="https://cscindia.info/">
+                {% for social_media in center.social_media_links.all %} 
+                <a href="{{ social_media.social_media_link }}" class="a2a_button_{{social_media.social_media_name|lower}}"></a>
+                {% endfor %}
+            </div>
+            <script async src="https://static.addtoany.com/menu/page.js"></script>
+            <!-- AddToAny END -->
+
+
+
+
+        </div>
+
+
+        <!-- Sidebar
+================================================== -->
+        <div class="col-lg-4 col-md-4 sticky">
+
+
+            <!-- Book Now -->
+            <div id="apply-registration" class="boxed-widget booking-widget margin-top-35">
+                <h3><i class="fa fa-calendar-check-o "></i> APPLY NOW</h3>
+                <div class="row with-forms  margin-top-0">
+
+                    <!-- Date Range Picker - docs: http://www.daterangepicker.com/ -->
+                    <div class="col-lg-12">
+                        <form method="post" action="{% url 'home:service_request' center.slug %}">
+                            {% csrf_token %}
+                            <input type="text" placeholder="Name:" name="applicant_name" required>
+                            <input type="email" placeholder="E-Mail ID:" name="applicant_email" required>
+                            <input type="text" placeholder="Phone No:" name="applicant_phone" pattern="[+0-9]{7,13}" required>
+                            <select class="chosen-select" data-placeholder="Select Services" name="service" required>
+                                <option label="Select Services"></option>
+                                {% for service in center.services.all %}
+                                <option value="{{service.slug}}" >{{service.first_name}}</option>
+                                {% endfor %}
+                            </select>
+                            <textarea name="message" id="" cols="10" rows="2" placeholder="Message" required></textarea>
+
+                            <button type="submit" class="button book-now fullwidth margin-top-5">SUBMIT NOW</button>
+                        </form>
+                    </div>
+
+
+                </div>
+
+                <!-- Book Now -->
+
+            </div>
+            <!-- Book Now / End -->
+
+
+
+
+            {% if center.show_opening_hours %}
+            <!-- Opening Hours -->
+            <div class="boxed-widget opening-hours margin-top-35">
+
+                <h3><i class="sl sl-icon-clock"></i> Opening Hours</h3>
+                <ul>
+                    <li>Monday <span>{% if center.mon_opening_time %} {{center.mon_opening_time}} - {{center.mon_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Tuesday <span>{% if center.tue_opening_time %} {{center.tue_opening_time}} - {{center.tue_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Wednesday <span>{% if center.wed_opening_time %} {{center.wed_opening_time}} - {{center.wed_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Thursday <span>{% if center.thu_opening_time %} {{center.thu_opening_time}} - {{center.thu_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Friday <span>{% if center.fri_opening_time %} {{center.fri_opening_time}} - {{center.fri_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Saturday <span>{% if center.sat_opening_time %} {{center.sat_opening_time}} - {{center.sat_closing_time}} {% else %} Closed {% endif %}</span></li>
+                    <li>Sunday <span>{% if center.sun_opening_time %} {{center.sun_opening_time}} - {{center.sun_closing_time}} {% else %} Closed {% endif %}</span></li>
+                </ul>
+            </div>
+            <!-- Opening Hours / End -->
+            {% endif %}
+            
+            {% if center.show_social_media_links and center.social_media_links.all|length > 0 %}
+            <div class="widget margin-top-40">
+                <h3 class="margin-bottom-25">Social Media</h3>
+                <ul class="social-icons rounded">
+                    {% for social_media in center.social_media_links.all %} 
+                    <li><a class="{{social_media.social_media_name|lower}}" href="{{ social_media.social_media_link }}"><i class="icon-{{social_media.social_media_name|lower}}"></i></a></li>
+                    {% endfor %}                    
+                </ul>
+            </div>
+            {% endif %}            
+
+
+
+
+
+        </div>
+        <!-- Sidebar / End -->
+
+    </div>
+</div>
+
+
+
+<section id="csc-faqs" class="fullwidth margin-top-70 padding-top-75 padding-bottom-70"
+    data-background-color="#f1f1f1" style="background: #f1f1f1;">
+    <!-- Info Section -->
+    <div class="container">
+
+        {% if faqs %}
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="headline centered"> Frequently Asked Questions (FAQ) </h3>
+
+
+                <!-- Toggles Container -->
+                <div class="style-2">
+
+                    <!-- Toggle 1 -->
+                    <div class="toggle-wrap">
+                        <span class="trigger"><a href="#">What is common service Centre scheme? <i
+                                    class="sl sl-icon-plus"></i></a></span>
+                        <div class="toggle-container" style="display: none;">
+                            <p>Under the National e-Governance Plan (NeGP) formulated by the Department of
+                                Electronics and Information Technology (DEITY), Ministry of Communication and
+                                Information Technology, Government of India, the Common Services Centers (CSCs)
+                                are conceptualized as ICT enabled, front end service delivery points for
+                                delivery of Government, Social and Private Sector services in the areas of
+                                agriculture, health, education, entertainment, FMCG products, banking and
+                                financial services, utility payments, et </p>
+                        </div>
+                    </div>
+
+                    <!-- Toggle 2 -->
+                    <div class="toggle-wrap">
+                        <span class="trigger"><a href="#">What Are The Services Provided by CSC? <i
+                                    class="sl sl-icon-plus"></i> </a></span>
+                        <div class="toggle-container" style="display: none;">
+                            <p>CSC (Common Service Centre) Center Offers Services are GST Registration, FSSAI
+                                Registration, MSME Registration, Trademark Registration, Government
+                                Registration, Flight Ticket Booking, Train Ticket Booking, Visa Assistance,
+                                Pancard Services, Passport Services, Insurance Services, Income Tax Filing, ISO
+                                Registration, BIS Registration, Barcode Registration, Recharge, and Bill
+                                Payments, Banking and Money Transfer, Digital Signature, Aadhaar Enrollment,
+                                Aadhaar Registration and Updation, Marriage Registration, Ration Card Services,
+                                Scholarship Registration, Educational Registrations, Govt Job Applications,
+                                Voter ID Card Services, Driving Licence Related Services, Vahan Related
+                                Services, eDistrict Services, UDID Card</p>
+                        </div>
+                    </div>
+
+
+                    <div class="toggle-wrap">
+                        <span class="trigger"><a href="#">How do I find the common service Centre? <i
+                                    class="sl sl-icon-plus"></i> </a></span>
+                        <div class="toggle-container" style="display: none;">
+                            <p>You had better visit the home page <a
+                                    href="https://cscindia.info">https://cscindia.info</a> and search the
+                                nearest Common Service Center</p>
+                        </div>
+                    </div>
+
+
+                    <div class="toggle-wrap">
+                        <span class="trigger"><a href="#">What is VLE full form? <i class="sl sl-icon-plus"></i>
+                            </a></span>
+                        <div class="toggle-container" style="display: none;">
+                            <p>VLE means Village Level Entrepreneur</p>
+                        </div>
+                    </div>
+
+
+                    <div class="toggle-wrap">
+                        <span class="trigger"><a href="#">Is CSC Govt authorised? <i
+                                    class="sl sl-icon-plus"></i> </a></span>
+                        <div class="toggle-container" style="display: none;">
+                            <p>CSC is described as a special purpose vehicle (SPV) and named CSC e-Governance
+                                Services India Limited (CSC-SPV), which has been promoted by the government of
+                                India’s Ministry of Electronics and Information Technology (MeitY), is a
+                                “government company” under the provisions of the Companies Act of 2013 and other
+                                laws.</p>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Toggles Container / End -->
+
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+    <!-- Info Section / End -->
+
+
+</section>
+
+
+
+<!-- Map Container -->
+
+<div class="contact-map" id="csc-contact">
+    <!-- Google Maps -->
+    <div id="singleListingMap-container">
+        <iframe src="https://www.google.com/maps?q={{center.latitude}},{{center.longitude}}&z=15&output=embed"
+            style="border:0; width: 100%; height: 450px;"></iframe>
+    </div>
+    <!-- Google Maps / End -->
+
+    <!-- Office -->
+    <div class="address-box-container">
+        <div class="address-container" data-background-image="{% static 'images/our-office.jpg' %}">
+            <div class="office-address">
+                <h3>Our Office</h3>
+                <ul>
+                    <li>{{center.street}}, {{center.landmark_or_building_name}}</li>
+                    <li>{{center.block}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Map Container / End -->
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $('document').ready(() => {
+        $("#product-applicant-name, #product-applicant-email, #product-applicant-phone").on('input', function () {		
+            const productApplicantName = $("#product-applicant-name").val();
+            const productApplicantEmail = $("#product-applicant-email").val();
+            const productApplicantPhone = $("#product-applicant-phone").val();
+        
+            if (productApplicantName && productApplicantEmail && productApplicantPhone) {
+				$('#pop-up-submit-btn').prop('disabled', false);
+			} else {
+				$('#pop-up-submit-btn').prop('disabled', true);
+			}
+		});
+		
+		// Close | Cancel add service pop up box
+		$('#pop-up-cancel-btn, .close-btn').click(() => $('#pop-up-box').hide())
+
+        $('#pop-up-submit-btn').click((e) => {
+            e.preventDefault();
+            $('#pop-up-dropdown').prop('disabled', false).trigger('chosen:updated');
+            $('#pop-up-form').submit();
+        })
+    });
+
+    function orderProduct(productSlug, centerSlug) {
+        $(`#pop-up-dropdown option[value='${productSlug}']`).prop('selected', true).trigger('chosen:updated');
+        $('#pop-up-form').prop('action', `/product_request/${centerSlug}`);
+        $('#pop-up-box').show();
+    }
+</script>
+{% endblock scripts %}

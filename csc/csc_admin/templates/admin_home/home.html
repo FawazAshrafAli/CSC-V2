@@ -1,0 +1,166 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Home {% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_home/css/home.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<style>
+    .dashboard-stat-content h4 {
+        font-size: 32px;
+    }
+
+    .tiles {
+        cursor: pointer;
+    }
+    #centers-tile {
+        cursor: pointer;
+    }
+</style>
+<!-- Titlebar -->
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Hello, Admin!</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li>Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Notice -->
+<div class="row">
+    <div class="col-md-12">
+        {% include "components/message.html" %}
+    </div>
+</div>
+
+<!-- Content -->
+<div class="row">
+
+    <!-- Item -->
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-stat color-1 tiles" id="centers-tile">
+            <div class="dashboard-stat-content"><h4 id="centers-count">{{csc_centers|length}}</h4> <span>CSC Centers</span></div>
+            <div class="dashboard-stat-icon"><i class="fa fa-building"></i></div>
+        </div>
+    </div>
+
+    <!-- Item -->
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-stat color-2 tiles" id="services-tile">
+            <div class="dashboard-stat-content"><h4 id="products-count">{{services|length}}</h4> <span>Services</span></div>
+            <div class="dashboard-stat-icon"><i class="fa fa-handshake"></i></div>
+        </div>
+    </div>
+
+    
+    <!-- Item -->
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-stat color-3 tiles" id="products-tile">
+            <div class="dashboard-stat-content"><h4 id="products-count">{{products|length}}</h4> <span>Products</span></div>
+            <div class="dashboard-stat-icon"><i class="fa fa-box"></i></div>
+        </div>
+    </div>
+
+    <!-- Item -->
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-stat color-4 tiles" id="posters-tile">
+            <div class="dashboard-stat-content"><h4 id="posters-count">{{posters|length}}</h4> <span>Posters</span></div>
+            <div class="dashboard-stat-icon"><i class="fa fa-sticky-note"></i></div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    
+    <!-- Recent Activity -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box with-icons margin-top-20">
+            <h4>CSC Centers</h4>
+            <ul id="service-enquiries">
+                {% for center in csc_centers|slice:':5' %}
+                <li>
+                    <i class="list-box-icon fa fa-building"></i><a href="{% url 'csc_admin:csc_center' center.slug %}"> <strong>{{center.name}}</strong> {% if center.type_and_location %}{{center.type_and_location}}{% endif %}!</a>
+                    <a href="{% url 'csc_admin:csc_center' center.slug %}" class="close-list-item" onclick="markServiceEnquiryViewed('${service_enquiry.slug}');"></a>
+                </li>
+                {% endfor %}
+                <a href="{% url 'csc_admin:csc_centers' %}" style="display: flex; justify-content: center;">
+                    <li style="padding-left: 0">See More</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Invoices -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box invoices with-icons margin-top-20">
+            <h4>Posters</h4>
+            <ul id="product-enquiries">
+                {% for poster in posters|slice:':5' %}
+                <li>
+                    <i class="list-box-icon fa fa-sticky-note"></i><a href="{% url 'csc_admin:poster' poster.slug %}"> <strong>{{poster.title}}</strong></a>
+                    <a href="{% url 'csc_admin:poster' poster.slug %}" class="close-list-item" onclick="markServiceEnquiryViewed('${service_enquiry.slug}');"></a>
+                </li>
+                {% endfor %}
+                <a href="{% url 'csc_admin:posters' %}" style="display: flex; justify-content: center;">
+                    <li style="padding-left: 0">See More</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box with-icons margin-top-20">
+            <h4>Services</h4>
+            <ul>
+                {% for service in services|slice:':5' %}
+                <li>
+                    <i class="list-box-icon fa fa-handshake"></i><a href="{% url 'csc_admin:service' service.slug %}"> <strong>{{service.first_name}}</strong> {% if service.tailing_name %}{{service.tailing_name}}{% endif %}</a>
+                    <a href="{% url 'csc_admin:service' service.slug %}" class="close-list-item" onclick="markServiceEnquiryViewed('${service_enquiry.slug}');"></a>
+                </li>
+                {% endfor %}
+                <a href="{% url 'csc_admin:services' %}" style="display: flex; justify-content: center;">
+                    <li style="padding-left: 0">See More</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box with-icons margin-top-20">
+            <h4>Products</h4>
+            <ul>
+                {% for product in products|slice:':5' %}
+                <li>
+                    <i class="list-box-icon fa fa-box"></i><a href="${service_enquiry.get_absolute_url}"> <strong>{{product.name}}</strong></a>
+                    <a href="#" class="close-list-item" onclick="markServiceEnquiryViewed('${service_enquiry.slug}');"></a>
+                </li>
+                {% endfor %}
+                <a href="{% url 'csc_admin:products' %}" style="display: flex; justify-content: center;">
+                    <li style="padding-left: 0">See More</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/admin_home/js/home.js' %}"></script>
+{% endblock scripts %}

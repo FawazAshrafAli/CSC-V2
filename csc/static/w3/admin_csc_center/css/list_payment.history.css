@@ -1,0 +1,60 @@
+#payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+#payment-table tr {
+    border-bottom: 1px solid silver;
+}
+
+
+#payment-table td:first-child,
+#payment-table th:first-child,
+#td-image,
+#th-image {
+    text-align: payment;
+}
+
+#payment-table img {
+    padding: 3px 0;
+    height: 50px;
+}
+
+#payment-table button {
+    height: 0;
+    padding: 0 10px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+th,td {
+    text-align:payment;
+    vertical-align: top;
+}
+
+.row-items:hover {
+  cursor: pointer;
+  color: blue;
+}
+
+/* ************ */
+
+.dashboard-list-box {
+    background-color: #fff;
+}
+
+/* ******** */
+
+.text-center {
+    text-align: center;
+}
+
+#no-data-row {
+    color:red;
+}

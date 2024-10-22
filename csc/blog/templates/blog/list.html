@@ -1,0 +1,451 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Blogs{% endblock title_prefix %}
+
+{% block meta_description %}
+"Discover insightful blogs about Common Service Centers (CSC) in India and their services. Stay informed and updated with our latest posts."
+{% endblock meta_description %}
+
+{% block meta_keywords %}
+"CSC Centers in India, Common Service Centre Blogs, CSC Blogs, CSC Services"
+{% endblock meta_keywords %}
+
+{% block og_title_prefix %}Blogs{% endblock og_title_prefix %}
+
+{% block og_description %}
+"Discover insightful blogs about Common Service Centers (CSC) in India and their services. Stay informed and updated with our latest posts."
+{% endblock og_description %}
+
+{% block meta_tags %}{% endblock meta_tags %}
+
+{% block schema_markup %}
+<script type="application/ld+json" id="dynamic-ld-json">
+{
+	"@context": "http://schema.org",
+	"@type": "WebSite",
+	"url": "https://cscindia.info",
+	"potentialAction": {
+	"@type": "SearchAction",
+	"target": "https://{{request.get_host}}/?q={q}",
+	"query-input": "required name=q"
+	}
+}
+</script>
+
+<script type="application/ld+json">
+	{
+		"@context": "http://schema.org",
+		"@type": "WebPage",
+		"mainEntity": {
+		"@type": "CreativeWork",
+		"name": "Keyphrases",
+		"about": [
+			{% for category in categories|slice:'4' %}
+			{
+			"@type": "Thing",
+			"name": "{{category.name}}"
+			}{% if not forloop.last %},{% endif %}
+			{% endfor %}
+			// Add more keywords as needed
+		]
+		}
+	}
+</script>
+
+<script type="application/ld+json">
+{
+	"@context": "http://schema.org",
+	"@type": "CollectionPage",
+	"name": "Tags Page",
+	"description": "A page listing various tags for categorizing content.",
+	"url": "https://{{request.get_host}}/blog/tags",
+	"mainEntity": {
+		"@type": "ItemList",
+		"itemListElement": [
+		{% for tag in tags %}
+		{
+			"@type": "ListItem",
+			"position": {{forloop.counter}},
+			"url": "https://{{request.get_host}}/blog/tags/{{tag.slug}}",
+			"name": "{{tag.name}}"
+		}{% if not forloop.last %},{% endif %}
+		{% endfor %}
+		// Add more tags as needed
+		]
+	}
+}
+</script>
+
+
+
+<script type="application/ld+json">
+	{
+		"@context": "http://schema.org",
+		"@type": "BreadcrumbList",
+		"itemListElement": [
+		{
+			"@type": "ListItem",
+			"position": 1,
+			"name": "Home",
+			"item": "https://{{request.get_host}}"
+		},
+		{
+			"@type": "ListItem",
+			"position": 2,
+			"name": "Blog",
+			"item": "https://{{request.get_host}}{{request.path}}"
+		}	
+		]
+	}
+</script> 
+{% endblock schema_markup %}
+
+{% block content %}
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+
+				<h2>Blog</h2><span>Latest Blogs</span>
+
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+						<li>Blog</li>
+					</ul>
+				</nav>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+	{% if tag_name %}
+	{% if blogs %}
+	<h3>Blogs tagged with "{{ tag_name }}"</h3>
+	{% else %}
+	<h3>Oops ! There is no blogs tagged with "{{ tag_name }}"</h3>
+	{% endif %}
+	<br>
+	{% endif %}
+
+	<!-- Blog Posts -->
+	<div class="blog-page">
+		<div class="row">
+			<div class="col-lg-9 col-md-8 padding-right-30">
+				<!-- Blog Post -->
+				<div id="list-blogs"> 
+					{% for blog in blogs %}
+					<div class="blog-post row-items" data-title="{{blog.title}}" data-image="{% if blog.image %}{{blog.image.url}}{% endif %}" data-published="{{blog.published_at|date:'Y-m-d'}}" data-modified="{{blog.updated_at|date:'Y-m-d'}}" data-slug="{{blog.slug}}" data-summary="{{blog.summary}}" data-tags="{{blog.list_tags}}">
+						<!-- Img -->
+						<a href="{% url 'blog:detail' blog.slug %}" class="post-img">
+							<img src={% if blog.image %} {{blog.image.url}} {% else %} "{% static 'images/blog-post-01.jpg' %}" {% endif %} alt="">
+						</a>				
+						<!-- Content -->
+						<div class="post-content">
+							<h3><a href="{% url 'blog:detail' blog.slug %}">{{blog.title}} </a></h3>
+							<ul class="post-meta">
+								<li>{{blog.created_at|date:"F d, Y"}}</li>					
+							</ul>
+							<p>{{blog.summary}}</p>
+							<a href="{% url 'blog:detail' blog.slug %}" class="read-more">Read More <i class="fa fa-angle-right"></i></a>
+						</div>
+					</div>
+					{% endfor %}				
+				</div>
+				<!-- Pagination -->
+				<div class="clearfix"></div>
+				<div class="row">
+					<div class="col-md-12">
+						<!-- Pagination -->
+						<div class="pagination-container margin-bottom-40">
+							<nav class="pagination" id="pagination-nav">
+								<ul>
+								  <li>
+								  <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+								  </li>                
+								  <li><a href="#" id="first-page">1</a></li>
+								  <li><a href="#" id="second-page">2</a></li>
+								  <li><a href="#" id="third-page" >3</a></li>
+								  <li>
+								  <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+								  </li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+				<!-- Pagination / End -->
+			</div>
+			<!-- Blog Posts / End -->
+			<!-- Widgets -->
+			<div class="col-lg-3 col-md-4">
+				<div class="sidebar right">
+					<!-- Widget -->
+					<div class="widget">
+						<h3 class="margin-top-0 margin-bottom-25">Search Blog</h3>
+						<form method="#" id="blog-search-form" class="search-blog-input">
+							<div class="input"><input class="search-field" type="text" placeholder="Type and hit enter" name="q" id="search-input-value" value="{{query}}"/></div>		
+						</form>
+						<div class="clearfix"></div>
+					</div>
+					<!-- Widget / End -->
+					<!-- Widget -->
+					<div class="widget margin-top-40">
+						<h3>Popular Posts</h3>
+						<ul class="widget-tabs">
+							<!-- Post #1 -->
+                             {% for blog in ideal_blogs|slice:'3' %}
+							<li>
+								<div class="widget-content">
+									<div class="widget-thumb">
+										<a href="{{blog.get_absolute_url}}"><img src={% if blog.image %} {{blog.image.url}} {% else %} "{% static 'images/blog-widget-03.jpg' %}" {% endif %} alt=""></a>
+									</div>								
+									<div class="widget-text">
+										<h5><a href="{{blog.get_absolute_url}}">{{blog.title}} </a></h5>
+										<span>{{blog.created_at|date:"F d, Y"}}</span>
+									</div>
+									<div class="clearfix"></div>
+								</div>
+							</li>
+                            {% endfor %}							
+						</ul>
+					</div>
+					<!-- Widget / End-->
+					<!-- Widget -->
+					<div class="widget margin-top-40">
+						<h3>Categories</h3>
+						<ul class="list-4 color">
+                            {% for category in categories|slice:'4' %}
+							<li>{{category}}</li>
+							{% endfor %}
+						</ul>
+					</div>
+					<!-- Widget / End -->
+					<!-- Widget -->
+					<div class="widget margin-top-40">
+						<h3>Tags</h3>
+						<ul class="option-set">
+							{% for tag in tags %}
+							<li><a href="{% url 'blog:tag_filtered_blogs' tag.slug %}">{{tag.name}}</a></li>
+							{% endfor %}		
+						</ul>
+					</div>
+					<!-- Widget / End -->
+					<!-- Widget / End-->
+					<div class="clearfix"></div>
+					<div class="margin-bottom-40"></div>					
+				</div>
+			</div>
+		</div>
+		<!-- Sidebar / End -->
+	</div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<!-- Blog Search -->
+<script src={% static 'w3/blog/js/searchBlog.js' %}></script>
+
+<script>
+	$(document).ready(() => {
+	// Pagination
+	  function paginator () {
+		let itemsPerPage = 3;
+		let currentPage = 1;
+		let totalItems = $('.row-items').length;
+		let totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+		$('.prev-page').hide();    
+  
+		function paginationBtnVisibility() {
+		  $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+		  $('.next-page').hide();
+		  $('.prev-page').hide();
+		  
+		  if (currentPage == totalPages) {          
+			$('.next-page').hide();
+			
+			if (totalPages == 1) {
+			  $('#first-page').html(currentPage).addClass('current-page').show();                       
+			  
+			} else if (totalPages == 2) {
+			  $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+			  $('#second-page').html(currentPage).addClass('current-page').show();
+			  $('.prev-page').show();
+			  
+			} else if (totalPages == 3) {
+			  $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+			  $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+			  $('#third-page').html(currentPage).addClass('current-page').show();
+			  $('#prev-page').show();
+  
+			} else {
+			  $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+			  $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+			  $('#third-page').html(currentPage).addClass('current-page').show();
+			  $('.prev-page').show();            
+			};
+  
+		  } else if (currentPage > 1) {          
+			$('.prev-page').show();
+			$('.next-page').show();
+			$('#first-page').html(currentPage - 1).addClass('prev-page').show();
+			$('#second-page').html(currentPage).addClass('current-page').show();
+			$('#third-page').html(currentPage + 1).addClass('next-page').show();
+  
+		  } else if (currentPage == 1 && totalPages > 0) {          
+			$('.next-page').show();
+			$('#first-page').html(currentPage).addClass('current-page').show();
+			$('#second-page').html(currentPage + 1).addClass('next-page').show();
+  
+			if (totalPages >= 3) {          
+			  $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+			}
+		  }          
+		};
+  
+		paginationBtnVisibility();
+  
+		function renderPage(page) {
+			$('.row-items').hide();
+			$('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+			$('#pagination a').removeClass('active');
+			$('#pagination a').eq(page).addClass('active');
+			$('.prev-page').toggleClass('disabled', page === 1);
+			$('.next-page').toggleClass('disabled', page === totalPages);
+		}
+  
+		$(document).on('click', '.next-page', function() {
+			if (currentPage < totalPages) {
+				currentPage++;
+				$('#current-page').html(currentPage);
+				paginationBtnVisibility();
+				renderPage(currentPage);
+			}
+		});
+  
+		$(document).on('click', '.upcoming-page', function() {
+			if (currentPage < totalPages - 1) {
+				currentPage += 2;
+				$('#current-page').html(currentPage);
+				paginationBtnVisibility();
+				renderPage(currentPage);
+			}
+		});
+  
+		$(document).on('click', '.prev-page', function() {
+		  if (currentPage > 1) {
+			  currentPage--;
+			  $('#current-page').html(currentPage);
+			  paginationBtnVisibility();
+			  renderPage(currentPage);
+		  }
+		});
+  
+		$(document).on('click', '.earlier-page', function() {
+		  if (currentPage > 2) {
+			  currentPage -= 2;
+			  $('#current-page').html(currentPage);
+			  paginationBtnVisibility();
+			  renderPage(currentPage);
+		  }
+		});
+  
+		// Initialize the first page
+		renderPage(currentPage);
+	  };
+  
+	  paginator();
+
+	  // Generate schema for blogs on the current page
+
+	  // Remove any existing schema script
+		function removeExistingSchema() {
+			const blogSchemaScript = document.getElementById('blog-schema');
+			if (blogSchemaScript) {
+				blogSchemaScript.remove();
+				console.log('Blog schema removed:', blogSchemaScript.textContent);
+			}
+		}
+
+	  function generateSchema() {
+
+		// Collect the blogs currently visible in the #list-blogs container
+		const blogs = document.querySelectorAll('#list-blogs .blog-post');
+		const blogList = [];
+	
+		blogs.forEach((blog, index) => {
+			// Check if the blog is visible
+			if (getComputedStyle(blog).display !== 'none') {
+				const blogData = {
+					"@type": "ListItem",
+					"position": blogList.length + 1, // Position is based on visible blogs only
+					"item": {
+						"@type": "BlogPosting",
+						"headline": blog.getAttribute('data-title'),
+						"image": blog.getAttribute('data-image') ? `https://{{request.get_host}}${blog.getAttribute('data-image')}` : '',
+						"datePublished": blog.getAttribute('data-published'),
+						"dateModified": blog.getAttribute('data-modified'),
+						"author": {
+							"@type": "Person",
+							"name": "CSCIndia.info"
+						},
+						"publisher": {
+							"@type": "Organization",
+							"name": "CSC Locator",
+							"logo": {
+								"@type": "ImageObject",
+								"url": "https://{{request.get_host}}/static/images/logo.png"
+							}
+						},
+						"mainEntityOfPage": {
+							"@type": "WebPage",
+							"@id": `https://{{request.get_host}}/blog/${blog.getAttribute('data-slug')}`
+						},
+						"articleBody": `<h3>${blog.getAttribute('data-title')}</h3><p>${blog.getAttribute('data-summary')}</p>`,
+						"keywords": blog.getAttribute('data-tags'),
+						"url": `https://{{request.get_host}}/${blog.getAttribute('data-slug')}`
+					}
+				};
+				blogList.push(blogData);
+			}
+		});
+	
+		// Create the JSON-LD object
+		const schemaData = {
+			"@context": "http://schema.org",
+			"@type": "ItemList",
+			"name": "List of Blog Articles",
+			"itemListElement": blogList
+		};
+
+		removeExistingSchema();
+	
+			// Inject new JSON-LD schema
+			const script = document.createElement('script');
+			script.type = 'application/ld+json';
+			script.id = 'blog-schema';
+			script.textContent = JSON.stringify(schemaData);
+			document.head.appendChild(script);
+		}
+
+		// Call the function when the page loads or when pagination is applied
+		generateSchema();
+		
+		// Optional: Hook this function to pagination changes if applicable
+		$(document).on('click', '.next-page, .prev-page, .upcoming-page, .earlier-page', function() {
+			removeExistingSchema();
+			generateSchema();
+		});
+		})
+  </script>
+{% endblock scripts %}

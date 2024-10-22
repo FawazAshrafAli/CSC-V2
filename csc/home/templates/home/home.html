@@ -1,0 +1,588 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Home{% endblock title_prefix %}
+
+{% block meta_description %}"List of Common Service Centres (CSC) in India"{% endblock meta_description %}
+
+{% block meta_keywords %}"CSC Centers in India, Common Service Centres, List of CSC Centers, Find CSC Centers"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}Home{% endblock og_title_prefix %}
+
+{% block og_description %}"List of Common Service Centres (CSC) in India"{% endblock og_description %}
+
+{% block meta_tags %}{% endblock meta_tags %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+	{
+	  "@context": "http://schema.org",
+	  "@type": "WebSite",
+	  "url": "https://{{request.get_host}}",
+	  "potentialAction": {
+		"@type": "SearchAction",
+		"target": "https://{{request.get_host}}{{request.path}}/csc_centers/?state={{state_obj.state}}&district={{district_obj.district}}&block={{block_obj.block}}&pincode={{pincode}}&from=googlesl",
+		"query-input": "required name=search_term_string"
+	  }
+	}
+	</script>
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "FAQPage",
+		  "mainEntity": [
+		  	{% for faq in faqs|slice:':5' %}
+			{
+			  "@type": "Question",
+			  "name": "{{faq.question}}?",
+			  "acceptedAnswer": {
+				"@type": "Answer",
+				"text": "{{faq.answer}}"
+			  }
+			}{% if not forloop.last %},{% endif %}
+			{% endfor %}
+		  ]
+		}
+		</script>
+		<script type="application/ld+json">
+			{
+			  "@context": "http://schema.org",
+			  "@type": "WebPage",
+			  "mainEntity": {
+				"@type": "CreativeWork",
+				"name": "Keyphrases",
+				"about": [
+				  {
+					"@type": "Thing",
+					"name": "CSC Centers in India"
+				  },
+				  {
+					"@type": "Thing",
+					"name": "Common Service Centres"
+				  },
+				  {
+					"@type": "Thing",
+					"name": "List of CSC Centers"
+				  },
+				  {
+					"@type": "Thing",
+					"name": "Find CSC Centers"
+				  }
+				]
+			  }
+			}
+		</script>
+		<script type="application/ld+json">
+			{
+			"@context": "http://schema.org",
+			"@type": "CollectionPage",
+			"name": "Tags Page",
+			"description": "A page listing various tags for categorizing content.",
+			"url": "https://{{request.get_host}}/tags",
+			"mainEntity": {
+			"@type": "ItemList",
+			"itemListElement": [
+			{% for service in services|slice:':18' %}
+			{				
+			"@type": "ListItem",
+			"position": {{forloop.counter}},
+			"url": "https://{{request.get_host}}/tags/{{service.slug}}",
+			"name": "{{service.name}}"
+			}{% if not forloop.last %},{% endif %}
+			{% endfor %}			
+			// Add more tags as needed
+			]
+			}
+			}
+		</script>
+
+<script type="application/ld+json">
+	{
+		"@context": "http://schema.org",
+		"@type": "ItemList",
+		"name": "List of Blog Articles",
+		"itemListElement": [
+		{% for blog in blogs|slice:':3' %}
+		{
+			"@type": "ListItem",
+			"position": {{forloop.counter}},
+			"item": {
+				"@type": "BlogPosting",
+				"headline": "{{blog.title}}",
+				"image": "https://{{request.get_host}}{% if blog.image %}{{blog.image.url}}{% else %}{% static 'w3/images/no_image.png' %}{% endif %}",
+				"datePublished": "{{blog.created_at|date:'Y-m-d'}}",
+				"dateModified": "{{blog.updated_at|date:'Y-m-d'}}",
+				"author": {
+					"@type": "Person",
+					"name": "CSCIndia.info"
+				},
+				"publisher": {
+					"@type": "Organization",
+					"name": "CSCIndia.info",
+					"logo": {
+						"@type": "ImageObject",
+					"url": "https://{{request.get_host}}/static/images/logo.png"
+				}
+			},
+			"mainEntityOfPage": {
+				"@type": "WebPage",
+				"@id": "http://{{request.get_host}}{% url 'home:view' %}"
+			},
+			"articleBody": "<h3>{{blog.title}}</h3> <p>{{blog.summary}}</p>",
+			"keywords": "{{blog.list_tags}}",
+			"url": "https://{{request.get_host}}{% url 'blog:detail' blog.slug %}"
+		}
+	}{% if not forloop.last %},{% endif %}
+	{% endfor %}
+	]
+}
+</script>
+
+			<script type="application/ld+json">
+				{
+				  "@context": "http://schema.org",
+				  "@type": "ItemList",
+				  "itemListElement": [
+				  {% for service in services|slice:':18' %}
+					{
+					  "@type": "ListItem",
+					  "position": {{forloop.counter}},
+					  "item": {
+						"@type": "Service",
+						"provider": {
+						  "@type": "Organization",
+						  "name": "CSCIndia.info", 
+						  "url": "https://{{request.get_host}}/",
+						  "logo": "https://{{request.get_host}}/static/images/logo.png"
+						},
+						"name": "{{service.name}}",
+						"description": "Access fast and reliable {{service.first_name}} at your nearest Common Service Center. Get expert assistance and hassle-free solutions tailored to your needs."
+					  }
+					}{% if not forloop.last %},{% endif %}
+					{% endfor %}					
+					// Add more products and services provided by companies as needed
+				  ]
+				}
+				</script>
+{% endblock schema_markup %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/home/css/home.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<!-- Banner
+================================================== -->
+<div class="main-search-container plain-color">
+	<div class="main-search-inner">
+
+		<div class="container">
+			<div class="row">
+				{% include "components/message.html" %}
+				<div class="col-md-12">
+                
+					<div class="main-search-headlines">
+						<h2>
+							Apply for
+							<!-- Typed words can be configured in script settings at the bottom of this HTML file -->
+							<span class="typed-words"></span>
+						</h2>
+						<h4>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and IT (MeitY), Government of India.</h4>
+					</div>
+					
+
+					<form method="get" action="{% url 'home:csc_centers' %}">
+						
+						<div class="add-listing-headline">
+							<h3> Pincode Search</h3>
+							<!-- Switcher -->
+							<label class="switch"><input type="checkbox" id="pincode-checkbox-btn"><span
+									class="slider round"></span></label>
+						</div>
+
+						<div class="main-search-input">
+
+							<div class="main-search-input-item" id="pincode-input-div">
+								<input type="text" placeholder="Search With Pincode" name="pincode" value=""/>
+							</div>
+							<div class="main-search-input-item" id="state-input-div">
+								<select class="chosen-select" data-placeholder="Select State" id="state-dropdown" name="state" required>
+									<option label="Select State"></option>
+									{% for state in states %}
+									<option value="{{state.state}}">{{state.state}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="main-search-input-item" id="district-input-div">
+								<select class="chosen-select" data-placeholder="Select District" id="district-dropdown" name="district">
+									<option label="Select District"></option>
+								</select>
+							</div>
+													
+							<div class="main-search-input-item" id="block-input-div">
+								<select class="chosen-select" data-placeholder="Select Block" id="block-dropdown" name="block">
+									<option label="Select Block"></option>
+								</select>
+							</div>
+							<button class="button" type="submit">Search</button>
+							
+						</div>
+					</form>
+					<div id="csc-near-me-div">
+						<a href="#" id="near-me">Centers Near Me</a>
+					</div>
+				</div>
+			</div>
+			<!-- Features Categories -->
+			<div class="row">
+				<div class="col-md-12">
+					<h5 class="highlighted-categories-headline">Or browse featured categories:</h5>
+					  
+					<div class="highlighted-categories">
+						{% for service in services|slice:':5' %}
+						<!-- Box -->
+						<a href="{% url 'services:service' service.slug %}" class="highlighted-category">
+					    	<h4>{{service.first_name}}</h4>
+						</a>
+						{% endfor %}
+					</div>
+					
+				</div>
+			</div>
+			<!-- Featured Categories - End -->
+		</div>
+
+	</div>
+
+	<!-- Main Search Photo Slider -->
+	<div class="container msps-container">
+
+		<div class="main-search-photo-slider">
+			<div class="msps-slider-container">
+				<div class="msps-slider">
+					<div class="item"><img src="{% static 'images/slider01.jpeg' %}" class="item" title="Title 1"/></div>
+					<div class="item"><img src="{% static 'images/slider02.jpeg' %}" class="item" title="Title 1"/></div>
+					<div class="item"><img src="{% static 'images/slider03.jpeg' %}" class="item" title="Title 1"/></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="msps-shapes" id="scene">
+
+			<div class="layer" data-depth="0.2">
+				<svg height="40" width="40" class="shape-a">
+					<circle cx="20" cy="20" r="17" stroke-width="4" fill="transparent" stroke="#C400FF" />
+				</svg>
+			</div>
+
+			<div class="layer" data-depth="0.5">
+				<svg width="90" height="90" viewBox="0 0 500 800" class="shape-b">
+				<g transform="translate(281,319)">
+				<path fill="transparent" style="transform:rotate(25deg)" stroke-width="35" stroke="#F56C83" fill  d="M260.162831,132.205081
+				A18,18 0 0,1 262.574374,141.205081
+				A18,18 0 0,1 244.574374,159.205081H-244.574374
+				A18,18 0 0,1 -262.574374,141.205081
+				A18,18 0 0,1 -260.162831,132.205081L-15.588457,-291.410162
+				A18,18 0 0,1 0,-300.410162
+				A18,18 0 0,1 15.588457,-291.410162Z"/></g></svg>
+			</div>
+
+			<div class="layer" data-depth="0.2" data-invert-x="false" data-invert-y="false" style="z-index: -10">
+				<svg height="200" width="200" viewbox="0 0 250 250" class="shape-c">
+				<path d="
+				    M 0, 30
+				    C 0, 23.400000000000002 23.400000000000002, 0 30, 0
+				    S 60, 23.400000000000002 60, 30
+				        36.599999999999994, 60 30, 60
+				        0, 36.599999999999994 0, 30
+				" fill="#FADB5F" transform="rotate(
+				    -25,
+				    100,
+				    100
+				) translate(
+				    0
+				    0
+				) scale(3.5)"></path>
+				</svg>
+			</div>
+
+
+			<div class="layer" data-depth="0.6" style="z-index: -10">
+				<svg height="120" width="120" class="shape-d">
+					<circle cx="60" cy="60" r="60" fill="#222" />
+				</svg>
+			</div>
+
+
+			<div class="layer" data-depth="0.2">
+				<svg height="70" width="70" viewBox="0 0 200 200"  class="shape-e">
+					<path fill="#FF0066" d="M68.5,-24.5C75.5,-0.8,58.7,28.5,33.5,46.9C8.4,65.4,-25.2,73.1,-42.2,60.2C-59.2,47.4,-59.6,13.9,-49.8,-13.7C-40,-41.3,-20,-63.1,5.4,-64.8C30.7,-66.6,61.5,-48.3,68.5,-24.5Z" transform="translate(100 100)" />
+				</svg>
+			</div>
+
+		</div>
+	</div>
+
+
+
+</div>
+
+
+<!-- Content
+================================================== -->
+<section class="fullwidth margin-top-0 padding-top-0 padding-bottom-40" id="main-description-div">
+<div class="container">
+	<div class="row">
+		
+		<div class="col-md-12">
+			<h3 class="headline margin-top-75">
+				<strong class="headline-with-separator">COMMON SERVICE CENTRES (CSC)</strong>
+			</h3>
+            
+            <p>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and IT (MeitY), Government of India. CSCs are easy access points for delivery of various digital services to rural and urban people in India, thereby contributing to a digitally and financially inclusive society.In rural India. CSCs are easy access points for delivery of various digital services to rural and urban people in India, thereby contributing to a digitally and financially inclusive society.In rural India, CSCs are not just service delivery points, but changing agents too, promoting rural entrepreneurship and building rural capacities and livelihoods.CSC e-Governance Services India Limited is incorporated under the Companies Act, 1956 which provides a centralized collaborative framework for delivery of services to citizens through CSCs, besides ensuring systematic viability and sustainability of the scheme. The CSCs offer web-enabled e-governance services in rural areas, including applications for Passport, Pancard, Aadhaar, Voter ID, Ration Card etc , various Government certificates, and utility payments such as electricity, telephone and water bills. People can access high quality and cost-effective video, voice and data content and services, in the areas of e-governance, education, health, telemedicine, tele-law, entertainment as well as other private services through CSCs.
+
+</p>
+		</div>
+
+		 
+	</div>
+</div>
+</section>
+<!-- Category Boxes / End -->
+
+
+<!-- Listings -->
+<div class="container margin-top-70">
+	<div class="row">
+
+		<div class="col-md-12">
+			<h3 class="headline centered margin-bottom-45">
+					<strong class="headline-with-separator">Our Services</strong>
+				<span>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+			</h3>
+		</div>
+
+		<div class="col-md-12">
+			<div class="simple-slick-carousel dots-nav">
+
+			{% for service in services|slice:':12' %}
+			<!-- Listing Item -->
+			<div class="carousel-item">
+				<a href="{% url 'services:service' service.slug %}" class="listing-item-container">
+					<div class="listing-item">
+						<img src="{% if service.image %} {{service.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="{{service.first_name}}" {% if not service.image %} class="defailt-service-image" {% endif %}>
+                       <div class="listing-item-content">
+							<h3>{{service.name}}</h3>
+							<span></span>
+						</div>
+					</div>				 
+				</a>
+			</div>
+			<!-- Listing Item / End -->
+			{% endfor %}	
+			</div>
+			
+		</div>
+
+	</div>
+</div>
+<!-- Listings / End -->
+
+<section class="fullwidth margin-top-70 padding-top-75 padding-bottom-70" id="faqs-main-div" data-background-color="#f1f1f1">
+	<!-- Info Section -->
+	<div class="container">
+
+		{% if faqs %}
+		<div class="row">
+			<div class="col-md-12">
+				<h3 class="headline centered"> Frequently Asked Questions (FAQ)	</h3>
+                
+   
+			<!-- Toggles Container -->
+			<div class="style-2">
+				{% for faq in faqs|slice:':5' %}
+				<!-- Toggle 1 -->
+				<div class="toggle-wrap">
+					<span class="trigger"><a href="#">{{faq.question}} <i class="sl sl-icon-plus"></i></a></span>
+					<div class="toggle-container">
+						<p>{{faq.answer}} </p>
+					</div>
+				</div>
+				{% endfor %}
+
+			</div>
+
+			<br>
+			<!-- Toggles Container / End -->
+			
+			<div id="more-faq-div">
+				<a href="{% url 'faq:faqs' %}" class="button border">More FAQs</a>
+			<div>
+
+			</div>
+		</div>
+		{% endif %}
+
+	</div>
+	<!-- Info Section / End -->
+ 
+
+</section>
+
+
+<!-- Parallax -->
+<div class="parallax"
+	data-background="images/slider-bg-02.jpg' %}"
+	data-color="#36383e"
+	data-color-opacity="0.6"
+	data-img-width="800"
+	data-img-height="505">
+
+	<!-- Infobox -->
+	<div class="text-content white-font">
+		<div class="container">
+
+			<div class="row">
+             <h2>Add Your CSC - Common Services Centre</h2>
+				<div class="col-md-6 col-12">
+					<ul class="list-3 color">
+						<li>This is NOT registration for a new CSC ID (यह नई सीएससी आईडी के लिए पंजीकरण नहीं है)</li>
+						<li>This is a Google-optimized smart locator for CSC entrepreneurs (यह सीएससी उद्यमियों के लिए गूगल-अनुकूलित स्मार्ट लोकेटर है)</li>
+						<li>This is NOT official from CSC e-governance India Ltd but an initiative of entrepreneurs (यह सीएससी ई-गवर्नेंस इंडिया लिमिटेड की ओर से आधिकारिक नहीं है बल्कि उद्यमियों की एक पहल है)</li>
+					</ul>
+				 </div>
+                 
+                 <div class="col-md-6 col-12">
+					<ul class="list-3 color">
+						<li>Make sure that No CSC is added in the locator very near to you (सुनिश्चित करें कि आपके बहुत नजदीक लोकेटर में कोई सीएससी नहीं जोड़ा गया है)</li>
+						<li>After user registration, login and add your CSC details. (उपयोगकर्ता पंजीकरण के बाद, लॉगिन करें और अपना सीएससी विवरण जोड़ें।)</li>
+						<li>If you do not add your CSC details in 3 days, your user registration will be deleted (यदि आप 3 दिनों में अपना सीएससी विवरण नहीं जोड़ते हैं, तो आपका उपयोगकर्ता पंजीकरण हटा दिया जाएगा)</li>
+					</ul>
+				 </div>
+                
+                
+			</div>
+			<a href="{% url 'csc_center:add_csc' %}" class="button margin-top-25">Get Started</a>
+		</div>
+	</div>
+
+	<!-- Infobox / End -->
+
+</div>
+<!-- Parallax / End -->
+
+
+
+
+
+<!-- Fullwidth Section -->
+<section class="fullwidth padding-top-75 padding-bottom-70" data-background-color="#f8f8f8">
+
+	<div class="container">
+		<div class="row">
+
+			<div class="col-md-12">
+				<h3 class="headline centered margin-bottom-45">
+					Shop Now
+					<span>Online Shopping </span>
+				</h3>
+			</div>
+			<div class="col-md-12">
+				<!-- Carousel / Start -->
+	<div class="simple-slick-carousel dots-nav">
+
+		{% for product in products|slice:'15' %}
+		<!-- Listing Item -->
+		<div class="carousel-item" style="display: flex; justify-content: center;">
+			<div class="product-grid">
+				<div class="product-image">
+					<a href="#product-pop-up-box" class="image order-btn">
+						<img class="pic-1" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}">
+						<img class="pic-2" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}">
+					</a>
+					 <span class="product-sale-label">sale!</span>
+					 
+					<div class="product-rating">
+ 
+						<a class="add-to-cart order-btn" href="#product-pop-up-box"> ORDER NOW </a>
+					</div>
+				</div>
+				<div class="product-content">
+					<h3 class="title"><a href="#product-pop-up-box" class="order-btn">{{product.name}}</a></h3>
+					<div class="price">₹ {{product.price}}</div>
+					
+				</div>
+			</div>
+		</div>
+		<!-- Listing Item / End -->
+		 {% endfor %}		
+
+	</div>
+	<!-- Carousel / End -->
+			</div>
+		</div>
+	</div>
+
+	
+
+
+</section>
+<!-- Fullwidth Section / End -->
+
+
+
+
+<!-- Recent Blog Posts -->
+<section class="fullwidth margin-top-0 padding-top-75 padding-bottom-75" data-background-color="#fff">
+	<div class="container">
+
+		{% if blogs %}
+		<div class="row">
+			<div class="col-md-12">
+				<h3 class="headline centered margin-bottom-55">
+					<strong class="headline-with-separator">From The Blog</strong>
+				</h3>
+			</div>
+		</div>
+
+		<div class="row">
+			{% for blog in blogs|slice:':3' %}
+			<!-- Blog Post Item -->
+			<div class="col-md-4">
+				<a href="{% url 'blog:detail' blog.slug %}" class="blog-compact-item-container">
+					<div class="blog-compact-item">
+						<img src="{% if blog.image %} {{blog.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Image of blog: {{blog.title}}">
+						<span class="blog-item-tag">{% if blog.category %}{{blog.category.name}}{% endif %}</span>
+						<div class="blog-compact-item-content">
+							<ul class="blog-post-tags">
+								<li>{{blog.created}}</li>
+							</ul>
+							<h3>{{blog.title}}</h3>
+							<p>{{blog.summary|slice:":45"}}..</p>
+						</div>
+					</div>
+				</a>
+			</div>
+			<!-- Blog post Item / End -->
+			{% endfor %}
+			
+			<div class="col-md-12 centered-content">
+				<a href="{% url 'blog:blogs' %}" class="button border margin-top-10">View Blog</a>
+			</div>
+
+		</div>
+		{% endif %}
+
+	</div>
+</section>
+<!-- Recent Blog Posts / End -->
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script>
+<script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
+
+<script src="{% static 'w3/home/js/home.js' %}"></script>
+{% endblock scripts %}

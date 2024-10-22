@@ -1,0 +1,118 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Add Products{% endblock title_prefix %}
+
+{% block content %}
+
+<style>
+    #submit-btn-div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+<div id="titlebar">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2><i class="sl sl-icon-plus"></i> Add Products</h2>
+                <!-- Breadcrumbs -->
+                <nav id="breadcrumbs">
+                    <ul>
+                        <li><a href="{% url 'home:view' %}">Home</a></li>
+                        <li>Add Products</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Content
+================================================== -->
+<!-- Container -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">                                    
+            <div id="add-listing" class="separated-form">
+                {% if messages %}
+                <div id="message-div">
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{message}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <!-- Section -->
+                    <div class="add-listing-section">
+                    
+                    <form method="post" action="{% url 'csc_admin:create_product' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Headline -->
+                        <div class="add-listing-headline">
+                            <h3><i class="sl sl-icon-doc"></i> Basic Informations</h3>
+                        </div>
+                        <!-- Title -->
+                        <div class="row with-forms">
+                            <div class="col-md-6">
+                                <h5>Product Name <i class="tip" data-tip-content="Name of Product"></i></h5>
+                                <input class="search-field" type="text" name="name" placeholder="Product Name" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Product Category <i class="tip" data-tip-content="Product Category"></i></h5>
+                                <select class="chosen-select" name="category" data-placeholder="Select Category" required>
+                                    <option label="Product Category"></option>
+                                    {% for category in product_categories %}
+                                    <option value="{{category.slug}}">{{category.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>                            
+                        </div>                            
+                        <div class="row with-forms">
+                            <div class="col-md-6">
+                                <h5>Product Image <i class="tip" data-tip-content="Product Image"></i></h5>
+                                <input class="search-field" type="file" name="image" />
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Product Price <i class="tip" data-tip-content="Product Price"></i></h5>
+                                <input class="search-field" type="text" name="price" placeholder="Product Price"/>
+                            </div>                            
+                        </div>
+                        <div class="row with-forms">
+                            <div class="col-md-12">
+                                <h5>Product Description</h5>
+                                <textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary" spellcheck="true" placeholder="Product Description"></textarea>
+                            </div>
+                        </div>
+                        <div id="submit-btn-div">
+                            <button type="submit" class="button text-center">Create Product</button>    
+                        </div>                    
+                    </form>
+                </div>
+                <!-- Section / End -->                                                
+            </div>
+        </div>
+        <!-- Switcher ON-OFF Content / End -->
+    </div>
+    <!-- Section / End -->        
+</div>
+<!-- Content / End -->
+<!-- Container / End -->
+{% endblock content %}
+
+{% block scripts %}
+
+
+
+ 
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+<!-- w3 -->
+<!-- Populate District Dropdown -->
+<script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script>
+
+<!-- Populate Block Dropdown -->
+<script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
+{% endblock scripts %}

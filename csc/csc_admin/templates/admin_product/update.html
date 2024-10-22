@@ -1,0 +1,140 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title_prefix %}Update Product{% endblock title_prefix %}
+
+{% block content %}
+<style>
+	#cke_id_content {
+		width: 75vw !important;										
+	}
+</style>
+<style>
+    #current-product-image a {
+        color: blue;
+    }
+
+    #current-product-image button {
+        color: black;
+        background-color: #fff;
+        font-size: 13px;
+        padding: 0px 10px;
+        border: none;
+        box-shadow: 0px 0px 3px #777;
+        border-radius: 5%;
+    }
+
+    #current-product-image button:hover {
+        color: #fff;
+        background-color: darkred;
+    }
+</style>
+<!-- Titlebar -->
+<div id="titlebar">
+	<div class="row">
+		<div class="col-md-12">
+			<!-- <h2>Update Product</h2> -->
+			<!-- Breadcrumbs -->
+			<nav id="breadcrumbs">
+				<ul>
+					<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+					<li><a href="{% url 'csc_admin:products' %}">Products</a></li>
+					<li><a href="{% url 'csc_admin:product' product.pk %}">{{product.name}}</a></li>						
+					<li>Update</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+
+{% include "admin_components/message.html" %}
+
+<div class="row">
+	<div class="row">
+		<div class="col-lg-12">
+			<div id="add-listing" class="separated-form">
+				<!-- Section -->
+				<form method="POST" action="{% url 'csc_admin:update_product' product.slug %}" enctype="multipart/form-data" class="add-listing-section">
+					{% csrf_token %}
+					<!-- Headline -->
+					<div class="add-listing-headline">
+						<h3><i class="sl sl-icon-doc"></i> Update Product</h3>
+					</div>
+
+					<!-- Title -->
+					<div class="row with-forms">
+						<div class="col-md-6">
+							<h5>Product Name <i class="tip" data-tip-content="Name of product"></i></h5>
+							<input class="search-field" type="text" name="name" value="{{product.name}}" placeholder="Name of your CSC"/ required>
+						</div>
+						<div class="col-md-6">
+							<h5>Product Category <i class="tip" data-tip-content="Product Category"></i></h5>
+							<select class="chosen-select" name="category" id="category-dropdown" data-placeholder="Select Category" required>
+								<option label="Product Category"></option>
+								{% for category in product_categories %}
+								<option value="{{category.slug}}" {% if product.category.slug == category.slug %} selected {% endif %}>{{category.name}}</option>
+								{% endfor %}
+							</select>
+						</div>
+																	
+					</div>
+					<br>						                        
+					<div class="row with-forms">
+						<div class="col-md-4">
+							<h5>Product Image <i class="tip" data-tip-content="Image of product"></i></h5>
+							<input class="search-field" type="file" name="image" id="product-image-input"/>                                 
+							<span id="current-product-image">{% if product.image %} current image: <a href="{{product.image.url}}" target="_blank" style="color:blue">{{product.image.name}}</a>&nbsp;&nbsp;<button type="button">Clear</button> {% endif %}</span>                                 
+						</div> 
+						<div class="col-md-4">
+							<h5>Product Price <i class="tip" data-tip-content="Product Price"></i></h5>
+							<input class="search-field" type="text" name="price" placeholder="Product Price" value="{{ product.price }}" />
+						</div>
+						<div class="col-md-4">
+							<h5>Product Quantity <i class="tip" data-tip-content="Product Quantity"></i></h5>
+							<input class="search-field" type="number" name="quantity" placeholder="Product Quantity" value="{{ product.quantity }}" />
+						</div>
+					</div>
+					<br>
+					<div class="row with-forms">
+						<div class="col-md-12">
+							<h5>Product Description</h5>
+							<textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary" spellcheck="true" placeholder="Product Description">{{product.description}}</textarea>
+						</div>
+					</div>
+					<div class="row with-forms text-center">
+						<button type="submit" class="button">Save Product</button>
+					</div>						
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<!-- Remove Product Image -->
+<script src="{% static 'w3/products/js/removeServiceImage.js' %}"></script>
+
+<!-- Preview Updating Product Image's Link -->
+<script>
+	$(document).ready(() => {
+		function previewServiceImageLink () {
+			const productImageInput = $('#product-image-input')[0];
+			const file = productImageInput.files[0]
+			const fileName = file.name
+	
+			if (file) {
+				const imageUrl = URL.createObjectURL(file);
+				let html = `current image: <a href=${imageUrl} target="_blank" />${fileName}</a>`;
+				$('#current-product-image').html(html);
+				$('#current-product-image').show();
+			};
+		};
+	
+		$('#product-image-input').on('change', previewServiceImageLink)
+	});
+
+</script>
+{% endblock scripts %}

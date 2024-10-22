@@ -1,0 +1,243 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Centers Enquiries {% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_service/css/admin_service.css' %}">
+
+<!-- Table Styles -->
+<style>
+    #center-table {
+        min-width: 100%;
+        background-color: #fff;
+    }
+    #center-table tr {
+        border-bottom: 1px solid silver;
+        height: 50px;
+    }
+    #center-table td:first-child,
+    #center-table th:first-child,
+    #td-image,
+    #th-image {
+        text-align: center;
+    }
+    #center-table img {
+        padding: 3px 0;
+        height: 50px;
+    }
+    #center-table button {
+        height: 0;
+        padding: 0 10px;
+    }
+    #center-table tbody tr:hover button {
+        height: 100%;
+        padding: 5px 10px;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+
+	<!-- Titlebar -->
+	<div id="titlebar">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Centers Enquiries</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+						<li>Centers Enquiries</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		{% if messages %}
+		<div id="message-div">
+			<ul class="messages">
+				{% for message in messages %}
+				<li {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+	</div>	
+
+	<div class="row">
+
+		<!-- Listings -->
+		<div class="col-lg-12 col-md-12">
+			<div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
+				<h4>Centers Enquiries</h4>
+				<br>
+				<table id="center-table">
+					<thead>
+						<tr>
+							<th>No</th>
+							<th>&nbsp;Center Name</th>
+                            <th style="text-align:center;">Service Enquiries</th>
+                            <th style="text-align:center;">Product Enquiries</th>                            
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="center-tbody">
+						{% for center in csc_centers %}
+						<tr class="center-items" style="vertical-align: text-top;">
+							<td>{{ forloop.counter }}</td>
+							<td>&nbsp;{{ center.name }}</td>
+                            <td style="text-align:center;">{{center.service_enquiries_count}}</td>
+                            <td style="text-align:center;">{{center.product_enquiries_count}}</td>
+                        </tr>
+						{% endfor %}
+					</tbody>
+				</table>                        				
+			</div>
+			<!-- Pagination -->
+			<div class="clearfix"></div>
+			<div class="row" id="pagination-row">
+			  <div class="col-md-12">
+				<!-- Pagination -->
+				<div class="pagination-container margin-top-20 margin-bottom-40">
+				  <nav class="pagination" id="pagination-nav">
+					<ul>
+					  <li>
+						<a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+					  </li>                
+					  <li><a href="#" id="first-page">1</a></li>
+					  <li><a href="#" id="second-page">2</a></li>
+					  <li><a href="#" id="third-page" >3</a></li>
+					  <li>
+						<a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+					  </li>
+					</ul>
+				  </nav>
+				</div>
+			  </div>
+			</div>
+		</div>
+
+
+		<!-- Copyrights -->
+		<div class="col-md-12">
+			<div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+    $(document).ready(() => {
+        // Pagination
+      function paginator () {
+        let itemsPerPage = 10;
+        let currentPage = 1;
+        let totalItems = $('.center-items').length;
+        let totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+        $('.prev-page').hide();      
+  
+        function paginationBtnVisibility() {
+          $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+          $('.next-page').hide();
+          $('.prev-page').hide();
+          
+          if (currentPage == totalPages) {          
+            $('.next-page').hide();
+            
+            if (totalPages == 1) {
+              $('#first-page').html(currentPage).addClass('current-page').show();                       
+              
+            } else if (totalPages == 2) {
+              $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+              $('#second-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();
+              
+            } else if (totalPages == 3) {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('#prev-page').show();
+  
+            } else {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();            
+            };
+  
+          } else if (currentPage > 1) {          
+            $('.prev-page').show();
+            $('.next-page').show();
+            $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#second-page').html(currentPage).addClass('current-page').show();
+            $('#third-page').html(currentPage + 1).addClass('next-page').show();
+  
+          } else if (currentPage == 1 && totalPages > 0) {          
+            $('.next-page').show();
+            $('#first-page').html(currentPage).addClass('current-page').show();
+            $('#second-page').html(currentPage + 1).addClass('next-page').show();
+  
+            if (totalPages >= 3) {          
+              $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+            }
+          }          
+        };
+  
+        paginationBtnVisibility();
+  
+        function renderPage(page) {
+            $('.center-items').hide();
+            $('.center-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            $('#pagination a').removeClass('active');
+            $('#pagination a').eq(page).addClass('active');
+            $('.prev-page').toggleClass('disabled', page === 1);
+            $('.next-page').toggleClass('disabled', page === totalPages);
+        }
+  
+        $(document).on('click', '.next-page', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.upcoming-page', function() {
+            if (currentPage < totalPages - 1) {
+                currentPage += 2;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.prev-page', function() {
+          if (currentPage > 1) {
+              currentPage--;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        $(document).on('click', '.earlier-page', function() {
+          if (currentPage > 2) {
+              currentPage -= 2;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        // Initialize the first page
+        renderPage(currentPage);
+      };
+  
+      paginator();
+    })
+</script>
+{% endblock scripts %}

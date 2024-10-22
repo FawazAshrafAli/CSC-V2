@@ -1,0 +1,203 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Returned CSC Center Requests{% endblock title_prefix %}
+
+{% block content %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_csc_center/css/admin_csc_center.css' %}">
+
+<style>
+    #center-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+    #center-table tr {
+        border-bottom: 1px solid silver;
+    }
+
+    #center-table tbody tr {
+        cursor: pointer;
+        height: 50px;
+    }
+
+    #center-table tbody tr:hover {
+        color: blue;
+    }
+
+    #center-table td:first-child,
+    #center-table th:first-child,
+    #td-image,
+    #th-image {
+        text-align: center;
+    }
+
+    #center-table img {
+        padding: 3px 0;
+        height: 50px;
+    }
+
+    #center-table button {
+        height: 0;
+        padding: 0 10px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    th,td {
+        text-align:center;
+    }
+</style>
+{% endblock styles %}
+
+    <!-- Titlebar -->
+    <div id="titlebar">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Returned CSC Center Requests</h2>
+                <!-- Breadcrumbs -->
+                <nav id="breadcrumbs">
+                    <ul>
+                        <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                        <li>Returned CSC Centers</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% include "components/message.html" %}
+    </div>
+
+    <div class="row">
+
+        <!-- Delete Confirmation Box Start-->
+        <div id="delete-confirmation-box" style="display: none;">
+            <div class="modal-content">
+                <h4><span>Deleting</span> CSC Center Request<span id="csc-name" style="color: black"></span> . . .</h4>
+                <h5>Are you sure?</h5>
+            </div>
+            <br>
+            <form method="GET" action="#">
+                <button type="submit" id="confirm-deletion-btn">Delete</button>
+                <button class="cancel-btn" type="button" id="cancel-deletion-btn">Cancel</button>
+            </form>
+        </div>
+        <!-- Delete Confirmation Box Start-->        
+
+        <div class="col-lg-12 col-md-8 padding-right-30">
+            <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <h4>Returned CSC Centers</h4>
+                    </div>                
+                </div>
+                <br>
+                <div class="table-responsive">
+                    <table id="center-table">
+                        <thead>
+                            <tr>
+                                <th>&nbsp;No</th>
+                                <th>&nbsp;Name</th>
+                                <th>Owner</th>
+                                <th>Location</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Feedback</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="center-tbody">
+                            {% if csc_centers and csc_centers|length != 0 %}
+                            {% for center in csc_centers %}
+                            <tr class="row-items" onclick="window.location='{% url 'csc_admin:returned_csc_center' center.slug %}'" id="tbody-tr-{{center.pk}}">
+                                <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
+                                <td><small>&nbsp;{{ center.csc_center.name }}</small></td>
+                                <td><small>{{center.csc_center.owner}}</small></td>
+                                <td><small>{{center.csc_center.partial_address}}</small></td>
+                                <td><small>{{center.csc_center.email}}</small></td>
+                                <td><small>{{center.csc_center.contact_number}}</small></td>
+                                <td style="max-width:360px;"><small>{{center.feedback}}</small></td>
+                                <style>
+                                    #tbody-tr-{{center.pk}}:hover #remove-btn-{{center.pk}} {
+                                        height: 30px;
+                                    }
+                                </style>
+                                <td style="position: relative;">
+                                    <div style="position: absolute; right: 50px; top: 10px;">                                    
+                                        <button class="button gray remove-btn" type="button" style="display: flex; flex-direction: row; justify-content: space-around; align-items: center;"
+                                            onclick="event.stopPropagation(); toggleCscDeletion(`{{center.slug}}`, `{{center.full_name}}`);"
+                                            id="remove-btn-{{center.pk}}"
+                                            ><i class="sl sl-icon-close"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr><td colspan="8" style="color:red;">No Returned Requests</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <!-- Pagination -->
+      <div class="clearfix"></div>
+      <div class="row" id="pagination-row">
+        <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+              <ul>
+                {% if page_obj.has_previous %}
+                <li>
+                  <a  href="?page={{ page_obj.previous_page_number }}" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+                </li>
+                {% endif %}            
+                <li><a href="#" id="first-page">{{ page_obj.number }}</a></li>                
+                {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+        <!-- Csc Posts / End -->        
+    </div>
+
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/"
+                target="_blank">Zentrix Technologies</a></div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+
+<script>
+    function toggleCscDeletion(cscSlug, cscName) {
+        $('#delete-confirmation-box form').prop('action', `/admin/delete_csc/${cscSlug}`);
+        $('#csc-name').html(`'${cscName}'`);
+        $('.close-btn').click();
+        $('#delete-confirmation-box').show();
+    };
+
+    $('.cancel-btn').click(function () {
+        $('#delete-confirmation-box').hide();
+        $('.close-btn').click();
+    })
+</script>
+
+{% endblock scripts %}

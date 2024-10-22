@@ -1,0 +1,203 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}{{current_service.name}}{% endblock title_prefix %}
+
+{% block meta_description %}"Explore a variety of services offered by Common Service Centers (CSCs) across different locations. Find the best services tailored to your needs, including digital, financial, and government services."{% endblock meta_description %}
+
+{% block meta_keywords %}"Common Service Center, CSC services, digital services, government services, online services, CSC center, public services"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}{{current_service.name}}{% endblock og_title_prefix %}
+
+{% block og_description %}"Explore a variety of services offered by Common Service Centers (CSCs) across different locations. Find the best services tailored to your needs, including digital, financial, and government services."{% endblock og_description %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "CSC Locator",
+  "description": "Access fast and reliable {{current_service.first_name}} at your nearest Common Service Center. Get expert assistance and hassle-free solutions tailored to your needs.",
+  "provider": {
+    "@type": "Organization",
+    "name": "CSCIndia.Info",
+    "url": "https://cscindia.info/",
+    "logo": "https://cscindia.info/images/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-9037559495",
+      "contactType": "Customer Service",
+      "areaServed": "IN",
+      "availableLanguage": ["English", "Malayalam", "Hindi", "Telugu", "Kannada", "Tamil"]
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "INR",
+    "price": "0000",
+    "eligibleRegion": {
+      "@type": "Place",
+      "name": "India"
+    }
+  },
+  "areaServed": "IN",
+  "additionalType": "Service",
+  "serviceType": "{{current_service.name}}",
+  "url": "https://{{request.get_host}}{{request.path}}",
+  "mainEntityOfPage": "https://{{request.get_host}}{{request.path}}"
+}
+</script>
+{% endblock schema_markup %}
+
+{% block styles %}
+	<link rel="stylesheet" href="{% static 'w3/service/css/detail.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Services</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+                        <li><a href="{% url 'services:services' %}">Services</a></li>
+						<li>{{current_service.name}}</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+
+	<!-- Blog Posts -->
+	<div class="blog-page">
+	<div class="row">
+
+		{% include "components/message.html" %}
+
+
+		<!-- Post Content -->
+		<div class="col-lg-9 col-md-8 padding-right-30">
+
+
+			<!-- Blog Post -->
+			<div class="blog-post single-post">
+				
+				<!-- Img -->
+				<img class="post-img" src="{% if current_service.image %} {{current_service.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Image of Service">
+
+				
+				<!-- Content -->
+				<div class="post-content">
+
+					<h3>{{current_service.name}}</h3>
+
+					<ul class="post-meta">
+						<li>{{current_service.created}}</li>		
+					</ul>
+
+					{% if current_service.description %}
+					<div>{{current_service.description|safe}}</div>
+					{% endif %}
+
+
+				<!-- AddToAny BEGIN -->
+<div class="a2a_kit a2a_kit_size_32 a2a_default_style" data-a2a-url="https://cscindia.info/">
+	<a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+	<a class="a2a_button_facebook"></a>
+	<a class="a2a_button_x"></a>
+	<a class="a2a_button_pinterest"></a>
+	<a class="a2a_button_threads"></a>
+	<a class="a2a_button_linkedin"></a>
+	<a class="a2a_button_reddit"></a>
+	</div>
+	<script async src="https://static.addtoany.com/menu/page.js"></script>
+	<!-- AddToAny END -->
+
+			 
+					<div class="clearfix"></div>
+
+				</div>
+			</div>
+ 
+
+			 
+  
+	</div>
+	<!-- Content / End -->
+
+
+
+	<!-- Widgets -->
+	<div class="col-lg-3 col-md-4">
+		<div class="sidebar right">
+ 
+
+			<!-- Widget -->
+			<div class="widget margin-top-40">
+				{% comment %} {% url 'services:request_service' service.slug %} {% endcomment %}
+                <form class="with-forms  margin-top-0" method="post" action="{% url 'services:request_service' current_service.slug %}">
+					{% csrf_token %}
+                    <h3 class="margin-top-0 margin-bottom-25">APPLY NOW</h3>
+					<!-- Date Range Picker - docs: http://www.daterangepicker.com/ -->
+					
+                    <input type="text" placeholder="Name:" name="name" required>
+                    <input type="text" placeholder="E-Mail ID:" name="email" required>
+                    <input type="text" placeholder="Phone No:" name="phone" pattern="[+0-9]{7,13}" minlength="7" maxlength="13" title="Should only contain digits or '+' with a minimum of 7 and a maximum of 13 characters." required>
+					<input type="text" id="location-input" placeholder="Location" name="location" required>
+                    <textarea id="message-input" cols="10" rows="2" name="message" placeholder="Message" required></textarea>
+
+                    <button type="submit" class="button book-now fullwidth margin-top-5">SUBMIT NOW</button>
+				</form>
+ 
+
+			</div>
+			<!-- Widget / End-->
+
+
+
+<!-- Widget -->
+<div class="widget margin-top-40">
+    <h3>SERVICES</h3>
+<ul class="list-4 color">
+                        {% for service in services|slice:'4' %}
+						<li>{{service.name}}</li>
+                        {% endfor %}
+					</ul>
+</div>
+<!-- Widget / End -->
+
+
+			<!-- Widget -->
+			<div class="widget margin-top-40">
+				<h3>SERVICE LINKS</h3>
+				<ul class="option-set">
+					{% for service in services|slice:4 %}
+                    <li><a href="{% url 'services:service' service.slug %}">{{service.name}}</a></li>
+					{% endfor %}                    
+                </ul>
+			</div>
+			<!-- Widget / End-->
+
+			<div class="clearfix"></div>
+			<div class="margin-bottom-40"></div>
+		</div>
+	</div>
+	</div>
+	<!-- Sidebar / End -->
+
+
+</div>
+</div>
+
+{% endblock content %}

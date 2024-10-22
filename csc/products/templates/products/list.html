@@ -1,0 +1,179 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Products{% endblock title_prefix %}
+
+{% block meta_description %}"Discover top-quality products available at your nearest CSC center. Enjoy reliable service, affordable pricing, and easy access to essential products."{% endblock meta_description %}
+
+{% block meta_keywords %}"Service Center Products, Products for Service Centers, Common Service Center Products, CSC Products"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}Products{% endblock og_title_prefix %}
+
+{% block og_description %}"Discover top-quality products available at your nearest CSC center. Enjoy reliable service, affordable pricing, and easy access to essential products."{% endblock og_description %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "mainEntity": {
+      "@type": "CreativeWork",
+      "name": "Keyphrases",
+      "about": [
+      {% for category in categories|slice:':4' %}
+        {
+          "@type": "Thing",
+          "name": "{{category.name}}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        // Add more keywords as needed
+      ]
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "CollectionPage",
+    "name": "Tags Page",
+    "description": "A page listing various tags for categorizing content.",
+    "url": "https://{{request.get_host}}{{request.path}}tags",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": [
+      {% for category in categories|slice:':4' %}
+      {
+        "@type": "ListItem",
+        "position": {{forloop.counter}},
+        "url": "https://{{request.get_host}}{{request.path}}tags/{{category.slug}}",
+        "name": "{{category.name}}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+      // Add more tags as needed
+      ]
+    }
+  }
+</script>
+{% endblock schema_markup %}
+
+{% block styles %}
+	<link rel="stylesheet" href="{% static 'w3/product/css/list.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Products</h2>
+        <span>Online Shopping</span>
+
+        <!-- Breadcrumbs -->
+        <nav id="breadcrumbs">
+          <ul>
+            <li><a href="{% url 'home:view' %}">Home</a></li>
+            <li>Products</li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "components/message.html" %}
+
+<!-- Content
+================================================== -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <!-- Sorting - Filtering Section -->
+      <div class="row margin-bottom-25">
+        <div class="col-md-12">
+          <div class="fullwidth-filters">
+            <!-- Panel Dropdown / End -->
+
+            <!-- Sort by -->
+            <div class="sort-by">
+              <div class="sort-by-select">
+                <select
+                  data-placeholder="List By Category"
+                  class="chosen-select-no-single" id="category-dropdown"
+                >
+                  <option value="" selected hidden disabled>Select Category</option>                  
+                  {% for category in categories %}
+                  <option value="{{category.slug}}" >{{category.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <!-- Sort by / End -->
+          </div>
+        </div>
+      </div>
+      <!-- Sorting - Filtering Section / End -->
+
+      <div class="row" id="list-product-div">
+		{% for product in products %}    
+        <!-- Listing Item -->
+        <div class="col-lg-3 col-md-4 row-items" title="{{product.name}}">
+          <div class="product-grid" style="height: 450px; max-height: 450px; width: 271px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div class="product-image" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+              <a href="#" class="image order-btn" data-slug="{{product.slug}}">
+                <img class="pic-1" data-slug="{{product.slug}}" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/noe_image.png' %} {% endif %}" style="width: 100%; height: auto; max-height: 100%; object-fit: contain;"/>
+                <img class="pic-2" data-slug="{{product.slug}}" src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/noe_image.png' %} {% endif %}" style="width: 100%; height: auto; max-height: 100%; object-fit: contain;"/>
+              </a>
+              <span class="product-sale-label">sale!</span>
+
+              <div class="product-rating">
+                <a class="add-to-cart order-btn" href="#" data-slug="{{product.slug}}"> ORDER NOW </a>
+              </div>
+            </div>
+            <div class="product-content" style="bottom: 0;" title="{{product.name}}">
+              <h3 class="title" style="max-width: 205px;" ><a href="#" class="order-btn" data-slug="{{product.slug}}" style="display: block;"><span style="display: block; max-height: 19.8px; text-overflow: ellipsis; overflow: hidden; box-sizing: border-box; width: 100%; text-wrap: nowrap;">{{product.name}}</span></a></h3>
+              <div class="price">₹{{product.price}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- Listing Item / End -->
+		{% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div class="clearfix"></div>
+        <div class="row" id="pagination-row">
+          <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+            <ul>
+              <li>
+              <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+              </li>                
+              <li><a href="#" id="first-page">1</a></li>
+              <li><a href="#" id="second-page">2</a></li>
+              <li><a href="#" id="third-page" >3</a></li>
+              <li>
+              <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+              </li>
+            </ul>
+            </nav>
+          </div>
+          </div>
+        </div>
+      </div>
+			<!-- Pagination / End -->
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/general/js/tilePaginator.js' %}"></script>
+<script src="{% static 'w3/product/js/list.js' %}"></script>
+{% endblock scripts %}

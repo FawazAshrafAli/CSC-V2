@@ -1,0 +1,168 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Services{% endblock title_prefix %}
+
+{% block meta_description %}"Explore a variety of services offered by Common Service Centers (CSCs) across different locations. Find the best services tailored to your needs, including digital, financial, and government services."{% endblock meta_description %}
+
+{% block meta_keywords %}"Common Service Center, CSC services, digital services, government services, online services, CSC center, public services"{% endblock meta_keywords %}
+
+{% block og_title_prefix %}Services{% endblock og_title_prefix %}
+
+{% block og_description %}"Explore a variety of services offered by Common Service Centers (CSCs) across different locations. Find the best services tailored to your needs, including digital, financial, and government services."{% endblock og_description %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "mainEntity": {
+      "@type": "CreativeWork",
+      "name": "Keyphrases",
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Common Service Center"
+        },
+        {
+          "@type": "Thing",
+          "name": "CSC services"
+        },
+        {
+          "@type": "Thing",
+          "name": "digital services"
+        },
+        {
+          "@type": "Thing",
+          "name": "government services"
+        }, 
+        {
+          "@type": "Thing",
+          "name": "online services"
+        }, 
+        {
+          "@type": "Thing",
+          "name": "CSC center"
+        }, 
+        {
+          "@type": "Thing",
+          "name": "public services"
+        }
+        // Add more keywords as needed
+      ]
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+    {% for service in services|slice:':18' %}
+      {
+        "@type": "ListItem",
+        "position": {{forloop.counter}},
+        "item": {
+          "@type": "Service",
+          "provider": {
+            "@type": "Organization",
+            "name": "CSC Locator",
+            "url": "https://cscindia.info/",
+            "logo": "https://cscindia.info/images/logo.png"
+          },
+          "name": "{{service.name}}",
+          "description": "Access fast and reliable {{service.first_name}} at your nearest Common Service Center. Get expert assistance and hassle-free solutions tailored to your needs."
+        }
+      },
+      {% endfor %}      
+      // Add more products and services provided by companies as needed
+    ]
+  }
+  </script>
+{% endblock schema_markup %}
+ 
+{% block content %}
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Services</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+						<li>Services</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<!-- Listing Item -->
+				 {% for service in services %}
+				<div class="col-lg-4 col-md-6 row-items" data-name="{{service.name}}">
+					<a href="{% url 'services:service' service.slug %}" class="listing-item-container compact">
+						<div class="listing-item">
+							<img src="{% if service.image %} {{service.image.url}} {% else %} {% static 'w3/images/no_image.png'  %} {% endif %}" alt="Image of service">
+							<div class="listing-item-content">
+								<h3>{{service.name}}</h3>
+							</div>
+ 						</div>
+					</a>
+				</div>
+				{% endfor %}
+				<!-- Listing Item / End -->
+			</div>
+ 
+ 
+
+			<!-- Pagination -->
+      <div class="clearfix"></div>
+        <div class="row" id="pagination-row">
+          <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+            <ul>
+              <li>
+              <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+              </li>                
+              <li><a href="#" id="first-page">1</a></li>
+              <li><a href="#" id="second-page">2</a></li>
+              <li><a href="#" id="third-page" >3</a></li>
+              <li>
+              <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+              </li>
+            </ul>
+            </nav>
+          </div>
+          </div>
+        </div>
+      </div>
+			<!-- Pagination / End -->
+
+            
+
+		</div>
+
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/general/js/tilePaginator.js' %}"></script>
+<script  src="{% static 'w3/service/js/list.js' %}"></script>
+{% endblock scripts %}

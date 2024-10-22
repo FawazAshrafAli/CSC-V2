@@ -1,0 +1,121 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title_prefix %}
+Blogs
+{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/blog/css/create.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<!-- Titlebar -->
+<div id="titlebar">
+	<div class="row">
+		<div class="col-md-12">
+			<h2 id="page-heading">Add Blog</h2>
+			<!-- Breadcrumbs -->
+			<nav id="breadcrumbs">
+				<ul>
+					<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+					<li><a href="{% url 'csc_admin:blogs' %}">Blogs</a></li>						
+					<li>Add</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+	{% include "admin_components/message.html" %}
+</div>
+
+<div class="row">
+	<div class="row">
+		<div class="col-lg-12">
+			<div id="add-listing" class="separated-form">
+				<!-- Section -->
+				<form method="POST" action="{% url 'csc_admin:add_blog_category' %}" class="add-listing-section" id="blog-category-form">
+					{% csrf_token %}
+					<div class="add-listing-headline">
+						<h3><i class="sl sl-icon-doc"></i> Blog Category</h3>
+					</div>
+					<div class="row with-forms">
+						<div class="col-md-12">
+							<h5>Blog Category <i class="tip" data-tip-content="Name of Blog Category"></i></h5>
+							<input class="search-field" type="text" name="name" placeholder="Name of Blog Category" required/>
+						</div>                							               							
+					</div>
+					<br>					
+					<div class="row with-forms text-center">
+						<div class="col-md-12" id="blog-form-btns">
+							<button type="submit" class="button">ADD CATERGORY</button>
+							<button type="button" class="button-pill">CANCEL</button>
+						</div>
+					</div>
+				</form>
+
+				<form method="POST" action="{% url 'csc_admin:create_blog' %}" enctype="multipart/form-data" class="add-listing-section" id="blog-form">
+					{% csrf_token %}
+					<!-- Headline -->
+					<div class="add-listing-headline" id="heading-div">
+						<h3><i class="sl sl-icon-doc"></i> Blog Informations</h3>
+
+						<button class="button gray" type="button" id="toggle-blog-category-form-btn">Add Blog Category</button>
+					</div>
+
+					<!-- Title -->
+					<div class="row with-forms">
+						<div class="col-md-6">
+							<h5>Blog Title <i class="tip" data-tip-content="Title of Blog"></i></h5>
+							<input class="search-field" type="text" name="title" placeholder="Title of Blog" required/>
+						</div>                							
+						<div class="col-md-6">
+							<h5>Blog Image <i class="tip" data-tip-content="Image of Blog"></i></h5>
+							<input class="search-field" type="file" name="image"/>
+						</div>                							
+					</div>
+					<div class="row with-forms">							
+						<div class="col-md-6">
+							<h5>Category <i class="tip" data-tip-content="Category of Blog"></i></h5>
+							<select class="chosen-select" data-placeholder="Select Category" name="category">
+								<option label="Select Category"></option>
+								{% for category in categories %}
+								<option value={{category.slug}}>{{category.name}}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-6">
+							<h5>Tags <i class="tip" data-tip-content="Tags of Blog"></i></h5>
+							<input class="search-field" type="text" name="tags" placeholder="Provide Tags Followed By Comma" required />
+						</div>                							
+					</div>
+
+					<div class="row with-forms">
+						<div class="col-md-12">
+							<h5>Summary <i class="tip" data-tip-content="Summary of Blog"></i></h5>
+							<!-- <textarea class="WYSIWYG" name="summary" cols="40" rows="3" spellcheck="true" placeholder="A short summary of the post"></textarea> -->
+							<input class="search-field" type="text" name="summary" placeholder="A Short Summary Of The Post"  required/>
+						</div>
+					</div>
+					<div class="row with-forms">
+						<div class="col-md-12">
+							<h5>Content <i class="tip" data-tip-content="Description of service"></i></h5>								
+							{{ form.media }}
+							{{ form.content }}								
+						</div>
+					</div>
+					<br>
+					<div class="row with-forms text-center">
+						<button type="submit" class="button">ADD BlOG</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/blog/js/create.js' %}"></script>
+{% endblock scripts %}

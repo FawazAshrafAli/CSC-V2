@@ -1,0 +1,118 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} Services {% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_service/css/list.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+	<!-- Titlebar -->
+	<div id="titlebar">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Services</h2>
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+						<li>Services</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		{% if messages %}
+		<div id="message-div">
+			<ul class="messages">
+				{% for message in messages %}
+				<li {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+
+	<!-- Delete Confirmation Box Start-->
+    <div id="delete-confirmation-box">
+        <div class="modal-content">            
+            <h4><span>Deleting</span> Service <span id="service-name"></span> . . .</h4>
+            <h5>Are you sure?</h5>                        
+        </div>
+        <br>
+        <form method="GET" action="#">
+            <button type="submit" id="confirm-deletion-btn">Delete</button>
+            <button type="button" id="cancel-deletion-btn">Cancel</button>
+        </form>
+    </div>
+    <!-- Delete Confirmation Box Start-->
+
+	<div class="row">
+
+		<!-- Listings -->
+		<div class="col-lg-12 col-md-12">
+			<div class="dashboard-list-box margin-top-0 bg-light">
+				<h4>Services</h4>
+				<br>
+				<table id="service-table">
+					<thead>
+						<tr>
+							<th>No</th>
+							<th id="th-image">Image</th>
+							<th>Service</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="service-tbody">
+						{% for service in services %}
+						<tr class="row-items" onclick="window.location='{% url 'csc_admin:service' service.slug %}'">
+							<td>{{ forloop.counter }}</td>
+							<td id="td-image">
+								<img src="{% if service.image %} {{service.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Product Image">
+							</td>
+							<td>{{ service.name }}</td>
+							<td><button class="button gray toggle-service-deletion-btn" data-service-slug="{{service.slug}}" data-service-name="{{service.name}}"><i class="sl sl-icon-close"></i> Delete</button></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>                        				
+			</div>
+			<!-- Pagination -->
+			<div class="clearfix"></div>
+			<div class="row" id="pagination-row">
+			  <div class="col-md-12">
+				<!-- Pagination -->
+				<div class="pagination-container margin-top-20 margin-bottom-40">
+				  <nav class="pagination" id="pagination-nav">
+					<ul>
+					  <li>
+						<a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+					  </li>                
+					  <li><a href="#" id="first-page">1</a></li>
+					  <li><a href="#" id="second-page">2</a></li>
+					  <li><a href="#" id="third-page" >3</a></li>
+					  <li>
+						<a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+					  </li>
+					</ul>
+				  </nav>
+				</div>
+			  </div>
+			</div>
+		</div>
+
+
+		<!-- Copyrights -->
+		<div class="col-md-12">
+			<div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/admin_service/js/list.js' %}"></script>
+
+<script src="{% static 'w3/general/js/paginator.js' %}"></script>
+{% endblock scripts %}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your CSC Center Account Expiration Notice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            width: 100%;
+            padding: 20px 0;
+            background-color: #f4f4f4;
+        }
+        .email-content {
+            width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            background-color: #FF5722;
+            color: #ffffff;
+            text-align: center;
+            padding: 25px;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .email-body {
+            padding: 20px;
+            color: #333333;
+            line-height: 1.7;
+        }
+        .email-body p {
+            margin: 15px 0;
+        }
+        .highlight {
+            color: #FF5722;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #FF5722;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .email-footer {
+            padding: 10px 20px;
+            background-color: #eeeeee;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+        @media screen and (max-width: 600px) {
+            .email-content {
+                width: 100% !important;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <!-- Email Header -->
+            <div class="email-header">
+                Important: Account Expiration Notice
+            </div>
+
+            <!-- Email Body -->
+            <div class="email-body">
+                <p>Dear <strong>{{ owner_name }}</strong>,</p>
+
+                <p>We hope this message finds you well. We want to inform you that your CSC Center account has expired as of <strong class="highlight">{{ expiration_date }}</strong>. To ensure that you can continue enjoying our services without interruption, we kindly ask you to renew your account at your earliest convenience.</p>
+                
+                <h2>Why Renew?</h2>
+                <ul>
+                    <li><strong>Continued Access:</strong> Avoid disruptions in services and maintain your presence.</li>
+                    <li><strong>Ongoing Support:</strong> Stay connected with our support team for any assistance you may need.</li>
+                    <li><strong>Exclusive Offers:</strong> As a renewed member, you will have access to special offers and updates.</li>
+                </ul>
+
+                <p style="text-align: center;">
+                    <a href="https://{{request.get_host}}/csc_center" class="button">Renew Your Account</a>
+                </p>
+
+                <p>If you have any questions, feel free to reach us at <strong>{{ support_email }}</strong>.</p>
+
+                <p>Thank you for being a valued member of our community. We look forward to continuing to support your CSC Center!</p>
+
+                <p>Best regards,<br>CSC Locator Team</p>
+            </div>
+
+            <!-- Email Footer -->
+            <div class="email-footer">
+                &copy; 2024 CSC Center. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

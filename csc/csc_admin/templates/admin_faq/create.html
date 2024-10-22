@@ -1,0 +1,121 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Add CSC Center{% endblock title_prefix %}
+
+{% block styles %}
+<style>
+    #add-faq-btn-div {
+        display: flex;
+        justify-content: center;
+    }
+    .dashboard-content {
+        padding-right: 0;
+        padding-left: 0;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+<div id="titlebar">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2><i class="sl sl-icon-plus"></i> Add FAQ</h2>
+                <!-- Breadcrumbs -->
+                <nav id="breadcrumbs">
+                    <ul>
+                        <li><a href="{% url 'home:view' %}">Home</a></li>
+                        <li>Add FAQ</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "admin_components/message.html" %}
+<!-- Content
+================================================== -->
+<!-- Container -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <form method="post" action="{% url 'csc_admin:add_faq' %}" id="add-faq-form">
+                {% csrf_token %}
+                <div id="add-listing" class="separated-form">                    
+                    <!-- Section -->
+                    <div class="add-listing-section margin-top-45">
+                        <!-- Headline -->
+                        <div class="add-listing-headline">
+                            <h3><i class="sl sl-icon-docs"></i> Details</h3>
+                        </div>
+                        <!-- Description -->
+                        <div class="form">
+                            <h5>Question</h5>
+                            <textarea class="WYSIWYG" name="question" cols="40" rows="2" id="question"
+                                spellcheck="true" placeholder="Frequently Asked Question" style="min-height: 50px" required></textarea>
+                        </div>
+                        <div class="form">
+                            <h5>Answer</h5>
+                            <textarea class="WYSIWYG" name="answer" cols="40" rows="2" id="answer"
+                                spellcheck="true" placeholder="Answer" required></textarea>
+                        </div>
+                        <div id="add-faq-btn-div">
+                            <button class="button" type="submit">ADD FAQ</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Section / End -->                    
+                    <div style="clear:both;"></div>
+                </div>
+                <!-- Section / End -->
+                    
+            </form>
+            <br>
+        </div>
+        <!-- Switcher ON-OFF Content / End -->
+    </div>
+    <!-- Section / End -->
+</div>
+<!-- Content / End -->
+<!-- Container / End -->
+{% endblock content %}
+
+{% block scripts %}
+<!-- DropZone | Documentation: http://dropzonejs.com -->
+<script type="text/javascript" src="{% static 'scripts/dropzone.js' %}"></script>
+
+
+<!-- Style Switcher
+================================================== -->
+<script src="{% static 'scripts/switcher.js' %}"></script>
+
+<div id="style-switcher">
+    <h2>Color Switcher <a href="#"><i class="sl sl-icon-settings"></i></a></h2>
+
+    <div>
+        <ul class="colors" id="color1">
+            <li><a href="#" class="main" title="Main"></a></li>
+            <li><a href="#" class="blue" title="Blue"></a></li>
+            <li><a href="#" class="green" title="Green"></a></li>
+            <li><a href="#" class="orange" title="Orange"></a></li>
+            <li><a href="#" class="navy" title="Navy"></a></li>
+            <li><a href="#" class="yellow" title="Yellow"></a></li>
+            <li><a href="#" class="peach" title="Peach"></a></li>
+            <li><a href="#" class="beige" title="Beige"></a></li>
+            <li><a href="#" class="purple" title="Purple"></a></li>
+            <li><a href="#" class="celadon" title="Celadon"></a></li>
+            <li><a href="#" class="red" title="Red"></a></li>
+            <li><a href="#" class="brown" title="Brown"></a></li>
+            <li><a href="#" class="cherry" title="Cherry"></a></li>
+            <li><a href="#" class="cyan" title="Cyan"></a></li>
+            <li><a href="#" class="gray" title="Gray"></a></li>
+            <li><a href="#" class="olive" title="Olive"></a></li>
+        </ul>
+    </div>
+
+</div>
+<!-- Style Switcher / End -->
+
+{% endblock scripts %}

@@ -1,0 +1,137 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<!-- Meta Tags Start -->
+{% block meta_description %}
+"Service Creation of Common Service Centres (CSC) in India"
+{% endblock meta_description %}
+
+{% block meta_og_description %}
+"Service Creation of Common Service Centres (CSC) in India"
+{% endblock meta_og_description %}
+<!-- Meta Tags Start -->
+
+{% block content %}
+
+<!-- Titlebar -->
+<div id="titlebar">
+	<div class="row">
+		<div class="col-md-12">
+			<h2>Add Service</h2>
+			<!-- Breadcrumbs -->
+			<nav id="breadcrumbs">
+				<ul>
+					<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+					<li><a href="{% url 'csc_admin:services' %}">Services</a></li>						
+					<li>Add</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+
+{% include "admin_components/message.html" %}
+
+<div class="row">
+	<div class="row">
+		<div class="col-lg-12">
+			<div id="add-listing" class="separated-form">
+				<!-- Section -->
+				<form method="POST" action="{% url 'csc_admin:create_service' %}" enctype="multipart/form-data" class="add-listing-section">
+					{% csrf_token %}
+					<!-- Headline -->
+					<div class="add-listing-headline">
+						<h3><i class="sl sl-icon-doc"></i> Service Informations</h3>
+					</div>
+
+					<!-- Title -->
+					<div class="row with-forms">
+						<div class="col-md-6">
+							<h5>Service Name <i class="tip" data-tip-content="Name of service"></i></h5>
+							<input class="search-field" type="text" name="name" placeholder="Name of Service"/ required>
+							</div>                							
+							<div class="col-md-6">
+								<h5>Service Image <i class="tip" data-tip-content="Image of service"></i></h5>
+								<input class="search-field" type="file" name="image"/>
+							</div>                							
+					</div>
+				
+					<!-- <div class="row submit-section">
+						<div class="col-md-6">
+							<h5>Service Image <i class="tip" data-tip-content="Image of service"></i></h5>
+							<div class="dropzone dz-clickable" id="my-dropzone">
+								<div class="dz-default dz-message"><span><i class="sl sl-icon-plus"></i> Click here or drop files to upload</span></div>
+							</div>
+						</div>
+					</div> -->
+					<div class="row with-forms">
+						<div class="col-md-12">
+						<h5>Service Description <i class="tip" data-tip-content="Description of service"></i></h5>								
+						{{ form.media }}
+						{{ form.description }}
+						</div>
+					</div>
+					<br>
+					<div class="row with-forms text-center">
+						<button type="submit" class="button">Create Service</button>
+					</div>						
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<!-- DropZone | Documentation: http://dropzonejs.com -->
+{% comment %} <script type="text/javascript" src="{% static 'scripts/dropzone.js' %}"></script> {% endcomment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/min/dropzone.min.js"></script>
+
+
+<!-- <script>
+    Dropzone.autoDiscover = false; // Prevent Dropzone from automatically attaching to all elements
+
+document.addEventListener("DOMContentLoaded", function() {
+	var myDropzone = new Dropzone("#my-dropzone", {
+		url: "{% url 'csc_admin:create_service' %}", // Replace with your form action URL
+		paramName: "image", // The name that will be used to transfer the file
+		maxFilesize: 2, // MB
+		acceptedFiles: '.jpg, .jpeg, .png',
+		addRemoveLinks: true, // Optional: Enable removing files from the dropzone
+		autoProcessQueue: false, // Disable automatic file processing
+		dictDefaultMessage: "Drop files here or click to upload", // Optional: Custom default message
+		init: function() {
+			this.on("addedfile", function(file) {
+				// Optional: Do something when a file is added
+				console.log('File added:', file);
+			});
+
+			// Ensure the submit button exists in the DOM before adding event listener
+			var submitButton = document.querySelector("#submit-button");
+			if (submitButton) {
+				submitButton.addEventListener("click", function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					
+					// Append the form data to the Dropzone's formData
+					myDropzone.on("sending", function(file, xhr, formData) {
+						formData.append("name", document.querySelector('input[name="name"]').value);
+						formData.append("description", document.querySelector('textarea[name="description"]').value);
+					});
+
+					myDropzone.processQueue(); // Process all files in the queue
+				});
+			}
+
+			this.on("success", function(file, response) {
+				// Handle successful file upload if needed
+				console.log('File uploaded successfully:', file, response);
+			});
+		}
+	});
+});
+</script> -->
+
+{% endblock scripts %}

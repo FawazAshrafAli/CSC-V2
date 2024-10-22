@@ -1,0 +1,22 @@
+#current-service-image a {
+    color: blue;
+}
+
+#current-service-image button {
+    color: black;
+    background-color: #fff;
+    font-size: 13px;
+    padding: 0px 10px;
+    border: none;
+    box-shadow: 0px 0px 3px #777;
+    border-radius: 5%;
+}
+
+#current-service-image button:hover {
+    color: #fff;
+    background-color: darkred;
+}
+
+.text-primary {
+    color: blue;
+}

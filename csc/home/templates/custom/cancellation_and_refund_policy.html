@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% block title_prefix %}Cancellation &amp; Refund Policy{% endblock title_prefix %}
+{% block content %}
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+
+				<h2>Cancellation &amp; Refund Policy</h2>
+
+
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url 'home:view' %}">Home</a></li>
+						<li>Cancellation &amp; Refund Policy</li>
+					</ul>
+				</nav>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="container">
+
+	<div class="row">
+		<div class="col-md-12">
+            <div class="content-container">
+                <p class="content-text"><strong>No cancellations &amp; Refunds are entertained</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

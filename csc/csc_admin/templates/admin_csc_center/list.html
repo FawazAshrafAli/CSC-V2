@@ -1,0 +1,326 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}CSC Center{% endblock title_prefix %}
+
+{% block content %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_csc_center/css/admin_csc_center.css' %}">
+
+<style>
+    #center-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+    #center-table tr {
+        border-bottom: 1px solid silver;
+    }
+
+    #center-table tbody tr {
+        cursor: pointer;
+        height: 50px;
+    }
+
+    #center-table tbody tr:hover {
+        color: blue;
+    }
+
+    #center-table td:first-child,
+    #center-table th:first-child,
+    #td-image,
+    #th-image {
+        text-align: center;
+    }
+
+    #center-table img {
+        padding: 3px 0;
+        height: 50px;
+    }
+
+    #center-table button {
+        height: 0;
+        padding: 0 10px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+{% endblock styles %}
+
+    <!-- Titlebar -->
+    <div id="titlebar">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>CSC Centers</h2>
+                <!-- Breadcrumbs -->
+                <nav id="breadcrumbs">
+                    <ul>
+                        <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                        <li>CSC Center</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% include "components/message.html" %}
+    </div>
+
+    <div class="row">
+
+        <!-- Delete Confirmation Box Start-->
+        <div id="delete-confirmation-box" style="display: none;">
+            <div class="modal-content">
+                <h4><span>Deleting</span> CSC Center <span id="csc-name" style="color: black"></span> . . .</h4>
+                <h5>Are you sure?</h5>
+            </div>
+            <br>
+            <form method="GET" action="#">
+                <button type="submit" id="confirm-deletion-btn">Delete</button>
+                <button class="cancel-btn" type="button" id="cancel-deletion-btn">Cancel</button>
+            </form>
+        </div>
+        <!-- Delete Confirmation Box Start-->        
+
+        <div class="col-lg-12 col-md-8 padding-right-30">
+            <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <h4>CSC Centers</h4>
+                    </div>
+                    <div class="col-lg-9">
+                        <!-- Sort by -->
+                        <div class="sort-by">
+                            <div class="sort-by-select">
+                                <select data-placeholder="List By Block" id="block-filter-dropdown" class="chosen-select-no-single">
+                                    <option value="" hidden disabled selected>List By Block</option>
+                                    {% for block_obj in blocks %}
+                                    <option value="{{block_obj.pk}}" {% if block_obj.pk == block_id %} selected {% endif %}>{{block_obj.block}}</option>                                              
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Sort by / End -->
+
+
+                        <!-- Sort by -->
+                        <div class="sort-by">
+                            <div class="sort-by-select">
+                                <select data-placeholder="List By District" id="district-filter-dropdown" class="chosen-select-no-single">
+                                    <option value="" hidden disabled selected>List By District</option>                                    
+                                    {% for district_obj in districts %}
+                                    <option value="{{district_obj.pk}}" {% if district_obj.pk == district %} selected {% endif %}>{{district_obj.district}}</option>                                              
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Sort by / End -->
+
+
+                        <!-- Sort by -->
+                        <div class="sort-by">
+                            <div class="sort-by-select">
+                                <select data-placeholder="List By State" id="state-filter-dropdown" class="chosen-select-no-single">
+                                    <option value="" hidden disabled selected>List By State</option>
+                                    {% for state_obj in states %}
+                                    <option value="{{state_obj.pk}}" {% if state_obj.pk == state %} selected {% endif %}>{{state_obj.state}}</option>                                              
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Sort by / End -->
+                    </div>
+                </div>
+                <br>
+                <div class="table-responsive">
+                    <table id="center-table">
+                        <thead>
+                            <tr>
+                                <th>&nbsp;No</th>
+                                <th>&nbsp;Name</th>
+                                <th>Owner</th>
+                                <th>Location</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="center-tbody">
+                            {% for center in centers %}
+                            <tr class="-items" onclick="window.location='{% url 'csc_admin:csc_center' center.slug %}'" id="tbody-tr-{{center.pk}}">
+                                <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
+                                <td><small>&nbsp;{{ center.name }}</small></td>
+                                <td><small>{{center.owner}}</small></td>
+                                <td><small>{{center.partial_address}}</small></td>
+                                <td><small>{{center.email}}</small></td>
+                                <td><small>{{center.contact_number}}</small></td>                                                        
+                                <style>
+                                    #tbody-tr-{{center.pk}}:hover #remove-btn-{{center.pk}} {
+                                        height: 30px;
+                                    }
+                                </style>
+                                <td style="position: relative;">
+                                    <div style="position: absolute; right: 50px; top: 10px;">                                    
+                                        <button class="button gray remove-btn" type="button" style="display: flex; flex-direction: row; justify-content: space-around; align-items: center;"
+                                            onclick="event.stopPropagation(); toggleCscDeletion(`{{center.slug}}`, `{{center.full_name}}`);"
+                                            id="remove-btn-{{center.pk}}"
+                                            ><i class="sl sl-icon-close"></i> Remove</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <!-- Pagination -->
+      <div class="clearfix"></div>
+      <div class="row" id="pagination-row">
+        <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+              <ul>
+                {% if page_obj.has_previous %}
+                <li>
+                  <a  href="?page={{ page_obj.previous_page_number }}" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+                </li>
+                {% endif %}            
+                <li><a href="#" id="first-page">{{ page_obj.number }}</a></li>                
+                {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+        <!-- Csc Posts / End -->        
+    </div>
+
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/"
+                target="_blank">Zentrix Technologies</a></div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+
+<script>
+    function toggleCscDeletion(cscSlug, cscName) {
+        $('#delete-confirmation-box form').prop('action', `/admin/delete_csc/${cscSlug}`);
+        $('#csc-name').html(`'${cscName}'`);
+        $('.close-btn').click();
+        $('#delete-confirmation-box').show();
+    };
+
+    $('.cancel-btn').click(function () {
+        $('#delete-confirmation-box').hide();
+        $('.close-btn').click();
+    })
+</script>
+
+<script>
+    // Fetch csc centers that falls under the selected state
+    $(document).ready(() => {
+        $('#state-filter-dropdown, #district-filter-dropdown, #block-filter-dropdown').change(function () {
+            const currentDropdownId = event.target.parentElement.parentElement.parentElement.previousSibling.id;
+            const state = $('#state-filter-dropdown').val();
+            const district = $('#district-filter-dropdown').val();
+            const block = $('#block-filter-dropdown').val();
+            let data;
+
+            window.location = `/admin/csc_centers/${state ? state : 0}/${district ? district : 0}/${block ? block : 0}/`;
+
+            if (currentDropdownId == "state-filter-dropdown") {
+                data = {'state': state}
+            } else if (currentDropdownId == "district-filter-dropdown") {
+                data = {'state': state, 'district': district}
+            } else if (currentDropdownId == "block-filter-dropdown") {
+                data = {'state': state, 'district': district, 'block': block}
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: '/admin/csc_centers/',
+                dataType: 'json',
+                data : data,
+                success: response => {
+                    if (currentDropdownId == "state-filter-dropdown") {                        
+                        $('#district-filter-dropdown').html('<option value="" hidden disabled selected>List By District</option>');
+                        response.districts.forEach(district => {
+                            let districtHtml = `<option value="${district.id}">${district.district}</option>`
+                            $('#district-filter-dropdown').append(districtHtml);
+                        })
+                        $('#district-filter-dropdown').trigger('chosen:updated');
+                    }
+
+                    if (currentDropdownId == "district-filter-dropdown") {
+                        $('#block-filter-dropdown').html('<option value="" hidden disabled selected>List By Block</option>');
+                        response.blocks.forEach(block => {
+                            let blockHtml = `<option value="${block.id}">${block.block}</option>`
+                            $('#block-filter-dropdown').append(blockHtml);
+                        })
+                        $('#block-filter-dropdown').trigger('chosen:updated');
+                    }
+
+                    $('#center-tbody').html('');
+                    response.centers.forEach(center => {
+                        let html = `<tr class="-items" onclick="window.location='/admin/csc_center/${center.slug}'" id="tbody-tr-${center.pk}">
+                                    <td><small>&nbsp;${ center.count }</small></td>
+                                    <td><small>&nbsp;${ center.name }</small></td>
+                                    <td><small>&nbsp;${ center.owner }</small></td>
+                                    <td><small>${center.partial_address}</small></td>
+                                    <td><small>${center.email}</small></td>
+                                    <td><small>${center.contact_number}</small></td>                                                        
+                                    <style>
+                                        #tbody-tr-${center.pk}:hover #remove-btn-${center.pk} {
+                                            height: 30px;
+                                        }
+                                    </style>
+                                    <td style="position: relative;">
+                                        <button class="button gray remove-btn" type="button"
+                                            onclick="event.stopPropagation(); toggleCscDeletion('${center.slug}', '${center.full_name}');"
+                                            id="remove-btn-${center.pk}"
+                                            style="position: absolute; right: 50px; top: 10px;">Remove</boÄutton>
+                                    </td>
+                                    <!-- <td><button class="button gray" onclick="event.stopPropagation(); toggleProductDeletion('${center.slug}', '${center.name}')">Remove</button></td> -->
+                                </tr>`
+                        $('#center-tbody').append(html);                        
+                    })
+                    // paginator();
+                },
+                error: error => console.error('Error: ', error),
+            })
+        })
+    })
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $("#state-filter-dropdown").chosen({
+      // width: '100%', // Adjust width as needed
+      search_contains: true, // Enable search function
+      no_results_text: 'No results found' // Custom text for no results
+    });
+
+    // Trigger chosen:updated if options are updated dynamically
+    // Optional: remove if not updating options dynamically
+    $("#state-filter-dropdown").trigger('chosen:updated');
+  });
+</script>
+
+{% endblock scripts %}

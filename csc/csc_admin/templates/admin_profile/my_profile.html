@@ -1,0 +1,129 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %} My Profile {% endblock title_prefix %}
+
+{% block styles %}
+<style>
+    {% comment %} #profile-form-submit-btn {
+        pointer-events: none;
+    } {% endcomment %}
+</style>
+{% endblock styles %}
+
+{% block content %} 
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>My Profile</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                    <li>My Profile</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% include "components/message.html" %}
+</div>
+
+<div class="row">
+
+    <!-- Profile -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box margin-top-0">
+            <h4 class="gray">Profile Details</h4>
+            <form class="dashboard-list-box-static" method="post" action="{% url 'csc_admin:update_profile' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Avatar -->
+                <div class="edit-profile-photo">
+                    <img src="{% if user.image %} {{user.image.url}} {% else %} {% static 'images/user-avatar.jpg' %} {% endif %}" id="dp" alt="Profile Picture">
+                    <div class="change-photo-btn">
+                        <div class="photoUpload">
+                            <span><i class="fa fa-upload"></i> Upload Photo</span>
+                            <input type="file" class="upload" name='image' id="upload-dp"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="my-profile">
+
+                    <label>Your Name</label>
+                    <input value="{% if user.full_name %}{{user.full_name}}{% endif %}" type="text" name="name" placeholder="Your Name">
+
+                    <label>Phone</label>
+                    <input value="{% if user.phone %}{{user.phone}}{% endif %}" type="text" name="phone" placeholder="Phone Number">
+
+                    <label>Email</label>
+                    <input value="{% if user.email %}{{user.email}}{% endif %}" type="text" name="email" id="email-input" placeholder="tom@example.com" required>
+
+                    <label>Notes</label>
+                    <textarea name="notes" id="notes" cols="30" rows="10" name="notes" placeholder="Notes">{% if user.notes %} {{user.notes}} {% endif %}</textarea>
+                </div>
+
+                <button class="button margin-top-15" type="submit" id="profile-form-submit-btn">Save Changes</button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="col-lg-6 col-md-12">
+        <div class="dashboard-list-box margin-top-0">
+            <h4 class="gray">Change Password</h4>
+            <div class="dashboard-list-box-static">
+
+                <!-- Change Password -->
+                <form class="my-profile" method="post" action="{% url 'csc_admin:change_password' %}">
+                    {% csrf_token %}
+                    <label class="margin-top-0">Current Password</label>
+                    <input type="password" name="current_password" placeholder="Current Password" required>
+
+                    <label>New Password</label>
+                    <input type="password" name="new_password" placeholder="New Password" required>
+
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+
+                    <button class="button margin-top-15" type="submit">Change Password</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+    </div>
+
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(() => {
+        // Update dp preview and enable submit button
+        $('#upload-dp').on('change', function () {
+            $('#profile-form-submit-btn').css('pointer-events', 'auto');
+
+            const file = this.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    $('#dp').prop('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });        
+    });
+
+</script>
+{% endblock scripts %}

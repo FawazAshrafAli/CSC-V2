@@ -1,0 +1,1055 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+
+<!-- Basic Page Needs
+================================================== -->
+<title>{% block title_prefix %}{% endblock title_prefix %} - Common Service Centres (CSC) in India</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/main-color.css' %}" id="colors">
+
+<link rel="shortcut icon" href="{% static 'images/Favicon.png' %}">
+
+<link rel="stylesheet" href="{% static 'w3/admin_base/css/admin_base.css' %}">
+
+<!-- W3 -->
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+{% block styles %}{% endblock styles %}
+</head>
+
+<body>
+<!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header Container
+================================================== -->
+<header id="header-container" class="fixed fullwidth dashboard">
+
+	<!-- Header -->
+	<div id="header" class="not-sticky">
+		<div class="container">
+			
+			<!-- Left Side Content -->
+			<div class="left-side">
+				
+				<!-- Logo -->
+				<div id="logo">
+					<a href="{% url 'home:view' %}"><img src="{% static 'images/logo.png' %}" alt="CSC Centers in India"></a>
+					<a href="{% url 'home:view' %}" class="dashboard-logo"><img src="{% static 'images/logo2.png' %}" alt=""></a>
+				</div>
+
+				<!-- Mobile Navigation -->
+				<div class="mmenu-trigger">
+					<button class="hamburger hamburger--collapse" type="button">
+						<span class="hamburger-box">
+							<span class="hamburger-inner"></span>
+						</span>
+					</button>
+				</div>
+
+				<!-- Main Navigation -->
+				 <nav id="navigation" class="style-1" itemscope="" itemtype="http://www.schema.org/SiteNavigationElement">
+					<ul id="responsive">
+
+						<li><a href="{% url 'csc_admin:home' %}" {% if home_page %} class="current" {% endif %}>Home</a></li>
+
+						<li><a href="{% url 'csc_admin:csc_center_requests' %}" {% if csc_center_page %} class="current" {% endif %}>CSC Centers</a></li>
+
+						<li><a href="{% url 'csc_admin:blogs' %}" {% if blog_page %} class="current" {% endif %}>Blog</a></li>
+
+						<li><a href="{% url 'csc_admin:services' %}" {% if service_page %} class="current" {% endif %}>Services</a></li>
+
+						<li><a href="{% url 'csc_admin:products' %}" {% if product_page %} class="current" {% endif %}>Products</a></li>
+
+                        <li><a href="{% url 'csc_admin:posters' %}" {% if poster_page %} class="current" {% endif %}>Posters</a></li>
+
+                        <li><a href="{% url 'csc_admin:faqs' %}" {% if faq_page %} class="current" {% endif %}>FAQ</a></li>
+
+                        <li><a href="{% url 'csc_admin:enquiries' %}" {% if enquiry_page %} class="current" {% endif %}>Enquiries</a></li>
+					</ul>
+				</nav>
+				<div class="clearfix"></div>
+				<!-- Main Navigation / End -->
+				
+			</div>
+			<!-- Left Side Content / End -->
+
+			<!-- Right Side Content / End -->
+			<div class="right-side">
+				<!-- Header Widget -->
+				<div class="header-widget">
+					
+					<!-- User Menu -->
+					<div class="user-menu">
+						<div class="user-name"><span><img id="user-dp" src="{% if request.user.image %} {{request.user.image.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="User DP"></span> {% if request.user %} {{ request.user.username }} {% else %} My Account {% endif %}</div>
+						<ul>
+							<li><a href="{% url 'csc_admin:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>							
+							<li><a href="{% url 'authentication:logout' %}"><i class="sl sl-icon-power"></i> Logout</a></li>
+						</ul>
+					</div>
+					
+					<a href="{% url 'csc_admin:add_csc' %}" class="button border with-icon">ADD CSC CENTER <i class="sl sl-icon-plus"></i></a>
+				</div>
+				<!-- Header Widget / End -->
+			</div>
+			<!-- Right Side Content / End -->
+
+		</div>
+	</div>
+	<!-- Header / End -->
+
+</header>
+<div class="clearfix"></div>
+<!-- Header Container / End -->
+
+
+<!-- Dashboard -->
+<div id="dashboard">
+
+	<!-- Navigation
+	================================================== -->
+
+	<!-- Responsive Navigation Trigger -->
+	<a href="#" class="dashboard-responsive-nav-trigger"><i class="fa fa-reorder"></i> Dashboard Navigation</a>
+
+	<div class="dashboard-nav">
+		<div class="dashboard-nav-inner">
+
+			<ul data-submenu-title="Main">
+				<li {% if home_page %} class="active" {% endif %}><a href="{% url 'csc_admin:home' %}"><i class="sl sl-icon-home"></i> Home</a></li>
+				<li {% if csc_center_page %} class="active" {% endif %}><a><i class="fa fa-building"></i> CSC Centers</a>
+					<ul>
+                        <li><a href="{% url 'csc_admin:csc_center_requests' %}">CSC Center Requests</a></li>
+						<li><a href="{% url 'csc_admin:csc_centers' %}">List CSC Center</a></li>
+                        <li><a href="{% url 'csc_admin:csc_owners' %}">List Owners</a></li>
+						<li><a href="{% url 'csc_admin:add_csc' %}">Add CSC Center</a></li>
+                        <li><a href="{% url 'csc_admin:approved_csc_centers' %}">Approved Center Requests</a></li>
+                        <li><a href="{% url 'csc_admin:returned_csc_centers' %}">Returned Center Requests</a></li>
+                        <li><a href="{% url 'csc_admin:rejected_csc_centers' %}">Rejected Center Requests</a></li>
+                        <li><a href="{% url 'csc_admin:payment_histories' %}">Payment History</a></li>
+					</ul>	
+				</li>
+
+				<li {% if blog_page %} class="active" {% endif %}><a><i class="fa fa-book"></i> Blog</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:blogs' %}">List Blog</a></li>
+						<li><a href="{% url 'csc_admin:create_blog' %}">Add Blog</a></li>
+                        <li><a href="{% url 'csc_admin:blog_categories' %}">List Blog Categories</a></li>
+					</ul>	
+				</li>
+
+				<li {% if service_page %} class="active" {% endif %} ><a><i class="fa fa-handshake"></i> Services</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:services' %}">List Services</a></li>
+						<li><a href="{% url 'csc_admin:create_service' %}">Add Service</a></li>	
+                        <li><a href="{% url 'csc_admin:service_enquiries' %}">Service Enquiries</a></li>						
+					</ul>	
+				</li>
+
+				<li {% if product_page %} class="active" {% endif %} ><a><i class="fa fa-box"></i> Products</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:create_product' %}">Add Product</a></li>
+						<li><a href="{% url 'csc_admin:products' %}">List Products</a></li>
+                        <li><a href="{% url 'csc_admin:add_product_category' %}">Add Product Category</a></li>						
+                        <li><a href="{% url 'csc_admin:product_categories' %}">List Product Categories</a></li>
+                        <li><a href="{% url 'csc_admin:product_enquiries' %}">Product Enquiries</a></li>
+                        
+					</ul>	
+				</li>
+
+                <li {% if poster_page %} class="active" {% endif %} ><a><i class="fa fa-image"></i> Posters</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:posters' %}">List Posters</a></li>
+						<li><a href="{% url 'csc_admin:create_poster' %}">Add Posters</a></li>						
+					</ul>	
+				</li>
+
+                <li {% if faq_page %} class="active" {% endif %} ><a><i class="fa fa-question"></i> FAQ</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:faqs' %}">List FAQ</a></li>
+						<li><a href="{% url 'csc_admin:add_faq' %}">Add FAQ</a></li>						
+					</ul>	
+				</li>
+
+                <li {% if enquiry_page %} class="active" {% endif %}><a><i class="fa fa-question"></i> Enquiries</a>
+					<ul>
+						<li><a href="{% url 'csc_admin:enquiries' %}">List Enquiries</a></li>
+						<li><a href="{% url 'csc_admin:centers_enquiries' %}">List CSC Centers Enquiries</a></li>						
+					</ul>	
+				</li>
+			</ul>
+            
+            <ul data-submenu-title="Components">
+                <li><a><i class="fa fa-map"></i> Locations</a>
+					<ul>
+						<li id="toggle-state-pop-up"><a href="#">States</a></li>
+						<li id="toggle-district-pop-up"><a href="#">Add Districts</a></li>
+						<li id="toggle-block-pop-up"><a href="#">Add Blocks</a></li>
+					</ul>	
+				</li>
+
+				<li><a><i class="fa fa-puzzle-piece"></i> CSC Components</a>
+					<ul>
+						<li id="toggle-name-type-pop-up"><a href="#">Name Type</a></li>
+						<li id="toggle-keyword-pop-up"><a href="#">Keywords</a></li>
+                        <li id="toggle-price-pop-up"><a href="#">Price</a></li>
+					</ul>	
+				</li>
+            </ul>
+
+			<ul data-submenu-title="Account">
+				<li {% if profile_page %} class="active" {% endif %} ><a href="{% url 'csc_admin:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>
+				<li><a href="{% url 'authentication:logout' %}"><i class="sl sl-icon-power"></i> Logout</a></li>
+			</ul>
+			
+		</div>
+	</div>
+	<!-- Navigation / End -->
+
+	<div class="dashboard-content">
+		<!-- Pop Up Box Start -->
+        <div id="pop-up-box">
+            <h3 id="pop-up-box-heading"></h3>
+            <button class="close-btn" aria-label="Close" title="Close">&times;</button>
+            <span id="pop-up-msg"></span>
+            <form id="pop-up-form">
+    
+            </form>
+        </div>
+        <!-- Pop Up Box Start -->
+         <script>
+            
+         </script>
+	{% block content %}
+	{% endblock content %}
+	</div>
+
+</div>
+<!-- Dashboard / End -->
+
+
+</div>
+<!-- Wrapper / End -->
+
+
+<!-- Scripts
+================================================== -->
+<script type="text/javascript" src="{% static 'scripts/jquery-3.6.0.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-migrate-3.3.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/mmenu.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/chosen.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/slick.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/rangeslider.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/waypoints.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/counterup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery-ui.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/tooltips.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/custom.js' %}"></script>
+
+
+<!-- w3 -->
+<script>
+	$(document).ready(() => {
+		setTimeout(() => {
+			$('#message-div').hide();
+		}, 3000);
+	})
+</script>
+
+<!-- Pop Up Scripts -->
+<script>
+
+    $(document).ready(() => {
+
+        $(document).on('click', '.close-btn, #pop-up-done-btn', () => {
+            $('#pop-up-box').hide();
+            $('#delete-confirmation-box').hide();
+        })
+
+        $(document).on('keydown', (event) => {
+            if (event.key === 'Escape') {
+                $('#pop-up-box').hide();
+            };
+        });
+
+        // To populate select with state data on toggling state btn
+        function getStates(e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'get',
+                url: '/admin/get_all_states/',
+                dataType: 'json',
+                success: data => {
+                    if (data.states && Array.isArray(data.states)) {
+                        $('#pop-up-dropdown').html('');
+                        if ($('#state-dropdown-input')) {
+                            $('#state-dropdown-input').html('<option value="" hidden disabled selected>Select State</option')
+                        };
+                        data.states.forEach(state => {
+                            let html = `<option value="${state.id}">${state.state}</option>`;
+                            $('#pop-up-dropdown').append(html);
+                            if ($('#state-dropdown-input')) {
+                                $('#state-dropdown-input').append(html);
+                            };
+                        });
+                    } else {
+                        $('#pop-up-dropdown').html('');
+                        if ($('#state-dropdown-input')) {
+                            $('#state-dropdown-input').html('')
+                        };
+                    };
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        };
+
+        $('#toggle-state-pop-up').click(() => {
+            getStates(event);
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('States');
+            $('#pop-up-box').show();
+        });
+
+        // To populate select with district data on toggling district btn
+        function getDistricts(e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'get',
+                url: '/admin/get_all_districts/',
+                dataType: 'json',
+                success: data => {
+                    if (data.districts && Array.isArray(data.districts)) {
+                        $('#pop-up-dropdown').html('');
+                        if ($('#district-dropdown-input')) {
+                            $('#district-dropdown-input').html('<option value="" hidden disabled selected>Select District</option')
+                        }
+                        data.districts.forEach(district => {
+                            let html = `<option value="${district.id}">${district.district}</option>`;
+                            $('#pop-up-dropdown').append(html);
+                            if ($('#district-dropdown-input')) {
+                                $('#district-dropdown-input').append(html);
+                            }
+                        });
+                    } else {
+                        $('#pop-up-dropdown').html('');
+                        if ($('#district-dropdown-input')) {
+                            $('#district-dropdown-input').html('')
+                        }
+                    };
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        }
+
+        $('#toggle-district-pop-up').click(() => {
+            getDistricts(event);
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('Districts');
+            $('#pop-up-box').show();
+        });
+
+        // To populate select with block data on toggling block btn
+        function getBlocks(e) {
+            e.preventDefault();
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('Blocks');
+
+            $.ajax({
+                type: 'get',
+                url: '/admin/get_all_blocks/',
+                dataType: 'json',
+                success: data => {
+                    if (data.blocks && Array.isArray(data.blocks)) {
+                        $('#pop-up-dropdown').html('');
+                        data.blocks.forEach(block => {
+                            let html = `<option value="${block.id}">${block.block}</option>`;
+                            $('#pop-up-dropdown').append(html);
+                        });
+                    } else {
+                        $('#pop-up-dropdown').html('');
+                    };
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        };
+
+        $('#toggle-block-pop-up').click(() => {
+            getBlocks(event);
+            $('#pop-up-box').show();
+        });
+
+        // To populate select with name type data on toggling block btn
+        function getNameTypes(e) {
+            e.preventDefault();
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('Name Types');
+
+            $.ajax({
+                type: 'get',
+                url: '/admin/get_name_types/',
+                dataType: 'json',
+                success: data => {
+                    if (data.name_types && Array.isArray(data.name_types)) {
+                        $('#pop-up-dropdown').html('');
+                        data.name_types.forEach(name_type => {
+                            let html = `<option value="${name_type.slug}">${name_type.type}</option>`;
+                            $('#pop-up-dropdown').append(html);
+                        });
+                    } else {
+                        $('#pop-up-dropdown').html('');
+                    };
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        };
+
+        $('#toggle-name-type-pop-up').click(() => {
+            getNameTypes(event);
+            $('#pop-up-box').show();
+        });
+
+        // To populate select with keyword data on toggling block btn
+        function getKeywords(e) {
+            e.preventDefault();
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('Keywords');
+
+            $.ajax({
+                type: 'get',
+                url: '/admin/get_csc_keywords/',
+                dataType: 'json',
+                success: data => {
+                    if (data.keywords && Array.isArray(data.keywords)) {
+                        $('#pop-up-dropdown').html('');
+                        data.keywords.forEach(keyword => {
+                            let html = `<option value="${keyword.slug}">${keyword.keyword}</option>`;
+                            $('#pop-up-dropdown').append(html);
+                        });
+                    } else {
+                        $('#pop-up-dropdown').html('');
+                    };
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        };
+
+        $('#toggle-keyword-pop-up').click(() => {
+            getKeywords(event);
+            $('#pop-up-box').show();
+        });
+
+        // To populate with price data on toggling price btn
+        function defaultPriceForm() {
+            $('#pop-up-form').html(`
+                <div class="form-group d-flex justify-content-end">
+                    <div class="d-flex justify-content-between align-items-center" id="offer-form-group">
+                        <input type="checkbox" name="offer" id="offer-input">
+                        <label for="offer" class="mb-0;">Offer Price</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (&#8377;)<span class="required-field">*</span></label>
+                    <input type="number" name="price" id="price-input" placeholder="Enter Price" />
+                </div>
+                <div class="row" id="date-input-div">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="from">From</label>
+                            <input type="date" name="from" id="from-input">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="to">To</label>
+                            <input type="date" name="to" id="to-input">
+                        </div>  
+                    </div>
+                </div>
+                <div class="form-group" id="description-input-div">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description-input" placeholder="Description"></textarea>
+                </div>
+                <div id="pop-up-add-btn-div">
+                    <button class="save-price-btn" id="pop-up-add-btn" type="button">Save Price</button>
+                    <button id="pop-up-done-btn" type="button">Done</button>
+                </div>
+            `);                    
+        }
+
+        function getPrice(e) {
+            e.preventDefault();
+            popUpDefaultView();
+            $('#pop-up-edit-toggle').hide();
+            $('#pop-up-delete-toggle').hide();
+            $('#pop-up-box-heading').html('Price');
+
+            $.ajax({
+                type: 'get',
+                url: '/payment/get_price/',
+                dataType: 'json',
+                success: response => {
+                    defaultPriceForm();                    
+                    $('#pop-up-add-btn').show();
+                    if (response.price) {
+                        $('#price-input').val(response.price);
+                    }
+                    if (response.from_date && response.to_date) {
+                        $('#offer-input').prop('checked', true);
+                        $('#date-input-div').show();
+                        $('#from-input').val(response.from_date);
+                        $('#to-input').val(response.to_date);
+                    }                
+                    if (response.description) {
+                        $('#description-input-div').show();
+                        $('#description-input').html(response.description);
+                    }
+
+                    let previous_price = $('#price-input').val();
+                    let previous_from = $('#from-input').val();
+                    let previous_to = $('#to-input').val();
+                    let previous_description = $('#description-input').val();
+                },
+                error: (jqXHR, textStatus, errorThrow) => {
+                    console.error("Error: ", textStatus, errorThrow);
+                }
+            });
+        };
+
+        $('#toggle-price-pop-up').click(() => {
+            getPrice(event);
+            $('#pop-up-box').show();
+
+            
+            $("#pop-up-add-btn")
+        });        
+
+        // Return to the default pop up box
+        function popUpDefaultView() {
+            $('#pop-up-form').html(
+                `<select id="pop-up-dropdown" size=5>
+                    
+                </select>
+                <div id="pop-up-functions">
+                    <div id="pop-up-btns">
+                        <button id="pop-up-add-toggle" type="button">Add</button>
+                        <button id="pop-up-edit-toggle" type="button">Edit</button>
+                        <button id="pop-up-delete-toggle" type="button">Delete</button>
+                    </div>                    
+                </div>`
+            );
+        };        
+
+        // Toggle add item.
+        $(document).on('click', '#pop-up-add-toggle', function () {
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let basePlacehodler;
+            let baseInputIdPrefix;
+            if (currentItem === 'Name Type') {
+                endpoint = `add_name_type`;
+                basePlacehodler = `Name Type`;
+                baseInputIdPrefix = `name-type`;
+            } else {
+                endpoint = `add_${currentItem.toLowerCase()}`
+                basePlacehodler = `Name of ${currentItem}`
+                baseInputIdPrefix = currentItem.toLowerCase()
+            }
+            $('#pop-up-form').html('')
+            $('#pop-up-form').html(
+                `${(currentItem == 'District' || currentItem == 'Block') ? `<select id="state-dropdown-input"></select>` : ''}
+
+                ${currentItem == 'Block' ? `<select id="district-dropdown-input"><option value="" hidden disabled selected>Select district</option></select>` : ''}
+
+                ${(currentItem == 'District' || currentItem == 'Block') ? `<textarea name="${currentItem.toLowerCase()}s" id="${baseInputIdPrefix}s-textarea"  placeholder="${basePlacehodler}s"></textarea>`
+                    : `<input type="text" name="${currentItem.toLowerCase()}" id="${baseInputIdPrefix}-input" placeholder="${basePlacehodler}">`}                
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-add-btn" type="button">Add ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+            if ((currentItem == 'District' || currentItem == 'Block')) {
+                getStates(event);
+            }
+        });
+
+        $(document).on('change keyup', '#state-dropdown-input', function () {
+            popUpPopulateDistricts($(this).val());
+        });
+
+        // Return to the default item fetched form
+        $(document).on('click', '#pop-up-cancel-btn', function () {
+            popUpDefaultView();
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            if (currentItem === "State") {
+                getStates(event);
+            } else if (currentItem === "District") {
+                getDistricts(event);
+            } else if (currentItem === "Block") {
+                getBlocks(event);
+            } else if (currentItem === 'Name Type') {
+                getNameTypes(event);
+            } else if (currentItem === "Keyword") {
+                getKeywords(event);
+            }
+        });
+
+        // To show editing and deleting toggle button on option select
+        function showEditAndDelete() {
+            for (var i = 0; i < $('#pop-up-form select')[0].options.length; i++) {
+                if ($('#pop-up-form select')[0].options[i].selected == true) {
+                    $('#pop-up-edit-toggle').show();
+                    $('#pop-up-delete-toggle').show();
+                };
+            };
+        };
+
+        $(document).on('change keyup', '#pop-up-form select', showEditAndDelete);
+
+        // Ajax Form Submission
+        function submitPopUpForm(requestType, requestUrl, data = undefined, successCallback) {
+            $.ajax({
+                type: requestType,
+                url: requestUrl,
+                data: data,
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: response => {
+                    if (response.error) {
+                        if (successCallback) successCallback(false, response.error);
+                    } else if (response.status === 'success') {
+                        if (successCallback) successCallback(true, null);
+                    } else {
+                        if (successCallback) successCallback(false, 'Unknown error');
+                    }
+                },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    console.error('Error:', textStatus, errorThrown);
+                    if (successCallback) successCallback(false, textStatus);
+                }
+            });
+        };
+
+        // Create item Form submission
+        $(document).on('click', '#pop-up-add-btn', () => {
+            let defaultBtnValue = $('#pop-up-add-btn').html();
+            $('#pop-up-add-btn').html('Processing. . .').prop('disabled', true);
+
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let data;
+            let endpoint;
+            endpoint = `add_${currentItem.toLowerCase()}`;
+            if (currentItem === 'State') {
+                let state = $('#state-input').val();
+                state = state?.trim() || state;
+                data = { 'state': state }
+
+            } else if (currentItem === 'District') {
+                let state = $('#state-dropdown-input').val();
+                let districts = $('#districts-textarea').val();
+
+                state = state?.trim() || state;
+                districts = districts?.trim() || districts;
+                
+                data = {
+                    'state': state,
+                    'districts': districts
+                };
+
+            } else if (currentItem === 'Block') {
+                let state = $('#state-dropdown-input').val();
+                let district = $('#district-dropdown-input').val();
+                let blocks = $('#blocks-textarea').val();
+
+                state = state?.trim() || state;
+                district = district?.trim() || district;
+                blocks = blocks?.trim() || blocks
+                data = {
+                    'state': state,
+                    'district': district,
+                    'blocks': blocks
+                };
+            } else if (currentItem === 'Name Type') {
+                endpoint = `add_name_type`;
+                let name_type = $('#name-type-input').val();
+                name_type = name_type?.trim() || name_type
+                data = { 'name_type': name_type }
+            } else if (currentItem === 'Keyword') {
+                let keyword = $('#keyword-input').val();
+                keyword = keyword?.trim() || keyword
+                data = { 'keyword': keyword }
+
+            } else if (currentItem == 'Pric') {
+                let price = $('#price-input').val();
+                price = price?.trim() || price
+                data = { 'price': price }
+                if ($('#offer-input').is(':checked')) {
+                    data['from'] = $('#from-input').val().trim();
+                    data['to'] = $('#to-input').val().trim();
+                    data['description'] = $('#description-input').val().trim();
+                }
+                endpoint = `${endpoint}e`
+            }
+
+            submitPopUpForm('post', `/admin/${endpoint}/`, data, (result, error) => {
+                $('#pop-up-add-btn').html(defaultBtnValue).prop('disabled', false);
+                if (result) {
+                    let message;
+                    $('#pop-up-msg').show()
+                    if (currentItem == 'Pric') {
+                        message = `Updated ${currentItem}e`;
+                        // $('#pop-up-box').hide();
+                    } else {
+                        message = `Added New ${currentItem}`;
+                    }
+                    $('#pop-up-msg').html(message).css('color', 'green')
+                    if (currentItem === 'State') {
+                        $('#state-input').val('');
+
+                    } else if (currentItem === 'District') {
+                        $('#state-dropdown-input option').first().prop('selected', true);
+                        $('#districts-textarea').val('');
+
+                    } else if (currentItem === 'Block') {
+                        $('#state-dropdown-input option').first().prop('selected', true);
+                        $('#district-dropdown-input option').first().prop('selected', true);
+                        $('#blocks-textarea').val('');
+
+                    } else if (currentItem === 'Name Type') {
+                        $('#name-type-input').val('');
+
+                    } else if (currentItem === 'Keyword') {
+                        $('#keyword-input').val('');
+
+                    }
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }
+                // Pop up form submission msg timeout
+                setTimeout(() => {
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });
+        });
+
+        // Toggle Edit Item
+        $(document).on('click', '#pop-up-edit-toggle', function () {
+            let dropdownValue = $('#pop-up-dropdown').val();
+            let dropdownSelectedText = $('#pop-up-dropdown option:selected').text()
+
+            localStorage.setItem('dropdownValue', dropdownValue);
+
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let basePlacehodler;
+            let baseInputIdPrefix;
+
+            if (currentItem === 'Name Type') {
+                basePlacehodler = `Name Type`;
+                baseInputIdPrefix = `name-type`;
+            } else {
+                basePlacehodler = `Name of ${currentItem}`;
+                baseInputIdPrefix = currentItem.toLowerCase();
+            }
+
+            $('#pop-up-form').html(`<h4>Edit ${currentItem}</h4>`);
+            $('#pop-up-form').append(
+                `${(currentItem == 'District' || currentItem == 'Block') ? `<select id="state-dropdown-input" ></select>` : ''}
+
+                ${currentItem == 'Block' ? `<select id="district-dropdown-input"><option value="" hidden disabled selected>Select district</option></select>` : ''}
+
+                 
+                <input type="text" id="${baseInputIdPrefix}-input" value="${dropdownSelectedText}" placeholder="${basePlacehodler}">
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-edit-btn" type="button">Save ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+            if (currentItem === 'District' || currentItem === 'Block') {
+                getStates(event);
+
+                if (currentItem === 'Block') {
+                    getDistricts(event);
+                }
+
+                $.ajax({
+                    type: 'get',
+                    url: `/admin/get_${currentItem.toLowerCase()}_detail/${dropdownValue}`,
+                    dataType: 'json',
+                    success: response => {
+                        let stateDropdownInput = $('#state-dropdown-input');
+                        let stateDropdownOptions = stateDropdownInput.find('option');
+
+                        if (response.state_id) {
+                            stateDropdownOptions.each((index, option) => {
+                                if (option.value == response.state_id) {
+                                    $(option).prop('selected', true);
+                                }
+                            });
+                        }
+
+                        if (currentItem === 'Block') {
+                            let districtDropdownInput = $('#district-dropdown-input');
+                            let districtDropdownOptions = districtDropdownInput.find('option');
+
+                            if (response.district_id) {
+                                districtDropdownOptions.each((index, option) => {
+                                    if (option.value == response.district_id) {
+                                        $(option).prop('selected', true);
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    error: error => {
+                        console.error("Error: ", error);
+                    }
+                });
+            };
+        });
+
+        // Edit item Form submission
+        $(document).on('click', '#pop-up-edit-btn', () => {
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let data;
+            let endpoint = `edit_${currentItem.toLowerCase()}`;
+            let itemId = localStorage.getItem('dropdownValue');
+            if (currentItem === 'State') {
+                let state = $('#state-input').val();
+                state = state?.trim() || state;
+                data = { 'state': state }
+
+            } else if (currentItem === 'District') {
+                let state = $('#state-dropdown-input').val();
+                let district = $('#district-input').val();
+                state = state?.trim() || state;
+                district = district?.trim() || district
+                data = {
+                    'state': state,
+                    'district': district
+                };
+
+            } else if (currentItem === 'Block') {
+                let state = $('#state-dropdown-input').val();
+                let district = $('#district-dropdown-input').val();
+                let block = $('#block-input').val();
+                state = state?.trim() || state;
+                district = district?.trim() || district
+                block = block?.trim() || block
+                data = {
+                    'state': state,
+                    'district': district,
+                    'block': block
+                };
+            } else if (currentItem === 'Name Type') {
+                endpoint = 'edit_name_type'
+                let name_type = $('#name-type-input').val();
+                name_type = name_type?.trim() || name_type
+                data = { 'name_type': name_type }
+
+            } else if (currentItem === 'Keyword') {
+                let keyword = $('#keyword-input').val();
+                keyword = keyword?.trim() || keyword
+                data = { 'keyword': keyword }
+
+            }
+            submitPopUpForm('post', `/admin/${endpoint}/${itemId}`, data, (result, error) => {
+                if (result) {
+                    $('#pop-up-cancel-btn').click()
+                    $('#pop-up-form').prepend(`<h5 id="main-pop-up-msg"></h5>`)
+                    $('#main-pop-up-msg').html(`Updated ${currentItem}`).css('color', 'green')
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }
+                // Pop up form submission msg timeout
+                setTimeout(() => {
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });
+        });
+
+        // Toggle Delete Item
+        $(document).on('click', '#pop-up-delete-toggle', function () {
+            let dropdownValue = $('#pop-up-dropdown').val();
+            let dropdownSelectedText = $('#pop-up-dropdown option:selected').text()
+
+            localStorage.setItem('dropdownValue', dropdownValue);
+
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            $('#pop-up-form').html(`<h4>Deleting ${currentItem} <span class="required-field">'${dropdownSelectedText}'</span></h4>`);
+            $('#pop-up-form').append(
+                `<h5>Are you sure?</h5><br>
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-delete-btn" type="button">Delete ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+        });
+
+        // Delete item Form submission
+        $(document).on('click', '#pop-up-delete-btn', () => {
+            let currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let data;
+            let itemId = localStorage.getItem('dropdownValue');
+            let endpoint = `delete_${currentItem.toLowerCase()}`;
+            if (currentItem === 'Name Type') {
+                endpoint = 'delete_name_type'
+            }
+
+            submitPopUpForm('get', `/admin/${endpoint}/${itemId}`, data, (result, error) => {
+                if (result) {
+                    $('#pop-up-cancel-btn').click()
+                    $('#pop-up-form').prepend(`<h5 id="main-pop-up-msg"></h5>`)
+                    $('#main-pop-up-msg').html(`Deleted ${currentItem}`).css('color', 'green')
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }
+                // Pop up form submission msg timeout
+                setTimeout(() => {
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });
+        });
+
+        // popUpDefaultView();
+    });
+
+    // Hide or unhide special price inputs
+    $(document).on('click', '#offer-input', (e) => {
+        if (e.target.checked == true) {
+            $('#date-input-div, #description-input-div').show();
+            $('#from-input, #to-input').prop('disabled', false);
+            $('#description-input').prop('disabled', false);
+        } else {
+            $('#date-input-div, #description-input-div').hide();
+            $('#from-input, #to-input').prop('disabled', true).val('');
+            $('#description-input').prop('disabled', true).empty();
+        }
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function popUpPopulateDistricts(stateId) {
+    $.ajax({
+        type: 'get',
+        url: '/admin/get_pop_up_districts/',
+        data: {'state_id': stateId},
+        dataType : 'json',
+        success: data => {
+            console.log(data);
+
+            $('#district-dropdown').chosen('destroy');
+
+            if ($('#district-dropdown-input')) {
+                $('#district-dropdown-input').html(`<option label="Select District"></option>`);
+            }
+
+            $('#district-dropdown').html(`<option label="Select District"></option>`);
+            if (data.districts && Array.isArray(data.districts)) {
+                data.districts.forEach(district => {
+                    let html = `<option value="${district.id}">${district.district}</option>`
+
+                    if ($('#district-dropdown-input')) {
+                        $('#district-dropdown-input').append(html);    
+                    }
+
+                    $('#district-dropdown').append(html);
+                });
+            } else {
+                if ($('#district-dropdown-input')) {
+                    $('#district-dropdown-input').html(`<option label="Select District"></option>`);
+                }
+
+                $('#district-dropdown').html(`<option label="Select District"></option>`);
+            };
+
+            $('#district-dropdown').chosen();
+
+        },
+        error: (jqXHR, textStatus, errorThrow) => {
+            console.log('Error: ', textStatus, errorThrow);
+        }
+    });
+};
+
+$(document).ready(() => {
+    $('#state-dropdown-input').on('change keyup', function() {
+        const stateId = $(this).val();
+        popUpPopulateDistricts(stateId);        
+    });
+
+    if ($('#state-dropdown-input').val()) {
+        const stateId = $('#state-dropdown').val();
+        popUpPopulateDistricts(stateId); 
+    }
+});
+
+</script>
+
+{% block scripts %}{% endblock scripts %}
+
+</body>
+</html>

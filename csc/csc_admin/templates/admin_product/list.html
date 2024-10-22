@@ -1,0 +1,820 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Products{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_product/css/admin_product.css' %}">
+<!-- Table Styles -->
+<style>
+    #product-table {
+        min-width: 100%;
+        background-color: #fff;
+    }
+    #product-table tr {
+        border-bottom: 1px solid silver;
+    }
+    #product-table tbody tr{
+        cursor: pointer;
+    }
+    #product-table tbody tr:hover {
+        color: blue;
+    }
+    #product-table td:first-child,
+    #product-table th:first-child,
+    #td-image,
+    #th-image {
+        text-align: center;
+    }
+    #product-table img {
+        padding: 3px 0;
+        height: 50px;
+    }
+    #product-table button {
+        height: 0;
+        padding: 0 10px;
+    }
+    #product-table tbody tr:hover button {
+        height: 100%;
+        padding: 5px 10px;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Products</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+                    <li>Products</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% include "admin_components/message.html" %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box" style="display: none;">
+    <div class="modal-content">            
+        <h4><span>Deleting</span> Product <span id="blog-name" style="color: black"></span> . . .</h4>
+        <h5>Are you sure?</h5>                        
+    </div>
+    <br>
+    <form method="GET" action="#">
+        <button type="submit" id="confirm-deletion-btn">Delete</button>
+        <button class="cancel-btn" type="button" id="cancel-deletion-btn">Cancel</button>
+    </form>
+</div>
+<!-- Delete Confirmation Box Start-->
+
+<div class="row">
+    <style>
+        #pop-up-box {
+            display: none;
+            position:fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;                
+            background: #f7f7f7;
+            box-shadow: 0 0 5px;
+            min-width: 390px;
+        }
+
+        #pop-up-box-heading {
+            background-color: #fff;
+            padding: 10px;
+            margin: 0 0 10px 0;
+
+            text-align: center;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px; 
+            right: 5px;
+            font-size: 24px;
+            color: red;
+            background-color: #fff;
+            border: none;
+            box-shadow: 0 0 1px #777;
+            padding: 0 7px;        
+        }
+
+        .close-btn:hover {
+            color: #fff;
+            background-color: rgba(255, 0, 0, 0.485);
+        }
+
+        #pop-up-form {
+            padding: 0 10px;
+            padding-bottom: 5px;
+        }
+
+        #pop-up-msg {
+            display: none;
+            padding-left: 10px;
+            font-size: small;
+        }
+
+        #pop-up-dropdown {                
+            min-height: 150px;                
+        }
+
+        #pop-up-btns {
+            float: right;
+            padding-bottom: 5px;
+        }
+
+        #pop-up-add-toggle {
+            color: #fff;
+            width: 75px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+            box-shadow: 0 0 5px #777;
+            border: none;
+        }
+
+        #pop-up-add-toggle:hover {
+            background: linear-gradient(to bottom, lime, green, darkgreen);
+        }
+
+        #pop-up-edit-toggle {
+            display: none;
+            color: #fff;
+            width: 75px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, coral, orange, coral);
+            box-shadow: 0 0 5px #777;
+            border: none;
+        }
+
+        #pop-up-edit-toggle:hover {
+            background: linear-gradient(to bottom, yellow, orange, coral);
+        }
+
+        #pop-up-delete-toggle {
+            display: none;
+            color: #fff;
+            width: 75px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, darkred, red, darkred);
+            box-shadow: 0 0 5px #777;
+            border: none;
+        }
+
+        #pop-up-delete-toggle:hover {
+            background: linear-gradient(to bottom, orange, red, darkred);
+        }
+
+        #pop-up-add-btn-div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #pop-up-add-btn {
+            color: #fff;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+            border: none;
+            margin-bottom: 5px;
+        }            
+
+        #pop-up-add-btn:hover {
+            background: linear-gradient(to bottom, lime, green, darkgreen);
+        }
+
+        #pop-up-edit-btn {
+            color: #fff;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, coral, orange, coral);
+            border: none;
+            margin-bottom: 5px;
+        }
+
+        #pop-up-edit-btn:hover {
+            background: linear-gradient(to bottom, yellow, orange, coral);
+        }
+
+        #pop-up-delete-btn {
+            color: #fff;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, darkred, red, darkred);
+            border: none;
+            margin-bottom: 5px;
+        }
+
+        #pop-up-delete-btn:hover {
+            background: linear-gradient(to bottom, orange, red, darkred);
+        }
+
+        #pop-up-cancel-btn {
+            color: #fff;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, darkblue, blue, darkblue);
+            border: none;
+            margin-bottom: 5px;
+        }
+
+        #pop-up-cancel-btn:hover {
+            background: linear-gradient(to bottom, steelblue, blue, darkblue);
+        }
+    </style>
+
+    <!-- Pop Up Box Start -->
+    <div id="pop-up-box">
+        <h3 id="pop-up-box-heading"></h3>
+        <button class="close-btn" aria-label="Close" title="Close">&times;</button>
+        <span id="pop-up-msg" ></span>
+        <form id="pop-up-form"> </form>
+    </div>
+    <!-- Pop Up Box Start -->
+
+    <div class="col-lg-12 col-md-8 padding-right-30">
+        <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
+            <h4>Products</h4>    
+            <br>
+            <table id="product-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th id="th-image">Image</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="product-tbody">
+                    {% for product in products %}
+                    <tr class="row-items" onclick="window.location='{% url 'csc_admin:product' product.slug %}'">
+                        <td>{{ forloop.counter }}</td>
+                        <td id="td-image">
+                            <img src="{% if product.image %} {{product.image.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Product Image">
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>&#8377; {{product.price}}</td>
+                        <td><button class="button gray" onclick="event.stopPropagation(); toggleProductDeletion(`{{product.slug}}`, `{{product.name}}`)"><i class="sl sl-icon-close"></i> Delete</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                        
+        </div>
+
+        <!-- Pagination -->
+      <div class="clearfix"></div>
+      <div class="row" id="pagination-row">
+        <div class="col-md-12">
+          <!-- Pagination -->
+          <div class="pagination-container margin-top-20 margin-bottom-40">
+            <nav class="pagination" id="pagination-nav">
+              <ul>
+                <li>
+                  <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+                </li>                
+                <li><a href="#" id="first-page">1</a></li>
+                <li><a href="#" id="second-page">2</a></li>
+                <li><a href="#" id="third-page" >3</a></li>
+                <li>
+                  <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- Product Posts / End -->    
+    
+</div>
+
+
+    <!-- Copyrights -->
+    <div class="col-md-12">
+        <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+{% comment %} <script>
+
+    $(document).ready(() => {
+
+        // Close pop up box
+        $('.close-btn').click(() => {
+            $('#pop-up-box').hide();
+        });
+
+        $(document).on('keydown', (event) => {
+            if (event.key === 'Escape') {
+                $('#pop-up-box').hide();
+            };
+        });
+
+        $('#product-category-btn').click(() => {
+            $('#pop-up-box-heading').html('Categories');
+            $('#pop-up-box').show();
+        });
+                
+
+        // Return to the default pop up box
+        function popUpDefaultView() {
+            $('#pop-up-form').html(
+                `<select id="pop-up-dropdown" size=5>
+                    
+                </select>
+                <div id="pop-up-functions">
+                    <div id="pop-up-btns">
+                        <button id="pop-up-add-toggle" type="button">Add</button>
+                        <button id="pop-up-edit-toggle" type="button">Edit</button>
+                        <button id="pop-up-delete-toggle" type="button">Delete</button>
+                    </div>                    
+                </div>`
+            );
+        };
+
+        // Toggle add item.
+        $(document).on('click', '#pop-up-add-toggle', function () {
+            const currentItem = Category;
+            let basePlacehodler;
+            let baseInputIdPrefix;
+
+            endpoint = `add_${currentItem.toLowerCase()}`;
+            basePlacehodler = `Name of ${currentItem}`;
+            baseInputIdPrefix = currentItem.toLowerCase();
+
+            $('#pop-up-form').html('')
+            $('#pop-up-form').html(
+                `${(currentItem == 'District' || currentItem == 'Block') ? `<select id="state-dropdown-input"></select>` : '' }
+
+                ${currentItem == 'Block' ? `<select id="district-dropdown-input"><option value="" hidden disabled selected>Select district</option></select>` : '' }
+
+                ${(currentItem == 'District' || currentItem == 'Block') ? `<textarea name="${currentItem.toLowerCase()}s" id="${baseInputIdPrefix}s-textarea"  placeholder="${basePlacehodler}s"></textarea>`
+                : `<input type="text" name="${currentItem.toLowerCase()}" id="${baseInputIdPrefix}-input" placeholder="${basePlacehodler}">`}                
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-add-btn" type="button">Add ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+            if ((currentItem == 'District' || currentItem == 'Block')) {
+                getStates(event);                
+            }
+        });
+
+        $(document).on('change', '#state-dropdown-input', function () {
+            populateDistricts($(this).val());
+        });
+
+        // Return to the default item fetched form
+        $(document).on('click', '#pop-up-cancel-btn', function () {
+            popUpDefaultView();
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            if (currentItem === "State") {
+                getStates(event);
+            } else if (currentItem === "District") {
+                getDistricts(event);
+            } else if (currentItem === "Block") {
+                getBlocks(event);
+            } else if (currentItem === 'Name Type') {
+                getNameTypes(event);
+            } else if (currentItem === "Keyword") {
+                getKeywords(event);
+            }
+        });
+
+        // To show editing and deleting toggle button on option select
+        function showEditAndDelete () {
+            for (var i=0; i < $('#pop-up-form select')[0].options.length; i++) {
+                if ($('#pop-up-form select')[0].options[i].selected == true) {
+                    $('#pop-up-edit-toggle').show();
+                    $('#pop-up-delete-toggle').show();
+                };
+            };
+        };
+
+        $(document).on('change', '#pop-up-form select', showEditAndDelete);
+
+        // Ajax Form Submission
+        function submitPopUpForm(requestType, requestUrl, data=undefined, successCallback) {
+            $.ajax({
+                type: requestType,
+                url: requestUrl,
+                data: data,
+                dataType: 'json',
+                success: response => {
+                    if (response.error) {
+                        if (successCallback) successCallback(false, response.error);
+                    } else if (response.status === 'success') {
+                        if (successCallback) successCallback(true, null);
+                    } else {
+                        if (successCallback) successCallback(false, 'Unknown error');
+                    }
+                },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    console.error('Error:', textStatus, errorThrown);
+                    if (successCallback) successCallback(false, textStatus);
+                }
+            });
+        };
+
+        // Create item Form submission
+        $(document).on('click', '#pop-up-add-btn', () => {
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            let data;
+            let endpoint;
+            endpoint = `add_${currentItem.toLowerCase()}`;
+            if (currentItem === 'State') {
+                const state = $('#state-input').val().trim();
+                data = {'state': state}
+
+            } else if (currentItem === 'District') {
+                const state = $('#state-dropdown-input').val().trim();
+                const districts = $('#districts-textarea').val().trim();
+                data = {
+                    'state': state,
+                    'districts': districts
+                };
+
+            } else if (currentItem === 'Block') {
+                const state = $('#state-dropdown-input').val().trim();
+                const district = $('#district-dropdown-input').val().trim();
+                const blocks = $('#blocks-textarea').val().trim();
+                data = {
+                    'state': state,
+                    'district': district,
+                    'blocks': blocks
+                };
+            } else if (currentItem === 'Name Type') {
+                endpoint = `add_name_type`;
+                const name_type = $('#name-type-input').val().trim();
+                data = {'name_type': name_type}
+            } else if (currentItem === 'Keyword') {
+                const keyword = $('#keyword-input').val().trim();
+                data = {'keyword': keyword}
+
+            }
+
+            submitPopUpForm('post', `/admin/${endpoint}/`, data, (result, error) => {
+                if (result) {                    
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(`Added New ${currentItem}`).css('color', 'green')
+                    if (currentItem === 'State') {
+                        $('#state-input').val('');
+
+                    } else if (currentItem === 'District') {
+                        $('#state-dropdown-input option').first().prop('selected', true);
+                        $('#districts-textarea').val('');
+
+                    } else if (currentItem === 'Block') {
+                        $('#state-dropdown-input option').first().prop('selected', true);
+                        $('#district-dropdown-input option').first().prop('selected', true);
+                        $('#blocks-textarea').val('');                        
+
+                    } else if (currentItem === 'Name Type') {
+                        $('#name-type-input').val('');
+
+                    } else if (currentItem === 'Keyword') {
+                        $('#keyword-input').val('');
+
+                    }
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }              
+                // Pop up form submission msg timeout
+                setTimeout(() => 
+                {                       
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });            
+        });
+
+        // Toggle Edit Item
+        $(document).on('click', '#pop-up-edit-toggle', function () {
+            const dropdownValue = $('#pop-up-dropdown').val();
+            const dropdownSelectedText = $('#pop-up-dropdown option:selected').text()
+
+            localStorage.setItem('dropdownValue', dropdownValue);            
+
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+
+            let basePlacehodler;
+            let baseInputIdPrefix;
+
+            if (currentItem === 'Name Type')  {
+                basePlacehodler = `Name Type`;
+                baseInputIdPrefix = `name-type`;
+            } else {
+                basePlacehodler = `Name of ${currentItem}`;
+                baseInputIdPrefix = currentItem.toLowerCase();
+            }
+
+            $('#pop-up-form').html(`<h4>Edit ${currentItem}</h4>`);
+            $('#pop-up-form').append(
+                `${(currentItem == 'District' || currentItem == 'Block') ? `<select id="state-dropdown-input" ></select>` : '' }
+
+                ${currentItem == 'Block' ? `<select id="district-dropdown-input"><option value="" hidden disabled selected>Select district</option></select>` : '' }
+
+                 
+                <input type="text" id="${baseInputIdPrefix}-input" value="${dropdownSelectedText}" placeholder="${basePlacehodler}">
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-edit-btn" type="button">Save ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+            if (currentItem === 'District' || currentItem === 'Block') {
+                getStates(event);
+
+                if (currentItem === 'Block') {
+                    getDistricts(event);
+                }
+                
+                $.ajax({
+                    type: 'get',
+                    url: `/admin/get_${currentItem.toLowerCase()}_detail/${dropdownValue}`,
+                    dataType: 'json',
+                    success: response => {
+                        const stateDropdownInput = $('#state-dropdown-input');
+                        const stateDropdownOptions = stateDropdownInput.find('option');
+
+                        if (response.state_id) {                            
+                            stateDropdownOptions.each((index, option) => {
+                                if (option.value == response.state_id) {
+                                    $(option).prop('selected', true);
+                                }
+                            });
+                        }
+
+                        if (currentItem === 'Block') {                            
+                            const districtDropdownInput = $('#district-dropdown-input');
+                            const districtDropdownOptions = districtDropdownInput.find('option');                            
+
+                            if (response.district_id) {                                
+                                districtDropdownOptions.each((index, option) => {                                                                        
+                                    if (option.value == response.district_id) {
+                                        $(option).prop('selected', true);
+                                    }
+                                });
+                            } 
+                        }
+                    },
+                    error: error => {
+                        console.error("Error: ", error);
+                    }
+                });
+            };
+        });
+
+        // Edit item Form submission
+        $(document).on('click', '#pop-up-edit-btn', () => {
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            let data;
+            let endpoint = `edit_${currentItem.toLowerCase()}`;
+            let itemId = localStorage.getItem('dropdownValue');            
+            if (currentItem === 'State') {
+                const state = $('#state-input').val();
+                data = {'state': state}
+
+            } else if (currentItem === 'District') {
+                const state = $('#state-dropdown-input').val().trim();
+                const district = $('#district-input').val().trim();
+                data = {
+                    'state': state,
+                    'district': district
+                };
+
+            } else if (currentItem === 'Block') {
+                const state = $('#state-dropdown-input').val().trim();
+                const district = $('#district-dropdown-input').val().trim();
+                const block = $('#block-input').val().trim();
+                data = {
+                    'state': state,
+                    'district': district,
+                    'block': block
+                };
+            } else if (currentItem === 'Name Type') {
+                endpoint = 'edit_name_type'
+                const name_type = $('#name-type-input').val();
+                data = {'name_type': name_type}
+            
+            } else if (currentItem === 'Keyword') {
+                const keyword = $('#keyword-input').val();
+                data = {'keyword': keyword}
+
+            }
+            submitPopUpForm('post', `/admin/${endpoint}/${itemId}`, data, (result, error) => {
+                if (result) {                    
+                    $('#pop-up-cancel-btn').click()
+                    $('#pop-up-form').prepend(`<h5 id="main-pop-up-msg"></h5>`)
+                    $('#main-pop-up-msg').html(`Updated ${currentItem}`).css('color', 'green')                    
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }
+                // Pop up form submission msg timeout
+                setTimeout(() => 
+                {                       
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });
+        });
+
+        // Toggle Delete Item
+        $(document).on('click', '#pop-up-delete-toggle', function () {
+            const dropdownValue = $('#pop-up-dropdown').val();
+            const dropdownSelectedText = $('#pop-up-dropdown option:selected').text()
+
+            localStorage.setItem('dropdownValue', dropdownValue);            
+
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            $('#pop-up-form').html(`<h4>Deleting ${currentItem} <span style="color:red">'${dropdownSelectedText}'</span></h4>`);
+            $('#pop-up-form').append(
+                `<h5>Are you sure?</h5><br>
+                <div id="pop-up-add-btn-div">
+                    <button id="pop-up-delete-btn" type="button">Delete ${currentItem.toUpperCase()}</button>
+                    <button id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            );
+        });
+
+        // Delete item Form submission
+        $(document).on('click', '#pop-up-delete-btn', () => {
+            const currentItem = $('#pop-up-box-heading').html().slice(0, -1);
+            let data;
+            let itemId = localStorage.getItem('dropdownValue');            
+            let endpoint = `delete_${currentItem.toLowerCase()}`;
+            if (currentItem === 'Name Type') {
+                endpoint = 'delete_name_type'
+            }
+
+            submitPopUpForm('get', `/admin/${endpoint}/${itemId}`, data, (result, error) => {
+                if (result) {
+                    $('#pop-up-cancel-btn').click()
+                    $('#pop-up-form').prepend(`<h5 id="main-pop-up-msg"></h5>`)
+                    $('#main-pop-up-msg').html(`Deleted ${currentItem}`).css('color', 'green')                    
+                } else {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                };
+                if (error) {
+                    $('#pop-up-msg').show()
+                    $('#pop-up-msg').html(error).css('color', 'red');
+                }
+                // Pop up form submission msg timeout
+                setTimeout(() => 
+                {                       
+                    $('#pop-up-msg').hide();
+                    $('#main-pop-up-msg').hide();
+                }, 6000);
+            });
+        });
+
+        popUpDefaultView();
+    });
+</script> {% endcomment %}
+
+<script>
+    function toggleProductDeletion(productSlug, productTitle) {		
+		$('#delete-confirmation-box form').prop('action', `/admin/delete_product/${productSlug}`);
+		$('#blog-name').html(`'${productTitle}'`);
+		$('#delete-confirmation-box').show();
+	};
+
+    $('.cancel-btn').click(() => {
+        $('#delete-confirmation-box').hide();
+    });
+</script>
+
+<script>
+    $(document).ready(() => {
+        // Pagination
+      function paginator () {
+        let itemsPerPage = 10;
+        let currentPage = 1;
+        let totalItems = $('.row-items').length;
+        let totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+        $('.prev-page').hide();      
+  
+        function paginationBtnVisibility() {
+          $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+          $('.next-page').hide();
+          $('.prev-page').hide();
+          
+          if (currentPage == totalPages) {          
+            $('.next-page').hide();
+            
+            if (totalPages == 1) {
+              $('#first-page').html(currentPage).addClass('current-page').show();                       
+              
+            } else if (totalPages == 2) {
+              $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+              $('#second-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();
+              
+            } else if (totalPages == 3) {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('#prev-page').show();
+  
+            } else {
+              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+              $('#third-page').html(currentPage).addClass('current-page').show();
+              $('.prev-page').show();            
+            };
+  
+          } else if (currentPage > 1) {          
+            $('.prev-page').show();
+            $('.next-page').show();
+            $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+            $('#second-page').html(currentPage).addClass('current-page').show();
+            $('#third-page').html(currentPage + 1).addClass('next-page').show();
+  
+          } else if (currentPage == 1 && totalPages > 0) {          
+            $('.next-page').show();
+            $('#first-page').html(currentPage).addClass('current-page').show();
+            $('#second-page').html(currentPage + 1).addClass('next-page').show();
+  
+            if (totalPages >= 3) {          
+              $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+            }
+          }          
+        };
+  
+        paginationBtnVisibility();
+  
+        function renderPage(page) {
+            $('.row-items').hide();
+            $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            $('#pagination a').removeClass('active');
+            $('#pagination a').eq(page).addClass('active');
+            $('.prev-page').toggleClass('disabled', page === 1);
+            $('.next-page').toggleClass('disabled', page === totalPages);
+        }
+  
+        $(document).on('click', '.next-page', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.upcoming-page', function() {
+            if (currentPage < totalPages - 1) {
+                currentPage += 2;
+                $('#current-page').html(currentPage);
+                paginationBtnVisibility();
+                renderPage(currentPage);
+            }
+        });
+  
+        $(document).on('click', '.prev-page', function() {
+          if (currentPage > 1) {
+              currentPage--;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        $(document).on('click', '.earlier-page', function() {
+          if (currentPage > 2) {
+              currentPage -= 2;
+              $('#current-page').html(currentPage);
+              paginationBtnVisibility();
+              renderPage(currentPage);
+          }
+        });
+  
+        // Initialize the first page
+        renderPage(currentPage);
+      };
+  
+      paginator();
+    })
+</script>
+{% endblock scripts %}

@@ -1,0 +1,871 @@
+{% extends "user_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Update CSC Center{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+{% endblock styles %}
+
+{% block content %}
+<style>
+    #update-csc-btns-div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #update-csc-btns-div button {
+        display: none;
+    }
+
+    #current-csc-logo button, #current-csc-banner button {
+        color: black;
+        background-color: #fff;
+        font-size: 13px;
+        padding: 0px 10px;
+        border: none;
+        box-shadow: 0px 0px 3px #777;
+        border-radius: 5%;
+    }
+
+    #current-csc-logo button:hover, #current-csc-banner button:hover {
+        color: #fff;
+        background-color: darkred;
+    }
+</style>
+
+    <div id="titlebar">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2><i class="sl sl-icon-plus"></i> Update CSC Centers</h2>
+                    <!-- Breadcrumbs -->
+                    <nav id="breadcrumbs">
+                        <ul>
+                            <li><a href="{% url 'users:home' %}">Home</a></li>
+                            <li><a href="{% url 'users:csc_centers' %}">CSC Centers</a></li>					
+                            <li>Update CSC Centers</li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "admin_components/message.html" %}
+    <!-- Content
+    ================================================== -->
+    <!-- Container -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12" id="payment-content">
+                
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <form method="post" action="{% url 'users:update_csc' center_obj.slug %}" enctype="multipart/form-data" id="add-csc-form">
+                    {% csrf_token %}
+                    <div id="add-listing" class="separated-form">
+                        <!-- Section -->
+                        <div class="add-listing-section">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-doc"></i> Basic Informations</h3>
+                            </div>
+                            <!-- Title -->
+                            <div class="row with-forms">
+                                <div class="col-md-6">
+                                    <h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i></h5>
+                                    <input class="search-field" type="text" name="name"
+                                        placeholder="Name of your CSC" value={{center_obj.name}} required/>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i></h5>
+                                    <select class="chosen-select" id="name-type-dropdown" name="type"
+                                        data-placeholder="Common Service Centre (CSC)" required>
+                                        <option label="CSC Name Type"></option>
+                                        {% for name_type in name_types %}
+                                        <option value="{{name_type.slug}}" {% if name_type.slug == center_obj.type.slug %} selected {% endif %}>{{name_type.type}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>
+                                    Location Name</h5>
+                            </div>
+                            <!-- Row -->
+                            <div class="row with-forms">
+                                <!-- Type -->
+                                <div class="col-md-12">
+                                    <h5>Keywords <i class="tip"
+                                            data-tip-content="Maximum of 15 keywords related with your business"></i>
+                                    </h5>
+                                    <select data-placeholder="Select Keywords" name="keywords" class="chosen-select"
+                                        multiple required>
+                                        {% for keyword in keywords %}
+                                        <option value="{{keyword.pk}}" {% for keyword_obj in center_obj.keywords.all %} {% if keyword.pk == keyword_obj.pk %} selected {% endif %} {% endfor %}>{{keyword.keyword}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Row / End -->
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-location"></i> Address/Location</h3>
+                            </div>
+                            <div class="submit-section">
+                                <div class="row with-forms">
+                                    <!-- State -->
+                                    <div class="col-md-4">
+                                        <h5>State</h5>
+                                        <select class="chosen-select" name="state" id="state-dropdown"
+                                            data-placeholder="Select State" required>
+                                            <option label="Select State"></option>
+                                            {% for state in states %}
+                                            <option value="{{state.pk}}" {% if state.pk == center_obj.state.pk %} selected {% endif %} >{{state.state}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>District</h5>
+                                        <select class="chosen-select" name="district" id="district-dropdown"
+                                            data-placeholder="Select District" required>
+                                            <option label="Select District"></option>
+                                            {% for district in selected_districts %}
+                                            <option value="{{district.pk}}" {% if district.pk == center_obj.district.pk %} selected {% endif %}>{{district.district}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>Block</h5>
+                                        <select class="chosen-select" name="block" id="block-dropdown"
+                                            data-placeholder="Select Block" required>
+                                            <option label="Select Block"></option>
+                                            {% for block in selected_blocks %}
+                                            <option value="{{block.pk}}" {% if block.pk == center_obj.block.pk %} selected {% endif %}>{{block.block}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Row -->
+                                <div class="row with-forms">
+                                    <!-- City -->
+                                    <div class="col-md-6">
+                                        <h5>Location</h5>
+                                        <input type="text" name="location" placeholder="Enter Location" value="{{center_obj.location}}" required>
+                                    </div>
+                                    <!-- Address -->
+                                    <div class="col-md-6">
+                                        <h5>Zip-Code</h5>
+                                        <input type="text" name="zipcode" placeholder="Enter Pincode" value="{{center_obj.zipcode}}" required>
+                                    </div>
+                                    <!-- Zip-Code -->
+                                    <div class="col-md-6">
+                                        <h5>Landmark / Building Name</h5>
+                                        <input type="text" name="landmark_or_building_name"
+                                            placeholder="e.g. 1st Floor, ABCD Building" value="{{center_obj.landmark_or_building_name}}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Address</h5>
+                                        <input type="text" name="address" placeholder="e.g. 964 School Street" value={{center_obj.street}} required>
+                                    </div>
+                                </div>
+                                <!-- Row / End -->
+                            </div>
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-picture"></i> Upload</h3>
+                            </div>
+                            <!-- Dropzone -->
+                            <div class="row submit-section" id="dropzone-uploads">
+                                <div class="col-md-6">
+                                    <h5>Upload Logo</h5>
+                                    <input type="file" name="logo" id="csc-logo-input" required>
+                                    <span id="current-csc-logo">{% if center_obj.logo %} current logo: <a href="{{center_obj.logo.url}}" target="_blank" style="color:blue">{{center_obj.logo.name}}</a>&nbsp;&nbsp;<button type="button" onclick="removeCscLogo({{center_obj.pk}})">Clear</button> {% endif %}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Upload Banner</h5>
+                                    <input type="file" name="banner" id="csc-banner-input" multiple required>
+                                    <span id="current-csc-banner">{% if center_obj.banner %} current banner: <a href="{{center_obj.banner.url}}" target="_blank" style="color:blue">{{center_obj.banner.name}}</a>&nbsp;&nbsp;<button type="button" onclick="removeCscBanner({{center_obj.pk}})">Clear</button> {% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-docs"></i> Details</h3>
+                            </div>
+                            <!-- Description -->
+                            <div class="form">
+                                <h5>Description</h5>
+                                <textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary"
+                                    spellcheck="true">{{center_obj.description}}</textarea>
+                            </div>
+                            <!-- Row -->
+                        <div class="row with-forms">
+                            <!-- Owner Name -->
+                            <div class="col-md-4">
+                                <h5>Owner Name</h5>
+                                <input type="text" name="owner" placeholder="Owner Name" value="{{center.owner}}" required>
+                            </div>
+                            <!-- Email Address -->
+                            <div class="col-md-4">
+                                <h5>E-Mail ID</h5>
+                                <input type="email" name="email" placeholder="E-Mail ID" value="{{center.email}}" readonly required>
+                            </div>
+                            <!-- Website -->
+                            <div class="col-md-4">
+                                <h5>Website <span>(optional)</span></h5>
+                                <input type="text" name="website" placeholder="www.domainname.com" value="{{center.website}}" >
+                            </div>
+                        </div>
+                        <!-- Row / End -->
+                        <!-- Row -->
+                        <div class="row with-forms">
+                            <!-- Phone -->
+                            <div class="col-md-4">
+                                <h5>Contact Number</h5>
+                                <input type="text" name="contact_number" placeholder="Contact Number" value="{{center.contact_number}}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Mobile Number</h5>
+                                <input type="text" name="mobile_number" placeholder="Mobile Number" value="{{center.mobile_number}}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>WhatsApp Number</h5>
+                                <input type="text" name="whatsapp_number" placeholder="WhatsApp Number" value="{{center.whatsapp_number}}" required>
+                            </div>
+                                <div class="col-md-12">
+                                    <h5>Select Services</h5>
+                                    <select data-placeholder="Select Services" name="services" class="chosen-select"
+                                        multiple required>
+                                        {% for service in services %}
+                                        <option value="{{service.pk}}" {% for service_obj in center_obj.services.all %} {% if service.pk == service_obj.pk %} selected {% endif %} {% endfor %} >{{service.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <h5>Select Products</h5>
+                                    <select data-placeholder="Select Services" name="products" class="chosen-select"
+                                        multiple>
+                                        {% for product in products %}
+                                        <option value="{{product.pk}}" {% for product_obj in center_obj.products.all %} {% if product.pk == product_obj.pk %} selected {% endif %} {% endfor %}>{{product.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Row / End -->
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-clock"></i> Opening Hours</h3>
+                                <!-- Switcher -->
+                                <label class="switch"><input type="checkbox" name="show_opening_hours" {% if center_obj.show_opening_hours %} checked {% endif %}><span
+                                        class="slider round"></span></label>
+                            </div>
+                            <!-- Switcher ON-OFF Content -->
+                            <div class="switcher-content">
+                                <!-- Day -->
+                                <div class="row opening-day">
+                                    <div class="col-md-2">
+                                        <h5>Monday</h5>
+                                    </div>
+                                    <div class="col-md-5">                
+                                        <select class="chosen-select" name="mon_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.mon_opening_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.mon_opening_time|time:'H:i' %} selected {% endif %} >{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="mon_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.mon_closing_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.mon_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Tuesday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="tue_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.tue_opening_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.tue_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                            <!-- Hours added via JS (this is only for demo purpose) -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="tue_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.tue_closing_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.tue_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Wednesday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="wed_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.wed_opening_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.wed_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="wed_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.wed_closing_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.wed_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Thursday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="thu_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.thu_opening_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.thu_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="thu_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.thu_closing_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.thu_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Friday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="fri_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.fri_opening_time %} selected {% endif %}>Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.fri_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="fri_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.fri_closing_time %} selected {% endif %} >Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.fri_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Saturday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="sat_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.sat_opening_time %} selected {% endif %} >Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.sat_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="sat_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.sat_closing_time %} selected {% endif %} >Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.sat_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                                <!-- Day -->
+                                <div class="row opening-day js-demo-hours">
+                                    <div class="col-md-2">
+                                        <h5>Sunday</h5>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="sun_opening_time"
+                                            data-placeholder="Opening Time" required>
+                                            <option label="Opening Time"></option>
+                                            <option value="" {% if not center_obj.sun_opening_time %} selected {% endif %} >Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.sun_opening_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="chosen-select" name="sun_closing_time"
+                                            data-placeholder="Closing Time" required>
+                                            <option label="Closing Time"></option>
+                                            <option value="" {% if not center_obj.sun_closing_time %} selected {% endif %} >Closed</option>
+                                            {% for time in time_data %}
+                                            <option value="{{time.time}}" {% if time.time == center_obj.sun_closing_time|time:'H:i' %} selected {% endif %}>{{time.str_time}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Day / End -->
+                            </div>
+                            <!-- Switcher ON-OFF Content / End -->
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-book-open"></i> Social Media Links</h3>
+                                <!-- Switcher -->
+                                <label class="switch"><input type="checkbox" name="show_social_media_links" {% if center_obj.show_opening_hours %} checked {% endif %}><span
+                                        class="slider round"></span></label>
+                            </div>
+                            <!-- Switcher ON-OFF Content -->
+                            <div class="switcher-content">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="pricing-list-container">
+                                            {% if center_obj.social_media_links.all|length > 0 %}
+                                            {% for social_media_obj in center_obj.social_media_links.all %}
+                                            <tr class="pricing-list-item pattern">
+                                                <td>
+                                                    <div class="fm-move"><i class="sl sl-icon-cursor-move"></i></div>
+                                                    <div class="fm-input pricing-name">
+                                                        <select class="chosen-select" name="social_medias"
+                                                            data-placeholder="Select Social Media">
+                                                            <option value="">Select Social Media</option>
+                                                            {% for social_media in social_medias %}
+                                                            <option value="{{social_media}}" {% if social_media_obj.social_media_name == social_media %} selected {% endif %}>{{social_media}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="fm-input pricing-ingredients"><input type="text"
+                                                            name="social_links"
+                                                            placeholder="URL (E.g https://www.socialmediaurl.com/name)" value="{{social_media_obj.social_media_link}}" />
+                                                    </div>
+                                                    <div class="fm-close"><a class="delete" href="#" onclick="removeSocialMediaLink('{{center_obj.slug}}', {{social_media_obj.pk}})"><i
+                                                                class="fa fa-remove"></i></a></div>
+                                                </td>
+                                            </tr>                                            
+                                            {% endfor %}
+                                            {% else %}
+                                            <tr class="pricing-list-item pattern">
+                                                <td>
+                                                    <div class="fm-move"><i class="sl sl-icon-cursor-move"></i></div>
+                                                    <div class="fm-input pricing-name">
+                                                        <select class="chosen-select" name="social_medias"
+                                                            data-placeholder="Select Social Media">
+                                                            <option value="">Select Social Media</option>
+                                                            {% for social_media in social_medias %}
+                                                            <option value="{{social_media}}">{{social_media}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="fm-input pricing-ingredients"><input type="text"
+                                                            name="social_links"
+                                                            placeholder="URL (E.g https://www.socialmediaurl.com/name)" />
+                                                    </div>
+                                                    <div class="fm-close"><a class="delete" href="#"><i
+                                                                class="fa fa-remove"></i></a></div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                        </table>
+                                        <button type="button" class="button" id="add-link-btn" >Add New link</button>                                        
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Switcher ON-OFF Content / End -->
+                        </div>
+                        <!-- Section / End -->
+                        <!-- Section -->
+                        <div class="add-listing-section margin-top-45">
+                            <!-- Headline -->
+                            <div class="add-listing-headline">
+                                <h3><i class="sl sl-icon-pin"></i>Location Map</h3>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <input type="text" name="latitude" id="latitude" placeholder="latitude" value="{{center_obj.latitude}}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" name="longitude" id="longitude" placeholder="longitude" value="{{center_obj.longitude}}" required>
+                                </div>
+                                <div id="map" style="width: 100%; height: 400px"></div>
+                            </div>
+                        </div>                        
+                        <div style="clear:both;"></div>
+                    </div>
+                    <!-- Section / End -->
+                     <div id="update-csc-btns-div">
+                        <a href="#" id="preview-btn" class="button preview">Preview <i class="fa fa-arrow-circle-right"></i></a>
+                        <button class="button preview" type="button">Save Changes</button>
+                     </div>
+                </form>
+                <br>
+            </div>
+            <!-- Switcher ON-OFF Content / End -->
+        </div>
+        <!-- Section / End -->
+    </div>
+<!-- Content / End -->
+<!-- Container / End -->
+{% endblock content %}
+
+{% block scripts %}
+
+<!-- Style Switcher
+================================================== -->
+<script src="{% static 'scripts/switcher.js' %}"></script>
+
+<div id="style-switcher">
+    <h2>Color Switcher <a href="#"><i class="sl sl-icon-settings"></i></a></h2>
+
+    <div>
+        <ul class="colors" id="color1">
+            <li><a href="#" class="main" title="Main"></a></li>
+            <li><a href="#" class="blue" title="Blue"></a></li>
+            <li><a href="#" class="green" title="Green"></a></li>
+            <li><a href="#" class="orange" title="Orange"></a></li>
+            <li><a href="#" class="navy" title="Navy"></a></li>
+            <li><a href="#" class="yellow" title="Yellow"></a></li>
+            <li><a href="#" class="peach" title="Peach"></a></li>
+            <li><a href="#" class="beige" title="Beige"></a></li>
+            <li><a href="#" class="purple" title="Purple"></a></li>
+            <li><a href="#" class="celadon" title="Celadon"></a></li>
+            <li><a href="#" class="red" title="Red"></a></li>
+            <li><a href="#" class="brown" title="Brown"></a></li>
+            <li><a href="#" class="cherry" title="Cherry"></a></li>
+            <li><a href="#" class="cyan" title="Cyan"></a></li>
+            <li><a href="#" class="gray" title="Gray"></a></li>
+            <li><a href="#" class="olive" title="Olive"></a></li>
+        </ul>
+    </div>
+
+</div>
+<!-- Style Switcher / End -->
+
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- Map -->
+<script>
+
+    $(document).ready(function () {
+        let latitude = 51.958
+        let longitude = 9.141
+
+        let currentLatitude = $('#latitude').val();
+        let currentLongitude = $('#longitude').val();
+
+        if (currentLatitude) {
+            latitude = currentLatitude
+        }
+
+        if (currentLongitude) {
+            longitude = currentLongitude
+        } 
+        
+        let mapOptions = {
+            center: [latitude, longitude],
+            zoom: 10
+        }
+
+        let map = new L.map('map', mapOptions);
+
+        let layer = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        map.addLayer(layer);
+
+
+        let marker = null;
+        marker = L.marker([latitude, longitude]).addTo(map);
+
+        function markOnMap(event=undefined, latitude, longitude) {
+                if (marker !== null) {
+                    map.removeLayer(marker);
+                }
+
+                let markingLatitude;
+                let markingLongitude;
+
+                if (latitude) {
+                    markingLatitude = latitude;
+                }
+                
+                if (longitude) {
+                    markingLongitude = longitude;
+                } 
+                
+                
+                if (!latitude && !longitude && event) {
+                    markingLatitude = event.latlng.lat;
+                    markingLongitude = event.latlng.lng;
+                }
+
+                marker = L.marker([markingLatitude, markingLongitude]).addTo(map);       
+
+                document.getElementById('latitude').value = markingLatitude;
+                document.getElementById('longitude').value = markingLongitude;
+            }
+
+        map.on('click', (event) => {            
+            markOnMap(event);
+        })
+
+        $('#latitude, #longitude').on('change', function() {
+            let changedLatitude = parseFloat($('#latitude').val());
+            let changedLongitude = parseFloat($('#longitude').val());
+
+            if (!isNaN(changedLatitude) && !isNaN(changedLongitude)) {
+                markOnMap(undefined, changedLatitude, changedLongitude);
+            }
+        });
+    })
+
+</script>
+
+<!-- w3 -->
+<!-- Populate District Dropdown -->
+<script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script>
+
+<!-- Populate Block Dropdown -->
+<script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
+
+<!-- Preview Form -->
+<script>
+    $(document).ready(() => {
+        $('#preview-btn').click(function () {
+            if ($(this).html() != 'Edit Form') {
+                $('#add-csc-form input').prop('readonly', true);
+                $('#add-csc-form textarea').prop('readonly', true);
+
+                $('#dropzone-uploads').css('pointer-events', 'none');
+                $('#add-link-btn').css('pointer-events', 'none');
+                $('#map').css('pointer-events', 'none');
+
+
+                $('#add-csc-form input:checkbox').prop('disabled', true);
+                $('#add-csc-form select').prop('disabled', true).trigger('chosen:updated');
+
+                $(this).html('Edit Form');
+                $('#update-csc-btns-div button').show();
+            } else {
+                $('#add-csc-form input').prop('readonly', false);
+                $('#add-csc-form textarea').prop('readonly', false);
+
+                $('#dropzone-uploads').css('pointer-events', 'auto');
+                $('#add-link-btn').css('pointer-events', 'auto');
+                $('#map').css('pointer-events', 'auto');
+
+
+                $('#add-csc-form input:checkbox').prop('disabled', false);
+                $('#add-csc-form select').prop('disabled', false).trigger('chosen:updated');
+
+                $(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
+                $('#update-csc-btns-div button').hide();
+            };
+        });
+    });
+
+    $('#update-csc-btns-div button').on('click', function () {
+        $('#add-csc-form input').prop('readonly', false);
+        $('#add-csc-form textarea').prop('readonly', false);
+
+        $('#dropzone-uploads').css('pointer-events', 'auto');
+        $('#add-link-btn').css('pointer-events', 'auto');
+        $('#map').css('pointer-events', 'auto');
+
+
+        $('#add-csc-form input:checkbox').prop('disabled', false);
+        $('#add-csc-form select').prop('disabled', false).trigger('chosen:updated');
+
+        $(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
+        $('#update-csc-btns-div button').hide();
+        
+        $('#add-csc-form').submit()
+    });
+</script>
+
+<!-- Remove CSC Logo and Banner -->
+<script src="{% static 'w3/admin_csc_center/js/removeCscImages.js' %}"></script>
+
+<!-- Preview Updating CSC Images Links -->
+<script>
+    function previewCscLogoLink () {
+        const cscLogoInput = $('#csc-logo-input')[0];
+        const file = cscLogoInput.files[0]
+        const fileName = file.name
+
+        if (file) {
+            const logoUrl = URL.createObjectURL(file);
+            let html = `current logo: <a href=${logoUrl} target="_blank" />${fileName}</a>`;
+            $('#current-csc-logo').html(html);
+            $('#current-csc-logo').show();
+        };
+    };
+
+    $('#csc-logo-input').on('change', previewCscLogoLink)
+
+    function previewCscBannerLink () {
+        const cscBannerInput = $('#csc-banner-input')[0];
+        const file = cscBannerInput.files[0]
+        const fileName = file.name
+
+        if (file) {
+            const logoUrl = URL.createObjectURL(file);
+            let html = `current banner: <a href=${logoUrl} target="_blank" />${fileName}</a>`;
+            $('#current-csc-banner').html(html);
+            $('#current-csc-banner').show();
+        };
+    };
+
+    $('#csc-banner-input').on('change', previewCscBannerLink)
+
+</script>
+
+<!-- Add New Social Media Link -->
+<script>
+    $(document).ready(() => {
+        $('#add-link-btn').click(() => {
+            $('#pricing-list-container').append(
+                `<tr class="pricing-list-item pattern">
+                    <td>
+                        <div class="fm-move"><i class="sl sl-icon-cursor-move"></i></div>
+                        <div class="fm-input pricing-name">
+                            <select class="chosen-select" name="social_medias"
+                                data-placeholder="Select Social Media">
+                                <option value="">Select Social Media</option>
+                                {% for social_media in social_medias %}
+                                <option value="{{social_media}}" {% for social_media_obj in center_obj.social_media_links.all %} {% if social_media_obj.social_media_name == social_media %} selected {% endif %} {% endfor %}>{{social_media}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="fm-input pricing-ingredients"><input type="text"
+                                name="social_links"
+                                placeholder="URL (E.g https://www.socialmediaurl.com/name)" />
+                        </div>
+                        <div class="fm-close"><a class="delete" href="#"><i
+                                    class="fa fa-remove"></i></a></div>
+                    </td>
+                </tr>`
+                
+            ); 
+
+            $(".chosen-select").chosen({
+                width: "100%",
+                disable_search: true
+            });
+        });
+        
+        // Check Payment
+        function checkPayment(center) {
+            $.ajax({
+              type: 'GET',
+              url: `/users/check_payment/`,
+              dataType: 'json',
+              data: {'center_slug': center},
+              success: response => {
+                if (response) {
+    
+                  $('#payment-content').html(`
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                  `)
+                }
+              },
+              error: error => console.error("Error: ", error),
+            })
+        };
+    
+        const center =  localStorage.getItem('centerSlug');
+        const user = localStorage.getItem('cscUser');
+
+        if (user == `{{request.user.username}}` && center) {      
+        checkPayment(center);
+        } else {
+        checkPayment(`{{center.slug}}`);        
+        }
+    });
+</script>
+
+<script>
+    function removeSocialMediaLink(cscId, socialMediaId) {
+        $.ajax({
+            type: 'POST',
+            url: `/admin/remove_social_media_link/${cscId}`,
+            dataType: 'json',
+            data: {'social_media_id': socialMediaId},
+            success: (data) => {
+                if (data.message) {
+                    console.log(data.message);
+                };
+            },
+            error: (error) => {
+                console.error("Error: ", error);
+            },
+        });
+    };
+</script>
+
+{% endblock scripts %}

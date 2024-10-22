@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block about_us_nav %} current {% endblock about_us_nav %}
+
+{% block content %}
+
+<!-- Titlebar
+================================================== -->
+<div id="titlebar">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+
+				<h2>About Us</h2><span>Who we are</span>
+
+				<!-- Breadcrumbs -->
+				<nav id="breadcrumbs">
+					<ul>
+						<li><a href="{% url "home:view" %}">Home</a></li>
+						<li>About Us</li>
+					</ul>
+				</nav>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Content
+================================================== -->
+<div class="container">
+	<div class="row">
+		
+		<div class="col-md-12">
+            
+            <p>CSC – Common Services Centre program is an initiative of the Ministry of Electronics and IT (MeitY), Government of India. CSCs are easy to access points for delivery of various digital services to rural and urban people in India, thereby contributing to a digitally and financially inclusive society.
+
+                In rural India, CSCs are not just service delivery points, but changing agents too, promoting rural entrepreneurship and building rural capacities and livelihoods.
+                
+                CSC e-Governance Services India Limited is incorporated under the Companies Act, 1956 which provides a centralized collaborative framework for delivery of services to citizens through CSCs, besides ensuring systematic viability and sustainability of the scheme.
+                
+                The CSCs offer web-enabled e-governance services in rural areas, including applications for Passport, Pancard, Aadhaar, Voter ID, Ration Card etc, various Government certificates, and utility payments such as electricity, telephone, and water bills. People can access high-quality and cost-effective video, voice, and data content and services, in the areas of e-governance, education, health, telemedicine, tele-law, entertainment as well as other private services through CSCs.
+                To know more about CSC, visit the nearest Common Service Center</p>
+
+        </div> 
+
+	</div>
+</div>
+
+{% endblock content %}

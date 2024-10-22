@@ -1,0 +1,123 @@
+{% extends "admin_base/base.html" %}
+{% load static %}
+
+{% block title_prefix %}Blogs Categories{% endblock title_prefix %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'w3/admin_blog/css/list_categories.css' %}">
+
+{% endblock styles %}
+
+{% block content %}
+
+<!-- Titlebar -->
+<div id="titlebar">
+	<div class="row">
+		<div class="col-md-12">
+			<h2>Blogs Categories</h2>
+			<!-- Breadcrumbs -->
+			<nav id="breadcrumbs">
+				<ul>
+					<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
+					<li>Blogs Categories</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+	{% include "admin_components/message.html" %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box">
+	<div class="modal-content">            
+		<h4><span>Deleting</span> Blog <span id="category-name"></span> . . .</h4>
+		<h5>Are you sure?</h5>                        
+	</div>
+	<br>
+	<form method="GET" action="#">
+		<button type="submit" id="confirm-deletion-btn">Delete</button>
+		<button class="cancel-btn" type="button" id="cancel-deletion-btn">Cancel</button>
+	</form>
+</div>
+<!-- Delete Confirmation Box Start-->
+
+
+<div class="row">
+	
+	<!-- Listings -->
+	<div class="col-lg-12 col-md-12">
+		<div class="dashboard-list-box margin-top-0">
+			<h4>Blogs Categories</h4>
+			<br>
+			<table id="category-table">
+				<thead>
+					<tr>
+						<th>No</th>
+						<th id="th-image">Blog Category</th>
+                        <th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody id="category-tbody">
+					{% if categories %}
+					{% for category in categories %}
+					<tr class="row-items">
+						<td>{{ forloop.counter }}</td>						
+						<td>{{ category.name }}</td>                        
+                        <td id="button-tds">
+							<div id="button-div">
+								<button type="button" class="button gray" onclick="window.location='{% url 'csc_admin:update_blog_category' category.slug %}'" ><i class="sl sl-icon-close"></i> Edit</button>
+							</div>
+						</td>											
+						<td id="button-tds">
+							<div id="button-div">
+								<button type="button" class="button gray toggle-delete-btn" data-category-slug="{{category.slug}}" data-category-name="{{category.name}}"><i class="sl sl-icon-close"></i> Delete</button>
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+					{% else %}
+					<tr><td style="color:red; text-transform: uppercase;" colspan="4">No blogs categories to display</td></tr>
+					{% endif %}
+				</tbody>
+			</table>			
+		</div>
+
+		<!-- Pagination -->
+		<div class="clearfix"></div>
+		<div class="row" id="pagination-row">
+		  <div class="col-md-12">
+			<!-- Pagination -->
+			<div class="pagination-container margin-top-20 margin-bottom-40">
+			  <nav class="pagination" id="pagination-nav">
+				<ul>
+				  <li>
+					<a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
+				  </li>                
+				  <li><a href="#" id="first-page">1</a></li>
+				  <li><a href="#" id="second-page">2</a></li>
+				  <li><a href="#" id="third-page" >3</a></li>
+				  <li>
+					<a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+				  </li>
+				</ul>
+			  </nav>
+			</div>
+		  </div>
+		</div>
+	</div>
+
+
+	<!-- Copyrights -->
+	<div class="col-md-12">
+		<div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'w3/general/js/paginator.js' %}"></script>
+
+<script src="{% static 'w3/admin_blog/js/list_categories.js' %}"></script>
+{% endblock scripts %}

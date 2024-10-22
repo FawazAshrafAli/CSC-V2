@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+        }
+        .header {
+            /* background-color: #007bff; */
+            background: linear-gradient(to bottom, #007bff, steelblue);
+            padding: 5px;
+            color: #ffffff;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+        }
+        .footer {
+            padding: 10px;
+            background-color: #333333;
+            color: #ffffff;
+            text-align: center;
+            font-size: 12px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CSC Center Created</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ owner }},</p>
+            
+            <p>Your CSC center '{{ name }}' has been approved. Complete the payment to activate your csc center account:</p>
+            <p>Please click <a href="{{ payment_link }}">Make Payment</a> to go to the payment page</p>
+
+            <h4>Benefits of creating csc center through us:</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque asperiores molestiae id ab magni excepturi tenetur suscipit deserunt reiciendis, ex odit velit officia animi. Necessitatibus explicabo enim nemo praesentium, laudantium exercitationem voluptatum fuga nihil aliquam voluptate? Repudiandae, itaque enim possimus voluptatibus assumenda incidunt id, velit odio odit provident repellat tempore hic vero. Fugiat sit amet unde et accusantium architecto, porro velit quis blanditiis nam, iusto eligendi voluptatum ipsa deserunt totam veniam ab possimus neque sint dolore? Nemo sit, cum optio, sunt officiis labore amet nihil rem laboriosam, dolores voluptatibus error.</p>
+
+            <p>If you didn't request this, please ignore this email.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; CSC Locator. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

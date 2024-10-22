@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Exclusive CSC Center Registration Offer!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            width: 100%;
+            padding: 20px 0;
+            background-color: #f4f4f4;
+        }
+        .email-content {
+            width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            background-color: #FF5722;
+            color: #ffffff;
+            text-align: center;
+            padding: 25px;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .email-body {
+            padding: 20px;
+            color: #333333;
+            line-height: 1.7;
+        }
+        .email-body p {
+            margin: 15px 0;
+        }
+        .highlight {
+            color: #FF5722;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #FF5722;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .email-footer {
+            padding: 10px 20px;
+            background-color: #eeeeee;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+        @media screen and (max-width: 600px) {
+            .email-content {
+                width: 100% !important;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <!-- Email Header -->
+            <div class="email-header">
+                Exclusive Offer 🎉
+            </div>
+
+            <!-- Email Body -->
+            <div class="email-body">
+                <p>Hey {{ customer_name }},</p>
+
+                <p>We’ve got something super exciting just for you! Starting from <strong class="highlight">{{ offer_start_date }}</strong>, we're thrilled to offer you an exclusive deal on our <strong>CSC Center Registration</strong> services.</p>
+
+                <p>That’s right—you can register your CSC Center at a special rate of just <strong class="highlight">&#8377;{{ offer_price|floatformat:'2' }}</strong>! But hurry, this offer is available only until <strong>{{ offer_expiry_date }}</strong>!</p>
+
+                <p>All you need to do is click the button below to claim this unbeatable offer and start your registration:</p>
+
+                <p style="text-align: center;">
+                    <a href="https://127.0.0.1:3004/csc_center" class="button">Get Started Now</a>
+                </p>
+
+                <p>If you’ve got any questions, we’re always here for you.</p>        
+                <p>Feel free to reach us at {{sender_mail}}.</p>
+
+                <p>Thank you for being part of the CSC Center family. We can’t wait to help you with your registration journey!</p>
+
+                <p>Best wishes,<br>CSC Locator Team</p>
+            </div>
+
+            <!-- Email Footer -->
+            <div class="email-footer">
+                &copy; 2024 CSC Center. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
