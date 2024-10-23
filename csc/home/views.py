@@ -37,7 +37,9 @@ class BaseHomeView(View):
             context["service_group_3"] = services[12:18] if len(services) > 12 else None
             context['services'] = services
             
-            context['states'] = State.objects.all()
+            states = State.objects.all()
+            context['states'] = states
+            context['footer_states'] = states.exclude(state = "nan")
             context['faqs'] = Faq.objects.all()
             context['home_page'] = True
 
