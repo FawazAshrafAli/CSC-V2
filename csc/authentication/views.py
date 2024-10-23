@@ -7,6 +7,7 @@ from django.utils.crypto import get_random_string
 from django.http import Http404
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Q
 import logging
 import uuid
 
@@ -32,6 +33,7 @@ class AuthenticationView(TemplateView):
                         return redirect(self.user_success_url)
                     else:
                         logout(request)
+                        messages.error(request, 'Email not verified. Please check your email for verification link.')
                         return redirect(self.redirect_url)
             return super().get(request, *args, **kwargs)
         except Exception:
@@ -42,12 +44,24 @@ class AuthenticationView(TemplateView):
         try:
             username = request.POST.get('username')
             password = request.POST.get('password')
+            remember_me = request.POST.get('remember_me')
 
             if username and password:
                 user = authenticate(request, username = username, password = password)
+                if user is None:
+                    user_list = User.objects.filter(Q(email = username) | Q(phone = username))
+                    user_list.exists()
+                    user_obj = user_list.first()
+                    if user_obj.check_password(password):
+                        user = user_obj                    
                 if user is not None:
-                    login(request, user)                   
-                    if user.is_superuser:
+                    login(request, user) 
+                    if user.is_superuser or user.email_verified:
+                        if remember_me:
+                            request.session.set_expiry(1209600)
+                        else:
+                            request.session.set_expiry(0)
+                    if user.is_superuser:                        
                         return redirect(self.admin_success_url)
                     elif user.email_verified:
                         return redirect(self.user_success_url)
@@ -55,7 +69,7 @@ class AuthenticationView(TemplateView):
                         messages.error(request, 'Email not verified. Please check your email for verification link.')
                         return redirect(reverse_lazy('authentication:login'))
                 else:
-                    messages.error(request, 'Invalid username or password.')
+                    messages.error(request, 'Invalid Credentials.')
                     
             return super().get(request, *args, **kwargs)
         except Exception:

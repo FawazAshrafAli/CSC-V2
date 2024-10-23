@@ -172,7 +172,7 @@
 				<div class="form-row">				
 					<button type="submit" class="button border margin-top-5" name="login" id="login-btn" value="Login">Login</button>
 					<div class="checkboxes margin-top-10">
-						<input id="remember-me" type="checkbox" name="check">
+						<input id="remember-me" type="checkbox" name="remember_me">
 						<label for="remember-me">Remember Me</label>
 					</div>
 				</div>				
@@ -212,12 +212,13 @@
 			}
 		});
 
-		$('#close-btn #pop-up-cancel-btn').click($('pop-up-box').hide());
+		$('.close-btn, #pop-up-cancel-btn').click(() => $('#pop-up-box').hide());
 
 		$('#forgot-password').click((e) => {
 			e.preventDefault();
 			$('#pop-up-box').show();
 		});
+
 	})
 </script>
 {% endblock scripts %}
