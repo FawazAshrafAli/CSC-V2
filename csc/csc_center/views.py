@@ -209,6 +209,7 @@ def convert_to_int_if_scientific_notation(value):
 
 def convert_to_int():
     csc_centers = CscCenter.objects.filter(Q(name__icontains = "E+") | Q(mobile_number__icontains = "E+") | Q(contact_number__icontains = "E+") | Q(whatsapp_number__icontains = "E+") | Q(latitude__icontains = "E+") | Q(longitude__icontains = "E+"))
+    to_update = []
 
     for csc_center in csc_centers:
         csc_center.mobile_number = convert_to_int_if_scientific_notation(csc_center.mobile_number)
@@ -217,7 +218,9 @@ def convert_to_int():
         csc_center.latitude = convert_to_int_if_scientific_notation(csc_center.latitude)
         csc_center.longitude = convert_to_int_if_scientific_notation(csc_center.longitude)
 
-        csc_center.save()
+        to_update.append(csc_center)
+    
+    CscCenter.objects.bulk_update(to_update, ['mobile_number', 'contact_number', 'whatsapp_number', 'latitude', 'longitude'])
 
     return "Convertion to int completed"
 
@@ -258,17 +261,23 @@ def create_dummy_payments():
 
 def remove_trailing_decimals():
     csc_centers = CscCenter.objects.filter(Q (contact_number__icontains = ".0") | Q(mobile_number__icontains = ".0") | Q(whatsapp_number__icontains = ".0"))
-    length = len(csc_centers)
-    print(length)
-    for count, csc_center in enumerate(csc_centers, start=1):
-        csc_center.contact_number = csc_center.contact_number.replace(".0", "")
-        csc_center.mobile_number = csc_center.mobile_number.replace(".0", "")
-        csc_center.whatsapp_number = csc_center.whatsapp_number.replace(".0", "")
-        csc_center.save()
+    to_update = []
+    print()
+    print("Removing trailing decimals. . .")
+    for csc_center in csc_centers:
+        if csc_center.contact_number:
+            csc_center.contact_number = csc_center.contact_number.replace(".0", "")
+        if csc_center.mobile_number:
+            csc_center.mobile_number = csc_center.mobile_number.replace(".0", "")
+        if csc_center.whatsapp_number:
+            csc_center.whatsapp_number = csc_center.whatsapp_number.replace(".0", "")
+        to_update.append(csc_center)
 
-        print(f"\rExecuted {count}/{length} rows - Completed {int((count / length) * 100)}%", end="")
+    CscCenter.objects.bulk_update(to_update, ["contact_number", "mobile_number", "whatsapp_number"])
 
-        
+    print()
+    return "\nRemoved Trailing Decimals!"
+
 
 def row_generator(csv_data):
     for index, row in csv_data.iterrows():
@@ -310,6 +319,7 @@ def import_excel_data():
                 owner = row["CSC Owner Name"] if row["CSC Owner Name"] and row["CSC Owner Name"] != "nan" and row["CSC Owner Name"] != '' else None,
                 email = str(row["csc_email"].lower() if row["csc_email"] and type(row["csc_email"]) == str and row["csc_email"] != "nan" and row["csc_email"] != '' else None),
                 contact_number = row["csc_phone"] if row["csc_phone"] and row["csc_phone"] != "nan" and row["csc_phone"] != '' else None,
+                mobile_number = row["csc_phonetwo"] if row["csc_phonetwo"] and row["csc_phonetwo"] != "nan" and row["csc_phonetwo"] != '' else None,
                 show_opening_hours = False, 
                 show_social_media_links = False,
                 latitude = row["csc_latitude"] if row["csc_latitude"] and len(str(row["csc_latitude"])) < 100 and row["csc_latitude"] != "nan" and row["csc_latitude"] != '' else None,
@@ -323,7 +333,7 @@ def import_excel_data():
                 if len(whatsapp) > 15:
                     whatsapp_list = whatsapp.split(',')
                     csc_center.whatsapp_number = whatsapp_list[0].strip()
-                    if len(whatsapp_list) > 1:
+                    if len(whatsapp_list) > 1 and not csc_center.mobile_number:
                         csc_center.mobile_number = whatsapp_list[1].strip()
                 else:
                     csc_center.whatsapp_number = whatsapp.strip()
@@ -356,10 +366,13 @@ def import_excel_data():
                 user_obj = User.objects.filter(Q (username = current_username) | Q (email = csc_center.email)).exists()
                 if not user_obj:
                     password = str(csc_center.contact_number) if csc_center.contact_number else "123456789"
-                    User.objects.create_user(username = current_username, email = csc_center.email, password = password)
+                    user = User.objects.create_user(username = current_username, email = csc_center.email, phone = csc_center.contact_number, password = password)
+                    user.email_verified = True
+                    user.save()
         
-        print(f"Executed {index + 1}/{length} rows - Completed {int((index + 1) / length * 100)}%")
+        print(f"\rExecuted {index + 1}/{length} rows - Completed {int((index + 1) / length * 100)}%", end="")
 
+    print()
     return "Importing Completed!"
 
 def restore():
@@ -372,6 +385,10 @@ def restore():
     remove_trailing_decimals()
     print("Creating dummy payments. . .")
     create_dummy_payments()
+
+    generate_name_from_slug()
+
+    print()
 
     return "Restoration Completed! You are all set."
 
@@ -394,4 +411,77 @@ def delete_and_restore():
     print("Creating dummy payments. . .")
     create_dummy_payments()
 
+    generate_name_from_slug()
+
+    print()
+
     return "Restoration Completed! You are all set."
+
+
+def import_mobile_numbers():
+    csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')
+    length = len(csv_data)  
+
+    print("\nImporting mobile numbers . . .\n")
+
+    for index, row in row_generator(csv_data):
+        
+        time.sleep(0.001)
+
+        print(f"\rExecuted {index + 1}/{length} rows - Completed {int((index + 1) / length * 100)}%", end="")
+
+        try:
+            csc_center = get_object_or_404(CscCenter, pk = f"CSC{row['ID']}")
+
+            csc_center.mobile_number = row["csc_phonetwo"] if row["csc_phonetwo"] and row["csc_phonetwo"] != "nan" and row["csc_phonetwo"] != '' else csc_center.mobile_number
+            csc_center.save()
+        except Http404:
+            continue
+        except Exception as e:
+            logger.exception(f"Error in importing mobile numbers from row id: {row['ID']}. Exception: {e}")
+            continue
+
+    print()
+    return "Mobile Number Importing Completed!"
+
+
+def set_user_phone():
+    try:
+        csc_centers = CscCenter.objects.all()
+        length = len(csc_centers)
+        for index, csc_center in enumerate(csc_centers, start=1):
+
+            print(f"\rSetting phone number. Completed {int((index + 1) / length * 100)}%", end="")
+
+            user_obj = User.objects.filter(email = csc_center.email)
+            if user_obj.exists():
+                user = user_obj.first()
+                user.phone = csc_center.contact_number
+                user.save()
+        print()
+        print("\nCompleted")
+    except Exception as e:
+        logger.exception(f"Error in setting user phone. Exception: {e}")
+
+def generate_name_from_slug():
+    try:
+        csc_centers = CscCenter.objects.filter(name = "nan")
+        to_update = []
+
+        print()
+        print("Genrating name from slug . . .")
+
+        for csc_center in csc_centers:
+            if csc_center.slug:
+                name = csc_center.slug.replace("-", " ").title()
+                csc_center.name = name
+
+                to_update.append(csc_center)
+
+        CscCenter.objects.bulk_update(to_update, ["name"])
+
+        print()
+        return "Name generation complete!"
+
+    except Exception as e:
+        logger.exception(f"Error in name center using slug. Exception: {e}")

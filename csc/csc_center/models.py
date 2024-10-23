@@ -264,9 +264,11 @@ class CscCenter(models.Model):
 
     @property
     def full_name(self):
-        if self.name and self.type and self.location:
-            return f"{self.name} {self.type} {self.location}"         
-        return f"{self.name} {self.street}"
+        if self.name and self.name != "nan" and self.type and self.type != "nan" and self.location and self.location != "nan":
+            return f"{self.name} {self.type} {self.location}"
+        elif self.name and self.name != "nan" and self.street and self.street != "nan" :
+            return f"{self.name} {self.street}"
+        return self.name
 
     @property
     def type_and_location(self):
@@ -316,6 +318,7 @@ class CscCenter(models.Model):
             keyword_list = []
             for keyword in self.keywords.all():
                 keyword_list.append(keyword.keyword)
+
             return keyword_list
         return None
     
