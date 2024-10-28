@@ -42,12 +42,12 @@ class Tag(models.Model):
 
 
 class Blog(models.Model):
-    image = models.ImageField(upload_to='blog_images/', null=True, blank=True)  # If you want a featured image
+    image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = RichTextField()
-    summary = models.TextField(max_length=500, blank=True)  # A short summary of the post
+    summary = models.TextField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

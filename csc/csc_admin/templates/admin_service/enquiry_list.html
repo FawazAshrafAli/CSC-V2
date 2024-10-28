@@ -60,11 +60,12 @@
                     <tr>
                         <th>&nbsp;<small>No</small></th>
                         <th>&nbsp;<small>Name</small></th>
-                        <th class="text-center"><small>Service</small></th>
-                        <th class="text-center"><small>Email</small></th>
+                        <th><small>Service</small></th>
+                        <th><small>Email</small></th>
                         <th class="text-center"><small>Phone</small></th>
-                        <th class="text-center"><small>Location</small></th>
-                        <th class="text-center"><small>Message</small></th>
+                        <th><small>Location</small></th>
+                        <th><small>Message</small></th>
+                        <th class="text-center"><small>Date &amp; Time</small></th>
                         <th></th>
                     </tr>
                     </thead>
@@ -73,11 +74,12 @@
                         <tr	class="row-items vertical-align-top">
                             <td>&nbsp;<small>{{ forloop.counter }}</small></td>
                             <td>&nbsp;<small>{{ enquiry.applicant_name }}</small></td>
-                            <td class="text-center"><small>{{ enquiry.service.first_name }}</small></td>
-                            <td class="text-center"><small><a href="mailto:{{enquiry.applicant_email}}" class="text-primary">{{ enquiry.applicant_email }}</a></small></td>
+                            <td><small>{{ enquiry.service.first_name }}</small></td>
+                            <td><small><a href="mailto:{{enquiry.applicant_email}}" class="text-primary">{{ enquiry.applicant_email }}</a></small></td>
                             <td class="text-center"><small><a href="tel:+91{{enquiry.applicant_phone}}" class="text-primary">{{ enquiry.applicant_phone }}</a></small></td>
                             <td class="text-area-data"><small>{{ enquiry.location }}</small></td>
                             <td class="text-area-data"><small>{{ enquiry.message }}</small></td>
+                            <td class="text-center"><small>{{ enquiry.created }}</small></td>
                             <td class="vertical-align-middle">
                                 <button type="button" class="button gray toggle-service-enquiry-deletion-btn" data-enquiry-slug="{{enquiry.slug}}" data-enquiry-service="{{enquiry.service}}">Delete</button>
                             </td>

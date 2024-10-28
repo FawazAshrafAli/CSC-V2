@@ -3,16 +3,21 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.urls import reverse_lazy
 from django.conf import settings
+from authentication.models import User
 
 logger = get_task_logger(__name__)
 
 
 @shared_task
-def send_verification_email(self, user):
+def send_verification_email(user_id, base_url):
+
     try:
-        verification_link = self.request.build_absolute_uri(
-            reverse_lazy('authentication:verify_email', kwargs = {"token": user.verification_token})
-        )
+        user = User.objects.get(pk = user_id)
+        # verification_link = request.build_absolute_uri(
+        #     reverse_lazy('authentication:verify_email', kwargs = {"token": user.verification_token})
+        # )
+
+        verification_link = f"{base_url}{reverse_lazy('authentication:verify_email', kwargs={'token': user.verification_token})}"
 
         sender = settings.DEFAULT_FROM_EMAIL
 
@@ -24,7 +29,7 @@ def send_verification_email(self, user):
             fail_silently=False
         )
     except Exception as e:
-        logger.error(f"Error sending verification email: {e}")
+        logger.error(f"Error sending verification email to {user.email}: {e}")
 
 
 @shared_task

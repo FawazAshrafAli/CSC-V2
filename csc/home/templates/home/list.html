@@ -144,15 +144,16 @@
 <div class="container">
   <div class="row">
     {% include "admin_components/message.html" %}
+    <form method="get" action="{% url 'home:csc_centers' %}" id="csc-form">
     <!-- Search -->
-    <div class="col-md-12">
-      <form method="get" action="{% url 'home:csc_centers' %}">
-
+      <div class="col-md-12">
         <div class="add-listing-headline" style="background-color: inherit; display: flex; justify-content: space-between; align-items: center; width: 320px; margin-bottom: 0;">
           <h3> Pincode Search</h3>
           <!-- Switcher -->
-          <label class="switch"><input type="checkbox" id="pincode-checkbox-btn" {% if pincode %} checked {% endif %}><span
-              class="slider round"></span></label>
+          <label class="switch">
+            <input type="checkbox" id="pincode-checkbox-btn" {% if pincode %} checked {% endif %}>
+            <span class="slider round"></span>
+          </label>
         </div>
 
         <div class="main-search-input gray-style margin-top-0 margin-bottom-10">
@@ -166,13 +167,12 @@
               <option value="{{state.state}}" {% if state.state == state_obj.state %} selected {% endif %} >{{state.state}}</option>
               {% endfor %}
             </select>
-          </div>
-          
+          </div>          
           <div class="main-search-input-item" id="district-input-div">
-            <select class="chosen-select" data-placeholder="Select District" id="district-dropdown" value="{{district_id}}" name="district">
+            <select class="chosen-select" data-placeholder="Select District" id="district-dropdown" name="district">
               <option label="Select District"></option>
               {% for district in districts %}
-              <option value="{{district.district}}" {% if district.district == district_obj.district %} selected {% endif %}>{{district.district}}</option>
+              <option value="{{district.district}}" {% if district.pk == district_obj.pk %} selected {% endif %}>{{district.district}}</option>
               {% endfor %}
             </select>
           </div>
@@ -184,86 +184,104 @@
               {% endfor %}
             </select>
           </div>
-          <button
-            class="button"
-            type="submit"
-          >
-            Search
-          </button>
+          <button class="button" type="submit" id="search-btn">Search</button>
         </div>
-      </form>
-    </div>
-    <!-- Search Section / End -->
+      
+      </div>
+      <!-- Search Section / End -->
 
-    <div class="col-md-12">
-      {% if centers %}
-      <!-- Sorting - Filtering Section -->
-      <div class="row margin-bottom-25 margin-top-30">
-        <div class="col-md-12">
-          <div class="fullwidth-filters">
-            <!-- Panel Dropdown -->
-            <div class="panel-dropdown wide float-right">
-              <a href="#">List By Service</a>
-              <div class="panel-dropdown-content checkboxes">
-                <!-- Checkboxes -->
-                <div class="row" id="list-by-services">
-                  {% if services|length > 0 %}
-                  <div class="col-md-6">
-                    {% for service in services|slice:':4' %}
-                    <input class="service" id="check-{{service.first_name}}" type="checkbox" name="check" value="{{service.slug}}" />
-                    <label for="check-{{service.first_name}}">{{service.first_name}}</label>
-                    {% endfor %}
+      <div class="col-md-12">
+        <!-- Sorting - Filtering Section -->
+        <div class="row margin-bottom-25 margin-top-30">
+          <div class="col-md-12">
+            <div class="fullwidth-filters">
+              <!-- Panel Dropdown -->
+              <div class="panel-dropdown wide float-right">
+                <a href="#">List By Service</a>
+                <div class="panel-dropdown-content checkboxes">
+                  <!-- Checkboxes -->
+                  <div class="row" id="list-by-services">
+                    {% if services|length > 0 %}
+                    <div class="col-md-6">
+                      {% for service in services|slice:':4' %}
+                      <input class="service" id="check-{{service.first_name}}" type="checkbox" name="service" value="{{service.slug}}" {% if service.slug in service_list %} checked {% endif %} />
+                      <label for="check-{{service.first_name}}">{{service.first_name}}</label>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if services|length > 4 %}
+                    <div class="col-md-6">
+                      {% for service in services|slice:'4:8' %}
+                      <input class="service" id="check-{{service.first_name}}" type="checkbox" name="service" value="{{service.slug}}" {% if service.slug in service_list %} checked {% endif %} />
+                      <label for="check-{{service.first_name}}">{{service.first_name}}</label>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
                   </div>
-                  {% endif %}
-                  {% if services|length > 4 %}
-                  <div class="col-md-6">
-                    {% for service in services|slice:'4:8' %}
-                    <input class="service" id="check-{{service.first_name}}" type="checkbox" name="check" value="{{service.slug}}" />
-                    <label for="check-{{service.first_name}}">{{service.first_name}}</label>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-                </div>
 
-                <!-- Buttons -->
-                <div class="panel-buttons">
-                  <button type="button" class="panel-cancel">Cancel</button>
-                  <button type="button" class="panel-apply" id="sort-btn">Apply</button>
+                  <!-- Buttons -->
+                  <div class="panel-buttons">
+                    <button type="button" class="panel-cancel">Cancel</button>
+                    <button type="button" class="panel-apply" id="sort-btn">Apply</button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <!-- Panel Dropdown / End -->              
-              
-
-            <!-- Sort by -->
-            <div class="sort-by">
-              <div class="sort-by-select">
-                <select
-                  data-placeholder="List By Name"
-                  class="chosen-select-no-single"
-                  id="sort-dropdown"
-                >
-                  <option value="name" selected>List By Name</option>
-                  <option value="state">List By State</option>
-                  <option value="district">List By District</option>
-                  <option value="block">List By Block</option>
-                </select>
+              <!-- Panel Dropdown / End -->              
+                
+              {% if not latitude and not longitude and not pincode %}
+              <!-- Sort by -->
+              <div class="sort-by">
+                <div class="sort-by-select">
+                  <select
+                    data-placeholder="List By Name"
+                    class="chosen-select-no-single"
+                    id="sort-dropdown" name="listing"
+                    onchange="$('#csc-form').submit();"
+                  >
+                    <option value="name" {% if listing == "name" %} selected {% endif %}>List By Name</option>
+                    {% if not state_obj %}
+                    <option value="state" {% if listing == "state" %} selected {% endif %}>List By State</option>
+                    {% endif %}
+                    {% if not district_obj %}
+                    <option value="district" {% if listing == "district" %} selected {% endif %}>List By District</option>
+                    {% endif %}
+                    {% if not block_obj %}
+                    <option value="block" {% if listing == "block" %} selected {% endif %}>List By Block</option>
+                    {% endif %}
+                  </select>
+                </div>
               </div>
+              <!-- Sort by / End -->
+              {% endif %}
+
+
             </div>
-            <!-- Sort by / End -->
           </div>
         </div>
+        <!-- Sorting - Filtering Section / End -->
       </div>
-      <!-- Sorting - Filtering Section / End -->
-      {% endif %}
+    </form>
+
+    <div class="col-md-12">
+      
 
       <div class="row" id="center-listing">
         {% if not centers %}
         <div>
           {% if pincode %}
-          <h3 class="centered-heading">No CSC centers found for pincode: {{pincode}}</h3>
+            {% if service_list %}
+            <h3 class="centered-heading">No CSC centers found with the selected services for pincode: {{pincode}}</h3>
+            {% else %}
+            <h3 class="centered-heading">No CSC centers found for pincode: {{pincode}}</h3>
+            {% endif %}
+          
           {% else %}
-          <h3 class="centered-heading">No CSC centers found for location: {{location}}</h3>
+            {% if service_list %}
+            <h3 class="centered-heading">No CSC centers found with the selected services for location: {{location}}</h3>  
+            {% else %}
+            <h3 class="centered-heading">No CSC centers found for location: {{location}}</h3>  
+            {% endif %}
+          
           {% endif %}
           <br>
         </div>
@@ -295,6 +313,8 @@
         {% endfor %}         
       </div>
 
+      {{centers.next_page}}
+
       <!-- Pagination -->
       <div class="clearfix"></div>
       <div class="row" id="pagination-row">
@@ -303,15 +323,17 @@
           <div class="pagination-container margin-top-20 margin-bottom-40">
             <nav class="pagination" id="pagination-nav">
               <ul>
+                {% if page_obj.has_previous %}
                 <li>
-                  <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
-                </li>                
-                <li><a href="#" id="first-page">1</a></li>
-                <li><a href="#" id="second-page">2</a></li>
-                <li><a href="#" id="third-page" >3</a></li>
-                <li>
-                  <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                  <a  href="?page={{ page_obj.previous_page_number }}&pincode={{ pincode }}&state={{ state_obj.state }}&district={{ district_obj.district }}&block={{ block_obj.block }}&listing={{ listing }}" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
                 </li>
+                {% endif %}            
+                <li><a href="#" id="first-page">{{ page_obj.number }}</a></li>                
+                {% if page_obj.has_next %}
+                <li>
+                  <a href="?page={{ page_obj.next_page_number }}&pincode={{ pincode }}&state={{ state_obj.state }}&district={{ district_obj.district }}&block={{ block_obj.block }}&listing={{ listing }}" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
+                </li>
+                {% endif %}
               </ul>
             </nav>
           </div>
@@ -329,181 +351,201 @@
 <script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
 
 <script>
-  $(document).ready(() => {
-    function filterAndSortCenters() {
-      const services = []
-      $('.service:checked').each(function () {
-        let service = $(this).val();
-        services.push(service);
-      });
+  $(document).ready(function () {
+    // $('#sort-dropdown').on('change', function () {
+    //   const listing = $(this).val();
+      
+    //   $.ajax({
+    //     type: 'GET',
+    //     url: '/filter_and_sort_centers/',
+    //     dataType: 'json',               
+    //     data:{          
+    //         "listing": listing,
+    //     },
+    //     async: false,
+    //     success: function(response) {
+    //         console.log("Response received:", response);
+    //     },
+    //     error: function(xhr, status, error) {
+    //         console.error("Error occurred:", error);
+    //     }
+    //   })
+    // });
 
-      const state = $('#state-dropdown').val();
-      const district = $('#district-dropdown').val();
-      const block = $('#block-dropdown').val();
-      const listing = $('#sort-dropdown').val();
+    // function filterAndSortCenters() {
+    //   const services = []
+    //   $('.service:checked').each(function () {
+    //     let service = $(this).val();
+    //     services.push(service);
+    //   });
 
-      $.ajax({
-        type: 'GET',
-        url: '/filter_and_sort_centers/',
-        dataType: 'json',
-        data: {
-          'services': services,
-          'state': state,
-          'district': district,
-          'block': block,
-          'listing': listing,
-        },
+    //   const state = $('#state-dropdown').val();
+    //   const district = $('#district-dropdown').val();
+    //   const block = $('#block-dropdown').val();
+    //   const listing = $('#sort-dropdown').val();
 
-        success: function (response) {
-          $('#center-listing').html('');
+    //   $.ajax({
+    //     type: 'GET',
+    //     url: '/filter_and_sort_centers/',
+    //     dataType: 'json',
+    //     data: {
+    //       'services': services,
+    //       'state': state,
+    //       'district': district,
+    //       'block': block,
+    //       'listing': listing,
+    //     },
 
-          if (response.centers.length == 0) {
-            $('#center-listing').html(`<h3 class="centered-heading">No CSC centers in {{location}} with the given services.</h3><br>`)
-          }
+    //     success: function (response) {
+    //       $('#center-listing').html('');
 
-          response.centers.forEach(center => {
-            let html = `<div class="col-lg-4 col-md-6 row-items">
-                          <a
-                            href="${center.absolute_url}"
-                            class="listing-item-container compact"
-                          >
-                            <div class="listing-item">
-                              <img src="{% static 'w3/images/csc_banner.png' %}" alt="" />
+    //       if (response.centers.length == 0) {
+    //         $('#center-listing').html(`<h3 class="centered-heading">No CSC centers in {{location}} with the given services.</h3><br>`)
+    //       }
 
-                              <div class="listing-item-content">
-                                <div class="listing_csc_logo">
-                                  <img src="${center.logo ? center.logo : '/static/images/EGATE-e1651050883359.jpg' }" alt="CSC Center Logo" />
-                                </div>
-                                <h3>${center.full_name}</h3>
-                                <p>CSC ID : ${center.pk}</p>
-                                <span
-                                  ><i class="fa fa-map-marker" aria-hidden="true"></i> ${center.partial_address}</span
-                                >
-                              </div>
-                            </div>
-                          </a>
-                        </div>`
-            $('#center-listing').append(html);
-          });
-          paginator();
+    //       response.centers.forEach(center => {
+    //         let html = `<div class="col-lg-4 col-md-6 row-items">
+    //                       <a
+    //                         href="${center.absolute_url}"
+    //                         class="listing-item-container compact"
+    //                       >
+    //                         <div class="listing-item">
+    //                           <img src="{% static 'w3/images/csc_banner.png' %}" alt="" />
 
-        },
+    //                           <div class="listing-item-content">
+    //                             <div class="listing_csc_logo">
+    //                               <img src="${center.logo ? center.logo : '/static/images/EGATE-e1651050883359.jpg' }" alt="CSC Center Logo" />
+    //                             </div>
+    //                             <h3>${center.full_name}</h3>
+    //                             <p>CSC ID : ${center.pk}</p>
+    //                             <span
+    //                               ><i class="fa fa-map-marker" aria-hidden="true"></i> ${center.partial_address}</span
+    //                             >
+    //                           </div>
+    //                         </div>
+    //                       </a>
+    //                     </div>`
+    //         $('#center-listing').append(html);
+    //       });
+    //       paginator();
 
-        error: error => console.error("Error:", error),
-      })
-    }
+    //     },
 
-    $('#sort-dropdown').on('change', filterAndSortCenters);
+    //     error: error => console.error("Error:", error),
+    //   })
+    // }
 
-    $('#sort-btn').click(filterAndSortCenters);
+    // $('#sort-dropdown').on('change', filterAndSortCenters);
 
-    // Pagination
-    function paginator () {
-      let itemsPerPage = 9;
-      let currentPage = 1;
-      let totalItems = $('.row-items').length;
-      let totalPages = Math.ceil(totalItems / itemsPerPage);
+    // $('#sort-btn').click(filterAndSortCenters);
 
-      $('.prev-page').hide();      
+     // Pagination
+    // function paginator () {
+    //   let itemsPerPage = 9;
+    //   let currentPage = 1;
+    //   let totalItems = $('.row-items').length;
+    //   let totalPages = Math.ceil(totalItems / itemsPerPage);
 
-      function paginationBtnVisibility() {
-        $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
-        $('.next-page').hide();
-        $('.prev-page').hide();
+    //   $('.prev-page').hide();      
+
+    //   function paginationBtnVisibility() {
+    //     $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
+    //     $('.next-page').hide();
+    //     $('.prev-page').hide();
         
-        if (currentPage == totalPages) {          
-          $('.next-page').hide();
+    //     if (currentPage == totalPages) {          
+    //       $('.next-page').hide();
           
-          if (totalPages == 1) {
-            $('#first-page').html(currentPage).addClass('current-page').show();            
+    //       if (totalPages == 1) {
+    //         $('#first-page').html(currentPage).addClass('current-page').show();            
             
-          } else if (totalPages == 2) {
-            $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
-            $('#second-page').html(currentPage).addClass('current-page').show();
-            $('.prev-page').show();
+    //       } else if (totalPages == 2) {
+    //         $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
+    //         $('#second-page').html(currentPage).addClass('current-page').show();
+    //         $('.prev-page').show();
             
-          } else if (totalPages == 3) {
-            $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
-            $('#second-page').html(currentPage - 1).addClass('prev-page').show();
-            $('#third-page').html(currentPage).addClass('current-page').show();
+    //       } else if (totalPages == 3) {
+    //         $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+    //         $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+    //         $('#third-page').html(currentPage).addClass('current-page').show();
 
-          } else {
-            $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
-            $('#second-page').html(currentPage - 1).addClass('prev-page').show();
-            $('#third-page').html(currentPage).addClass('current-page').show();
-            $('.prev-page').show();            
-          };
+    //       } else {
+    //         $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
+    //         $('#second-page').html(currentPage - 1).addClass('prev-page').show();
+    //         $('#third-page').html(currentPage).addClass('current-page').show();
+    //         $('.prev-page').show();            
+    //       };
 
-        } else if (currentPage > 1) {          
-          $('.prev-page').show();
-          $('.next-page').show();
-          $('#first-page').html(currentPage - 1).addClass('prev-page').show();
-          $('#second-page').html(currentPage).addClass('current-page').show();
-          $('#third-page').html(currentPage + 1).addClass('next-page').show();
+    //     } else if (currentPage > 1) {          
+    //       $('.prev-page').show();
+    //       $('.next-page').show();
+    //       $('#first-page').html(currentPage - 1).addClass('prev-page').show();
+    //       $('#second-page').html(currentPage).addClass('current-page').show();
+    //       $('#third-page').html(currentPage + 1).addClass('next-page').show();
 
-        } else if (currentPage == 1 && totalPages > 0) {          
-          $('.next-page').show();
-          $('#first-page').html(currentPage).addClass('current-page').show();
-          $('#second-page').html(currentPage + 1).addClass('next-page').show();
+    //     } else if (currentPage == 1 && totalPages > 0) {          
+    //       $('.next-page').show();
+    //       $('#first-page').html(currentPage).addClass('current-page').show();
+    //       $('#second-page').html(currentPage + 1).addClass('next-page').show();
 
-          if (totalPages >= 3) {          
-            $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
-          }
-        }          
-      };
+    //       if (totalPages >= 3) {          
+    //         $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
+    //       }
+    //     }          
+    //   };
 
-      paginationBtnVisibility();
+    //   paginationBtnVisibility();
 
-      function renderPage(page) {
-          $('.row-items').hide();
-          $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
-          $('#pagination a').removeClass('active');
-          $('#pagination a').eq(page).addClass('active');
-          $('.prev-page').toggleClass('disabled', page === 1);
-          $('.next-page').toggleClass('disabled', page === totalPages);
-      }
+    //   function renderPage(page) {
+    //       $('.row-items').hide();
+    //       $('.row-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+    //       $('#pagination a').removeClass('active');
+    //       $('#pagination a').eq(page).addClass('active');
+    //       $('.prev-page').toggleClass('disabled', page === 1);
+    //       $('.next-page').toggleClass('disabled', page === totalPages);
+    //   }
 
-      $(document).on('click', '.next-page', function() {
-          if (currentPage < totalPages) {
-              currentPage++;
-              $('#current-page').html(currentPage);
-              paginationBtnVisibility();
-              renderPage(currentPage);
-          }
-      });
+    //   $(document).on('click', '.next-page', function() {
+    //       if (currentPage < totalPages) {
+    //           currentPage++;
+    //           $('#current-page').html(currentPage);
+    //           paginationBtnVisibility();
+    //           renderPage(currentPage);
+    //       }
+    //   });
 
-      $(document).on('click', '.upcoming-page', function() {
-          if (currentPage < totalPages - 1) {
-              currentPage += 2;
-              $('#current-page').html(currentPage);
-              paginationBtnVisibility();
-              renderPage(currentPage);
-          }
-      });
+    //   $(document).on('click', '.upcoming-page', function() {
+    //       if (currentPage < totalPages - 1) {
+    //           currentPage += 2;
+    //           $('#current-page').html(currentPage);
+    //           paginationBtnVisibility();
+    //           renderPage(currentPage);
+    //       }
+    //   });
 
-      $(document).on('click', '.prev-page', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            $('#current-page').html(currentPage);
-            paginationBtnVisibility();
-            renderPage(currentPage);
-        }
-      });
+    //   $(document).on('click', '.prev-page', function() {
+    //     if (currentPage > 1) {
+    //         currentPage--;
+    //         $('#current-page').html(currentPage);
+    //         paginationBtnVisibility();
+    //         renderPage(currentPage);
+    //     }
+    //   });
 
-      $(document).on('click', '.earlier-page', function() {
-        if (currentPage > 2) {
-            currentPage -= 2;
-            $('#current-page').html(currentPage);
-            paginationBtnVisibility();
-            renderPage(currentPage);
-        }
-      });
+    //   $(document).on('click', '.earlier-page', function() {
+    //     if (currentPage > 2) {
+    //         currentPage -= 2;
+    //         $('#current-page').html(currentPage);
+    //         paginationBtnVisibility();
+    //         renderPage(currentPage);
+    //     }
+    //   });
 
-      // Initialize the first page
-      renderPage(currentPage);
-    };
+    //   // Initialize the first page
+    //   renderPage(currentPage);
+    // };
 
-    paginator();
+    // paginator();
 
   });
 
@@ -607,6 +649,23 @@
       if (currentUrl != updatedUrl) {
         window.history.replaceState(null, '', updatedUrl);
       };
-  })
+
+      $('#sort-btn').click(function () {
+        if (!$('#pincode-input').val() && !$('#state-dropdown').val() && `{{latitude}}` && `{{longitude}}`) {
+          const latitude = `{{latitude}}`;
+          const longitude = `{{longitude}}`;
+          $('#csc-form').prop('action', `/centers_near_me/${latitude}/${longitude}`);
+        };
+        $('#csc-form').submit();
+      });
+
+      $('#search-btn').click(function (e) {
+        e.preventDefault();
+        $('.service').prop('checked', false);
+        $('#sort-dropdown').val('name');
+        $('#csc-form').submit();
+      })
+      
+  });
 </script>
 {% endblock scripts %}

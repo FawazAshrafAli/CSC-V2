@@ -2,6 +2,8 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
+{% block title_prefix %}Add Service{% endblock title_prefix %}
+
 <!-- Meta Tags Start -->
 {% block meta_description %}
 "Service Creation of Common Service Centres (CSC) in India"
@@ -11,6 +13,14 @@
 "Service Creation of Common Service Centres (CSC) in India"
 {% endblock meta_og_description %}
 <!-- Meta Tags Start -->
+
+{% block styles %}
+<!-- Ck Editor Start -->
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+<link rel="stylesheet" href="{% static 'ckeditor/ckeditor.css' %}">
+<!-- Ck Editor End -->
+{% endblock styles %}
 
 {% block content %}
 

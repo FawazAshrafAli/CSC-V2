@@ -8,6 +8,30 @@
 
 {% block styles %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<style>
+	h5 {
+		display: flex;
+	}
+	.invalid-span {
+		display: none;
+		color: red !important;
+	}
+	.is-invalid {
+		border: 1px solid red !important;
+	}
+	.is-valid {
+		border: 1px solid green !important;
+	}
+	.valid {
+		display: none;
+		color: green
+	}
+	.invalid {
+		display: none;
+		color: red;
+	}
+</style>
 {% endblock styles %}
 
 {% block content %}
@@ -71,12 +95,11 @@
 						</div>
 						<!-- Title -->
 						<div class="row with-forms">
-							<div class="col-md-6">
-								<h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i></h5>
-								<input class="search-field" type="text" name="name"
-									placeholder="Name of your CSC" required/>
+							<div class="col-md-4" id="name-div">
+								<h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i><span class="invalid-span">&nbsp; <i>Required</i></span></h5>
+								<input class="search-field" type="text" name="name" id="name-input" placeholder="Name of your CSC" required/>															
 							</div>
-							<div class="col-md-6">
+							<div class="col-md-4">
 								<h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i></h5>
 								<select class="chosen-select" id="name-type-dropdown" name="type"
 									data-placeholder="Common Service Centre (CSC)" required>
@@ -85,10 +108,15 @@
 									<option value="{{name_type.slug}}">{{name_type.type}}</option>
 									{% endfor %}
 								</select>
+								<span id="type-span"></span>
 							</div>
-							<h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>
-								Location Name</h5>
+							<div class="col-md-4">
+								<h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i></h5>
+								<input class="search-field" type="text" name="csc_reg_no" id="reg-no-input"
+									placeholder="CSC Registration Number" required/>
+							</div>
 						</div>
+						<h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>Location Name</h5>
 						<!-- Row -->
 						<div class="row with-forms">
 							<!-- Type -->
@@ -122,7 +150,7 @@
 										data-placeholder="Select State" required>
 										<option label="Select State"></option>
 										{% for state in states %}
-										<option value="{{state.pk}}">{{state.state}}</option>
+										<option value="{{state.state}}">{{state.state}}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -144,23 +172,23 @@
 							<!-- Row -->
 							<div class="row with-forms">
 								<!-- City -->
-								<div class="col-md-6">
-									<h5>Location</h5>
-									<input type="text" name="location" placeholder="Enter Location" required>
+								<div class="col-md-6" id="location-div">
+									<h5>Location <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
+									<input type="text" name="location" id="location-input" placeholder="Enter Location" required>									
 								</div>
 								<!-- Address -->
-								<div class="col-md-6">
-									<h5>Zip-Code</h5>
+								<div class="col-md-6" id="zipcode-div">
+									<h5>Zip-Code <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 									<input type="text" name="zipcode" placeholder="Enter Pincode" required>
 								</div>
 								<!-- Zip-Code -->
-								<div class="col-md-6">
-									<h5>Landmark / Building Name</h5>
+								<div class="col-md-6" id="landmark-div">
+									<h5>Landmark / Building Name <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 									<input type="text" name="landmark_or_building_name"
 										placeholder="e.g. 1st Floor, ABCD Building" required>
 								</div>
-								<div class="col-md-6">
-									<h5>Address</h5>
+								<div class="col-md-6" id="address-div">
+									<h5>Address <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 									<input type="text" name="address" placeholder="e.g. 964 School Street" required>
 								</div>
 							</div>
@@ -179,10 +207,12 @@
 							<div class="col-md-6">
 								<h5>Upload Logo</h5>
 								<input type="file" name="logo" required>
+								<span><i>Note: Maximum logo size allowed: 20 KB.</i></span>
 							</div>
 							<div class="col-md-6">
 								<h5>Upload Banner</h5>
 								<input type="file" name="banner" multiple required>
+								<span><i>Note: Maximum size for each banner image is 20 KB.</i></span>
 							</div>								
 						</div>
 					</div>
@@ -195,26 +225,26 @@
 							<h3><i class="sl sl-icon-docs"></i> Details</h3>
 						</div>
 						<!-- Description -->
-						<div class="form">
-							<h5>Description</h5>
+						<div class="form" id="description-div">
+							<h5>Description <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary"
 								spellcheck="true"></textarea>
 						</div>
 						<!-- Row -->
 					<div class="row with-forms">
 						<!-- Owner Name -->
-						<div class="col-md-4">
-							<h5>Owner Name</h5>
+						<div class="col-md-4" id="owner-div">
+							<h5>Owner Name <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="text" name="owner" placeholder="Owner Name" required>
 						</div>
 						<!-- Email Address -->
-						<div class="col-md-4">
-							<h5>E-Mail ID</h5>
+						<div class="col-md-4" id="email-div">
+							<h5>E-Mail ID <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="email" name="email" placeholder="E-Mail ID" required>
 						</div>
 						<!-- Website -->
-						<div class="col-md-4">
-							<h5>Website <span>(optional)</span></h5>
+						<div class="col-md-4" id="website-div">
+							<h5>Website <span>(optional)</span> <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="text" name="website" placeholder="www.domainname.com">
 						</div>
 					</div>
@@ -222,16 +252,16 @@
 					<!-- Row -->
 					<div class="row with-forms">
 						<!-- Phone -->
-						<div class="col-md-4">
-							<h5>Contact Number</h5>
+						<div class="col-md-4" id="contact-div">
+							<h5>Contact Number <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="text" name="contact_number" placeholder="Contact Number" required>
 						</div>
-						<div class="col-md-4">
-							<h5>Mobile Number</h5>
+						<div class="col-md-4" id="mobile-div">
+							<h5>Mobile Number <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="text" name="mobile_number" placeholder="Mobile Number" required>
 						</div>
-						<div class="col-md-4">
-							<h5>WhatsApp Number</h5>
+						<div class="col-md-4" id="whatsapp-div">
+							<h5>WhatsApp Number <span class="invalid-span">&nbsp; <i>Required</i></span></h5>
 							<input type="text" name="whatsapp_number" placeholder="WhatsApp Number" required>
 						</div>
 							<div class="col-md-12">
@@ -743,5 +773,169 @@
             });
         });        
     });
+</script>
+
+<script>
+    $(document).ready(() => {
+        
+        const namePattern = /^[\p{L}\s'-]+$/u;
+        const slugPattern = /^[a-zA-Z0-9_-]+$/;
+        const phonePattern = /^(?:\+91|91|0)?(?:[789]\d{9}|\(?\d{2,5}\)?\d{6,8})$/;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+		const websitePattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(\/[^\s]*)?$/;
+
+        function validateForm() {  
+            let data = {}   
+            let formValid = true       
+
+            let name = $('#name-input-div input').val().trim();
+			let typeDropdown = $('#name-type-dropdown').val().trim();
+		 	let regNoInput = $('#reg-no-input').val().trim();
+
+            if (!name) {
+                $('#name-input').addClass('is-invalid');
+                $('#name-input').focus();
+				$("#name-span").addClass("invalid").html("This field is required.").show();
+                formValid = false;
+
+            } else {
+                $('#name-input').addClass('is-valid');
+                $('#name-input').blur();
+				$("#name-span").css("display", "none")
+
+                data["name"] = name
+            }            
+        }
+
+		// ZIP Code validation function for India
+		function validateZipCode(zipcode) {
+			const zipRegex = /^\d{6}$/;
+			return zipRegex.test(zipcode);
+		}
+
+		// Owner name validation function
+		function validateOwner(owner) {
+			return namePattern.test(owner);
+		}
+
+		function validateEmail(email) {
+			return emailPattern.test(email);
+		}
+
+		function validateWebsite(website) {
+			return websitePattern.test(website)
+		}
+
+		function validatePhone(phone) {
+			return phonePattern.test(phone)
+		}
+
+		// Input Validation
+		function validateInput(parentDiv) {
+			$(`${parentDiv} input, ${parentDiv} textarea`).on('input', function () {
+				const value = $(this).val();
+
+				// Specific validation for ZIP code
+				if (parentDiv === "#zipcode-div") {
+					if (validateZipCode(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i>Required</i>").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i>Please enter a valid 6-digit pincode</i>").show();
+					}
+				} 
+				// Specific validation for Owner's Name
+				else if (parentDiv === "#owner-div") {
+					if (validateOwner(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i>Required</i>").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i><small style='color: red;'>Please enter a valid name using letters from any language, spaces, apostrophes, or hyphens</small></i>").show();
+					}
+				} 
+
+				else if (parentDiv === "#email-div") {
+					if (validateEmail(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i>Required</i>").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i><small style='color: red;'>Please enter a valid email address</small></i>").show();
+					}
+				} 
+
+				else if (parentDiv === "#website-div") {
+					if (!value) {
+						$(this).removeClass('is-invalid').removeClass('is-valid');
+						$(`${parentDiv} .invalid-span`).hide();
+					}
+					else if (validateWebsite(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).empty("&nbsp; <i>Required</i>").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i><small style='color: red;'>Please enter a valid website URL that starts with 'http://' or 'https://'.</small></i>").show();
+					}
+				} 
+
+				else if (parentDiv === "#contact-div" || parentDiv === "#mobile-div" || parentDiv === "#whatsapp-div") {
+					console.log("entered")
+					if (validatePhone(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i>Required</i>").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; <i><small style='color: red;'>Please enter a valid phone number. Ensure it contains only digits.</small></i>").show();
+					}
+				} 
+
+				// General validation for other fields
+				else {
+					if (!value) {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).show();
+					} else {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).hide();
+					}
+				}
+			});
+		}
+
+		// Applying validation to different input fields
+		validateInput('#name-div');
+		validateInput('#location-div');
+		validateInput('#zipcode-div');
+		validateInput('#landmark-div');
+		validateInput('#address-div');
+		validateInput('#description-div');
+		validateInput('#owner-div');
+		validateInput('#email-div');
+		validateInput('#website-div');
+		validateInput('#contact-div');
+		validateInput('#mobile-div');
+		validateInput('#whatsapp-div');
+
+
+
+
+		
+		// CSC Type Validation
+		$('#name-type-dropdown').on('change', function () {
+			if (!$(this).val()) {
+				$(this).removeClass('is-valid').addClass('is-invalid');
+				$('#name_type_dropdown_chosen .chosen-single').css({"border": "1px solid red"});
+				$("#type-span").addClass("invalid").css("display", "block").html("This field is required.");
+			} else {
+				$(this).removeClass('is-invalid').addClass('is-valid');
+				$('#name_type_dropdown_chosen .chosen-single').css({"border": "1px solid green"});
+				$("#type-span").css("display", "none");
+			}
+			$('#name-type-dropdown').trigger('chosen:updated');
+		});
+
+    })
 </script>
 {% endblock scripts %}

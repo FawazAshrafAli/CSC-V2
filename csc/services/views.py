@@ -76,11 +76,12 @@ class CreateServiceEnquiryView(DetailServiceView, CreateView):
                     messages.warning(request, f"{field_name} is required")
                     return redirect(self.get_redirect_url())
 
-            ServiceEnquiry.objects.create(
+            enquiry_obj = ServiceEnquiry.objects.create(
                 applicant_name=applicant_name, applicant_email=applicant_email,
                 applicant_phone=applicant_phone, location=location, message=message,
                 service = service
                 )
+            print(enquiry_obj)
             messages.success(request, "Service Enquiry submitted successfully")
             return redirect(self.get_success_url())
         

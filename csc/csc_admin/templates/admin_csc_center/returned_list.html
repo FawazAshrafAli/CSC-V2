@@ -50,9 +50,11 @@
         width: 100%;
         -webkit-overflow-scrolling: touch;
     }
-
-    th,td {
-        text-align:center;
+    th, td {
+        vertical-align: top;
+    }
+    .text-center {
+        text-align: center;
     }
 </style>
 {% endblock styles %}
@@ -107,8 +109,9 @@
                                 <th>Owner</th>
                                 <th>Location</th>
                                 <th>Email</th>
-                                <th>Phone</th>
+                                <th class="text-center">Phone</th>
                                 <th>Feedback</th>
+                                <th class="text-center">Date &amp; Time</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -119,10 +122,11 @@
                                 <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
                                 <td><small>&nbsp;{{ center.csc_center.name }}</small></td>
                                 <td><small>{{center.csc_center.owner}}</small></td>
-                                <td><small>{{center.csc_center.partial_address}}</small></td>
+                                <td><small>{{center.csc_center.get_vertical_partial_address|safe}}</small></td>
                                 <td><small>{{center.csc_center.email}}</small></td>
-                                <td><small>{{center.csc_center.contact_number}}</small></td>
+                                <td class="text-center"><small>{{center.csc_center.contact_number}}</small></td>
                                 <td style="max-width:360px;"><small>{{center.feedback}}</small></td>
+                                <td class="text-center"><small>{{center.created}}</small></td>
                                 <style>
                                     #tbody-tr-{{center.pk}}:hover #remove-btn-{{center.pk}} {
                                         height: 30px;

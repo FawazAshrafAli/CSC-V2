@@ -76,20 +76,25 @@
                             </div>
                             <!-- Title -->
                             <div class="row with-forms">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i></h5>
                                     <input class="search-field" type="text" name="name"
-                                        placeholder="Name of your CSC" value={{center_obj.name}} required/>
+                                        placeholder="Name of your CSC" value={{center.name}} required/>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i></h5>
                                     <select class="chosen-select" id="name-type-dropdown" name="type"
                                         data-placeholder="Common Service Centre (CSC)" required>
-                                        <option label="CSC Name Type"></option>
+                                        <option label="CSC Name Type" value="" selected hidden disabled>CSC Name Type</option>
                                         {% for name_type in name_types %}
-                                        <option value="{{name_type.slug}}" {% if name_type.slug == center_obj.type.slug %} selected {% endif %}>{{name_type.type}}</option>
+                                        <option value="{{name_type.slug}}" {% if name_type.slug == center.type.slug %} selected {% endif %}>{{name_type.type}}</option>
                                         {% endfor %}
                                     </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i></h5>
+                                    <input class="search-field" type="text" name="csc_reg_no" value="{% if center.csc_reg_no %}{{center.csc_reg_no}}{% endif %}"
+                                        placeholder="CSC Registration Number" required/>
                                 </div>
                                 <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>
                                     Location Name</h5>
@@ -127,7 +132,7 @@
                                             data-placeholder="Select State" required>
                                             <option label="Select State"></option>
                                             {% for state in states %}
-                                            <option value="{{state.pk}}" {% if state.pk == center_obj.state.pk %} selected {% endif %} >{{state.state}}</option>
+                                            <option value="{{state.state}}" {% if state.pk == center_obj.state.pk %} selected {% endif %} >{{state.state}}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

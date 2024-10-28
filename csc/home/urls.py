@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     Error404,
     HomePageView, SearchCscCenterView,
-    FilterAndSortCscCenterView, CscCenterDetailView,
+    CscCenterDetailView,
     NearMeCscCenterView, ServiceRequestView, ProductRequestView, 
     KeywordsBasedCscCentersView, PrivacyPolicyView, TermAndConditionView,
     ShippingAndDeliveryPolicyView, CancellationAndRefundPolicyView
@@ -27,7 +27,6 @@ urlpatterns = [
     path('centers_near_me/<latitude>/<longitude>', NearMeCscCenterView.as_view(), name="centers_near_me"),
 
     path('csc_centers/', SearchCscCenterView.as_view(), name="csc_centers"),
-    path('filter_and_sort_centers/', FilterAndSortCscCenterView.as_view(), name="filter_and_sort_csc"),
     path("<str:slug>/", CscCenterDetailView.as_view(), name="csc_center"),
 
 ]

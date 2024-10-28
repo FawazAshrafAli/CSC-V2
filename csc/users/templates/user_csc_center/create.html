@@ -59,12 +59,12 @@
                             </div>
                             <!-- Title -->
                             <div class="row with-forms">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i></h5>
                                     <input class="search-field" type="text" name="name"
                                         placeholder="Name of your CSC" required/>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i></h5>
                                     <select class="chosen-select" id="name-type-dropdown" name="type"
                                         data-placeholder="Common Service Centre (CSC)" required>
@@ -73,6 +73,11 @@
                                         <option value="{{name_type.slug}}">{{name_type.type}}</option>
                                         {% endfor %}
                                     </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i></h5>
+                                    <input class="search-field" type="text" name="csc_reg_no"
+                                        placeholder="CSC Registration Number" required/>
                                 </div>
                                 <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>
                                     Location Name</h5>
@@ -110,7 +115,7 @@
                                             data-placeholder="Select State" required>
                                             <option label="Select State"></option>
                                             {% for state in states %}
-                                            <option value="{{state.pk}}">{{state.state}}</option>
+                                            <option value="{{state.state}}">{{state.state}}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

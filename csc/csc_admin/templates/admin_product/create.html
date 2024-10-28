@@ -105,14 +105,10 @@
 {% block scripts %}
 
 
-
- 
-<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-
 <!-- w3 -->
 <!-- Populate District Dropdown -->
-<script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script>
+{% comment %} <script src="{% static 'w3/admin_csc_center/js/populateDistricts.js' %}"></script> {% endcomment %}
 
 <!-- Populate Block Dropdown -->
-<script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script>
+{% comment %} <script src="{% static 'w3/admin_csc_center/js/populateBlocks.js' %}"></script> {% endcomment %}
 {% endblock scripts %}

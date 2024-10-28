@@ -35,11 +35,4 @@ $(document).ready(() => {
         
         populateBlocks(stateName, districtName);
     });
-
-    if ($('#state-dropdown').val() && $('#district-dropdown').val()) {
-        const districtName = $(this).val();
-        const stateName = $('#state-dropdown').val();
-        
-        populateBlocks(stateName, districtName);
-    }
 });

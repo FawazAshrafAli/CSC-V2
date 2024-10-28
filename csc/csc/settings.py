@@ -361,3 +361,6 @@ SITE_DOMAIN = 'cscindia.info'
 # Razor Pay
 RAZORPAY_KEY_ID = "rzp_test_m4LydPsT6mF9n1"
 RAZORPAY_KEY_SECRET = "p90CiA9zQAcNEI74kjLvpph5"
+
+
+MAX_UPLOAD_SIZE = 5242880  # 5 MB limit (in bytes)

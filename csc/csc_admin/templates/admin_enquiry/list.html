@@ -34,6 +34,9 @@
         height: 100%;
         padding: 5px 10px;
     }
+    .text-center {
+      text-align: center;
+    }
 </style>
 {% endblock styles %}
 
@@ -90,22 +93,24 @@
 						<tr>
 							<th>No</th>
 							<th>&nbsp;Name</th>
-              <th style="text-align:center;">Email</th>
-              <th style="text-align:center;">Phone</th>
-              <th style="text-align:center;">Location</th>
-              <th style="text-align:center;">Message</th>
+              <th>Email</th>
+              <th class="text-center">Phone</th>
+              <th>Location</th>
+              <th>Message</th>
+              <th class="text-center">Date &amp; Time</th>
 							<th></th>
 						</tr>
 					</thead>
 					<tbody id="enquiry-tbody">
 						{% for enquiry in enquiries %}
 						<tr class="enquiry-items" style="vertical-align: text-top;">
-							<td>{{ forloop.counter }}</td>
-							<td>&nbsp;{{ enquiry.name }}</td>
-              <td style="text-align:center;"><a href="mailto:{{enquiry.email}}" style="color: indigo;">{{ enquiry.email }}</a></td>
-              <td style="text-align:center;"><a target="_blank" href="tel:+91{{enquiry.phone}}" style="color: indigo;">{{ enquiry.phone }}</a></td>
-              <td style="text-align:center;">{{ enquiry.location }}</td>
-              <td style="max-width: 360px">{{ enquiry.message }}</td>
+							<td><small>{{ forloop.counter }}</small></td>
+							<td><small>&nbsp;{{ enquiry.name }}</small></td>
+              <td><small><a href="mailto:{{enquiry.email}}" style="color: indigo;">{{ enquiry.email }}</a></small></td>
+              <td class="text-center"><small><a target="_blank" href="tel:+91{{enquiry.phone}}" style="color: indigo;">{{ enquiry.phone }}</a></small></td>
+              <td><small>{{ enquiry.location }}</small></td>
+              <td style="max-width: 360px"><small>{{ enquiry.message }}</small></td>
+              <td class="text-center"><small>{{ enquiry.created }}</small></td>
 							<td style="text-align: right; padding-right: 10px; vertical-align: middle;"><button class="button gray" onclick="event.stopPropagation(); toggleFaqDeletion(`{{enquiry.slug}}`, `{{enquiry.name}}`)"><i class="sl sl-icon-close"></i> Delete</button></td>
 						</tr>
 						{% endfor %}

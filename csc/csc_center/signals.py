@@ -1,6 +1,6 @@
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
-from .models import CscKeyword, CscCenter
+from .models import CscKeyword, CscCenter, CscNameType
 from services.models import Service
 from django.db.models import Count
 import logging
@@ -27,6 +27,19 @@ def create_initial_keywords(sender, **kwargs):
                     logger.info(f"Assigned keywords to CSC Center: {csc_center.name}")
     except Exception as e:
         logger.exception(f"Error creating initial keywords for csc centers: {str(e)}")
+
+
+@receiver(post_migrate)
+def create_initial_name_type(sender, **kwargs):
+    try:
+        name_types = ["CSC", "Common Service Center", "Online Services", "Digital Seva (CSC)"]
+        if sender.name == "csc_center":
+            if CscNameType.objects.count() < 4:
+                for type in name_types:                    
+                    CscNameType.objects.get_or_create(type=type)
+                    logger.info(f"Created Name Type: {type}")
+    except Exception as e:
+        logger.exception(f"Error creating initial name types: {str(e)}")
 
 
 

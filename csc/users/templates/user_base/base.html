@@ -189,7 +189,7 @@
 					
 					<!-- User Menu -->
 					<div class="user-menu">
-						<div class="user-name" id="current-csc-center"><span><img src="{% static 'w3/images/no_image.png' %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> Loading . . .</div>
+						<div class="user-name" id="current-csc-center"><span><img src="{% if request.user.image %} {{request.user.image.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> Loading . . .</div>
 						<ul>
 							<li><a href="#" id="switch-csc-btn"><i class="fa fa-exchange-alt"></i> Switch Center</a></li>							
 							<li><a href="{% url 'users:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>
@@ -341,7 +341,7 @@
 		})
 
 		function defaultCurrentCsc() {
-			$('#current-csc-center').html(`<span><img src="{% if center.logo %} {{center.logo.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> {{center.name}}`);
+			$('#current-csc-center').html(`<span><img src="{% if request.user.image %} {{request.user.image.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> {{center.name|slice:':5'}}..`);
 		}
 
 		// Get the logo and name of the current center
@@ -353,7 +353,9 @@
 				data: {'center_slug': centerSlug},
 				success: response => {
 					if (response) {
-						$('#current-csc-center').html(`<span><img src="${response.current_center_logo ? response.current_center_logo : '/static/images/dashboard-avatar.jpg'}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> ${response.current_center_name}`);
+						let image_path = `{% if request.user.image %}{{ request.user.image.url }}{% else %}/static/images/dashboard-avatar.jpg{% endif %}`;						
+
+						$('#current-csc-center').html(`<span><img src="${image_path}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> ${response.current_center_name.slice(0,5)}..`);
 					} else {
 						defaultCurrentCsc();
 					}

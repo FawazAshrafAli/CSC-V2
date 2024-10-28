@@ -102,24 +102,10 @@
                                     </div>
                                 </div>
                                 <!-- Item -->
-                                {% comment %} <div class="col-lg-3 col-md-6">
-                                    <div class="dashboard-stat color-1">
-                                        <div class="dashboard-stat-content"><h4 id="services-count"><span style="font-size: 15px;">Loading . . .</span></h4> <span>Services</span></div>
-                                        <div class="dashboard-stat-icon"><i class="fa fa-handshake"></i></div>
-                                    </div>
-                                </div>
-                            
-                                <!-- Item -->
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="dashboard-stat color-2">
-                                        <div class="dashboard-stat-content"><h4 id="products-count"><span style="font-size: 15px;">Loading . . .</span></h4> <span>Products</span></div>
-                                        <div class="dashboard-stat-icon"><i class="fa fa-box"></i></div>
-                                    </div>
-                                </div> {% endcomment %}
                             
                                 <!-- Item -->
                                 <div class="col-lg-6 col-md-6">
-                                    <div class="dashboard-stat color-3" style="color: black; background-color: #F4EA56">
+                                    <div class="dashboard-stat color-3" id="service-enquiry-tile" style="color: black; background-color: #F4EA56">
                                         <div class="dashboard-stat-content"><h4 id="service-enquiries-count" style="color:black;"><span style="font-size: 15px;">Loading . . .</span></h4> <span>Service Enquiries</span></div>
                                         <div class="dashboard-stat-icon"><i class="fa fa-question-circle"></i></div>
                                     </div>
@@ -127,7 +113,7 @@
                             
                                 <!-- Item -->
                                 <div class="col-lg-6 col-md-6">
-                                    <div class="dashboard-stat color-4" style="color: black; background-color: #90D5FF">
+                                    <div class="dashboard-stat color-4" id="product-enquiry-tile" style="color: black; background-color: #90D5FF">
                                         <div class="dashboard-stat-content"><h4 id="product-enquiries-count" style="color:black;"><span style="font-size: 15px;">Loading . . .</span></h4> <span>Product Enquiries</span></div>
                                         <div class="dashboard-stat-icon"><i class="fa fa-cart-plus"></i></div>
                                     </div>
@@ -223,7 +209,17 @@
             getCenterData(`{{csc_center.slug}}`)
         }
 
-        
+
+
+
+
+        $(document).on('click', '#service-enquiry-tile', function () {
+            window.location = '/users/service_enquiries/';
+        });
+
+        $(document).on('click', '#product-enquiry-tile', function () {
+            window.location = '/users/product_enquiries/';
+        });
     });    
     
     // Remove service enquiry from home dashboard defaultHomeView

@@ -6,22 +6,24 @@ from services.models import Service
 
 class CscCenterAction(models.Model):
     csc_center = models.ForeignKey(CscCenter, on_delete=models.CASCADE)
-    rejection_reason = models.TextField()
-    feedback = models.TextField()
+    rejection_reason = models.TextField(null=True, blank=True)
+    feedback = models.TextField(null=True, blank=True)
 
-    slug = models.SlugField(blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True, max_length=250)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.csc_center.name)
-            self.slug = base_slug
+            base_slug = slugify(self.csc_center.slug)
+            slug = base_slug
             count = 1
-            while CscCenter.objects.filter(slug = self.slug).exists():
-                self.slug = f"{self.slug}-{count}"
+            while CscCenter.objects.filter(slug = slug).exists():
+                slug = f"{base_slug}-{count}"
                 count += 1
+            
+            self.slug = slug
 
         super().save(*args, **kwargs)
 

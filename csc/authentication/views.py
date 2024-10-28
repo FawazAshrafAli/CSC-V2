@@ -52,7 +52,7 @@ class AuthenticationView(TemplateView):
                     user_list = User.objects.filter(Q(email = username) | Q(phone = username))
                     user_list.exists()
                     user_obj = user_list.first()
-                    if user_obj.check_password(password):
+                    if user_obj and user_obj.check_password(password):
                         user = user_obj                    
                 if user is not None:
                     login(request, user) 
@@ -239,11 +239,14 @@ class UserRegistrationView(CreateView):
             user.verification_token = str(uuid.uuid4())
             user.save()
 
-            send_verification_email.delay(user)
+            base_url = f"https://{request.get_host()}"
+
+            # send_verification_email.delay(request, user)
+            send_verification_email.delay(user.id, base_url)
             messages.success(request, "A verification email has been send to your email address.")        
             return redirect(self.success_url)
-        except Exception:
-            logger.exception("Error in user registration")
+        except Exception as e:
+            logger.exception(f"Error in user registration: {e}")
             return redirect(self.redirect_url)
         
 

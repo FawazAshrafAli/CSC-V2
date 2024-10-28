@@ -5,7 +5,6 @@ function populateDistricts(stateName) {
         data: {'state_name': stateName},
         dataType : 'json',
         success: data => {
-            console.log(data);
 
             $('#district-dropdown').chosen('destroy');
 
@@ -41,14 +40,10 @@ function populateDistricts(stateName) {
     });
 };
 
-$(document).ready(() => {
+$(document).ready(function () {
     $('#state-dropdown').on('change', function() {
         const stateName = $(this).val();
         populateDistricts(stateName);        
     });
 
-    if ($('#state-dropdown').val()) {
-        const stateName = $('#state-dropdown').val();
-        populateDistricts(stateName); 
-    }
 });

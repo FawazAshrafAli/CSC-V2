@@ -34,6 +34,9 @@
 	  height: 100%;
 	  padding: 2px 10px;
 	}
+	.text-center {
+		text-align:center;
+	}
   </style>
 
 <!-- Titlebar -->
@@ -122,11 +125,12 @@
 								<thead>
 								<tr>
 									<th>No</th>
-									<th>Applicant Name</th>
-									<th style="text-align:center;">Service</th>
-									<th style="text-align:center;">Applicant Email</th>
-									<th style="text-align:center;">Applicant Phone</th>
-									<th style="text-align:center;">Message</th>
+									<th>&nbsp;Applicant Name</th>
+									<th>Service</th>
+									<th>Applicant Email</th>
+									<th class="text-center">Applicant Phone</th>
+									<th>Message</th>
+									<th class="text-center">Date &amp; Time</th>
 									<th></th>
 								</tr>
 								</thead>
@@ -181,10 +185,11 @@
 									>
 										<td>${ enquiry.count }</td>
 										<td>&nbsp;${ enquiry.applicant_name }</td>
-										<td style="text-align:center;">${ enquiry.service }</td>
-										<td style="text-align:center;">${ enquiry.applicant_email }</td>
-										<td style="text-align:center;">${ enquiry.applicant_phone }</td>
-										<td style="max-width: 360px">${ enquiry.message }</td>
+										<td>${ enquiry.service }</td>
+										<td>${ enquiry.applicant_email }</td>
+										<td class="text-center">${ enquiry.applicant_phone }</td>
+										<td>${ enquiry.message }</td>
+										<td class="text-center">${ enquiry.created }</td>
 										<td>
 										<button
 											class="button gray"

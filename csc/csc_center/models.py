@@ -10,6 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Max
 from django.urls import reverse
+import uuid
 
 class State(models.Model):
     state = models.CharField(max_length=150)
@@ -171,6 +172,7 @@ def csc_id_generator():
 
 class CscCenter(models.Model):
     id = models.CharField(max_length=50, primary_key=True, default=csc_id_generator)
+    csc_reg_no = models.CharField(max_length = 50, null = True, blank = True)
     qr_code_image = models.ImageField(upload_to='csc_qr_codes/', blank=True, null=True)
 
     name = models.CharField(max_length=150)
@@ -253,13 +255,22 @@ class CscCenter(models.Model):
             self.keywords.add(CscKeyword.objects.earliest('created'))
 
         if not self.slug:
-            base_slug = slugify(self.name)
-            slug = base_slug
-            counter = 1
-            while CscCenter.objects.filter(slug = slug).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug 
+            if self.name:
+                base_slug = slugify(self.name)
+
+                if not base_slug or base_slug == "":
+                    self.slug = str(uuid.uuid4())
+                
+                else:
+                    slug = base_slug
+                    count = 1
+                    while CscCenter.objects.filter(slug = slug).exists():
+                        slug = f"{base_slug}-{count}"
+                        count += 1
+                    self.slug = slug
+            else:
+                self.slug = str(uuid.uuid4())
+
         super().save(*args, **kwargs)
 
     @property
@@ -279,11 +290,26 @@ class CscCenter(models.Model):
         elif self.location:
             return self.location
         return None
-
+    
     @property
     def partial_address(self):
-        if self.block and self.district and self.state:
-            return f"{self.block}, {self.district}, {self.state}"
+        block = self.block.block if self.block and self.block.block != "nan" else None
+        district = self.district.district if self.district and self.district.district != "nan" else None
+        state = self.state.state if self.state and self.state.state != "nan" else None
+
+        parts = [block, district, state]
+        address = ", ".join(part for part in parts if part)
+        return address if address else None
+
+    @property
+    def get_vertical_partial_address(self):
+        block = self.block.block if self.block and self.block.block != "nan" else None
+        district = self.district.district if self.district and self.district.district != "nan" else None
+        state = self.state.state if self.state and self.state.state != "nan" else None
+
+        parts = [block, district, state]
+        address = ",<br>".join(part for part in parts if part)
+        return address if address else None
         
     
     @property
@@ -424,4 +450,3 @@ class Image(models.Model):
     name = models.CharField(max_length=150, default="No Image")
     image = models.ImageField(upload_to="rough/", blank=True, null=True)
     banner = models.ImageField(upload_to="rough_banner/", blank=True, null=True)
-

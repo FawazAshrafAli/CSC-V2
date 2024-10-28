@@ -1,6 +1,6 @@
 import requests
 from django.shortcuts import redirect, get_object_or_404, render
-from django.http import JsonResponse, Http404
+from django.http import Http404
 from django.views.generic import TemplateView, View, DetailView, ListView, CreateView
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
@@ -8,7 +8,8 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.contrib import messages
 from urllib.parse import quote
-from django.conf import settings
+from django.db.models import Count
+from django.views.decorators.csrf import csrf_exempt
 import logging
 
 
@@ -29,6 +30,7 @@ class Error404(TemplateView):
 class BaseHomeView(View):
     def get_context_data(self, **kwargs):
         context = {}
+        context = super().get_context_data(**kwargs)
 
         try:
             services = Service.objects.all()
@@ -75,177 +77,195 @@ class HomePageView(BaseHomeView, TemplateView):
         return context
     
 
-class SearchCscCenterView(HomePageView, ListView):
+class SearchCscCenterView(BaseHomeView, ListView):
     model = CscCenter
     template_name = 'home/list.html'
-    redirect_url = reverse_lazy('home:view')
+    paginate_by = 9
+    context_object_name = "centers"
 
     def encode_parameter(self, param):
         if param:
             return quote(param)
         return None
-    
-    def initial(self, request, *args, **kwargs):
-        try:
-            pincode = request.GET.get('pincode', None)
-            state = request.GET.get('state', None)
-            district = request.GET.get('district', None)
-            block = request.GET.get('block', None)
 
-            context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            pincode = self.request.GET.get('pincode')
+            state_name = self.request.GET.get('state')
+            district_name = self.request.GET.get('district')
+            block_name = self.request.GET.get('block')
+            listing = self.request.GET.get('listing', 'name')
+            services = self.request.GET.getlist('service', None)
+
+            context["service_list"] = services
+
+            context['listing'] = listing
 
             if pincode:
-                centers = CscCenter.objects.filter(zipcode = pincode, is_active = True)
                 context['pincode'] = pincode
 
-                if len(centers) > 0 or (not state and not district and not block):
-                    return centers, context
+            state_obj, district_obj, block_obj = None, None, None
 
-            if state:
-                try:
-                    state = get_object_or_404(State, state=state)
-                    kwargs['state'] = state
-                except Http404:
-                    pass
+            if state_name:
+                state_obj = get_object_or_404(State, state=state_name)
 
-            if district:
-                try:
-                    district = get_object_or_404(District, district=district)
-                    kwargs['district'] = district
-                except Http404:
-                    pass
+            if district_name:
+                district_obj = get_object_or_404(District, district=district_name)
 
-            if block:
-                try:
-                    block = get_object_or_404(Block, block=block)
-                    kwargs['block'] = block
-                except Http404:
-                    pass
+            if block_name:
+                block_obj = get_object_or_404(Block, block=block_name)
 
-            kwargs['is_active'] = True
-            centers = CscCenter.objects.filter(**kwargs)
-
-            if block:
-                location = block
-            elif district:
-                location = district
-            elif state:
-                location = state
-            else:
-                location = None
+            location = block_obj or district_obj or state_obj
 
             context.update({
-                'state_obj': state if state else None,
-                'district_obj': district if district else None,
-                'block_obj': block if block else None,
-                "meta_state": self.encode_parameter(state.state) if state else None,
-                "meta_district": self.encode_parameter(district.district) if district else None,
-                "meta_block": self.encode_parameter(block.block) if block else None,
+                'state_obj': state_obj,
+                'district_obj': district_obj,
+                'block_obj': block_obj,
+                'meta_state': self.encode_parameter(state_obj.state) if state_obj else None,
+                'meta_district': self.encode_parameter(district_obj.district) if district_obj else None,
+                'meta_block': self.encode_parameter(block_obj.block) if block_obj else None,
                 'location': location,
-                'districts': District.objects.filter(state = state) if state else None,
-                'blocks': Block.objects.filter(state = state, district = district) if state and district else None,
-                })
-
-            return centers, context
+                'districts': District.objects.filter(state=state_obj) if state_obj else None,
+                'blocks': Block.objects.filter(state=state_obj, district=district_obj) if state_obj and district_obj else None,
+            })
         except Exception as e:
-            logger.exception("Error in getting center dat and context data in csc center search view, %s", e)
-            return [], {}
+            logger.exception(f"Error in fetching context data of search csc center view: {e}")
+
+        return context
+
     
-    def get(self, request, *args, **kwargs):
-        try:            
-            centers, context = self.initial(request, *args, **kwargs)
-            centers = centers.order_by('name')
-            context.update({
-                'centers': centers,          
-                })
-            return render(request, self.template_name, context)
-        except Exception as e:
-            logger.exception("Error in rendering csc center search view: %s", e)
-            messages.error(request, "Something went wrong")
-            return redirect(self.redirect_url)    
-
-
-class FilterAndSortCscCenterView(SearchCscCenterView):
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
         try:
-            services = request.GET.getlist('services[]', None)
-            listing = request.GET.get('listing', None)
+            pincode = self.request.GET.get('pincode')
+            state_name = self.request.GET.get('state')
+            district_name = self.request.GET.get('district')
+            block_name = self.request.GET.get('block')
+            listing = self.request.GET.get('listing', 'name')
+            services = self.request.GET.getlist('service', None)        
 
-            centers, context = self.initial(request, *args, **kwargs)
+            service_list = []
 
-            filtered_centers = centers
+            if services:
+                for service in services:
+                    try:
+                        service_obj = get_object_or_404(Service, slug = service)            
+                        service_list.append(service_obj.id)
+                    except Http404:
+                        continue
+            
+            filters = {'is_active': True}
 
-            for center in centers:
-                set_services = set()
-                for service in center.services.all():
-                    set_services.add(service.slug)
-                if not set(services).issubset(set_services):
-                    filtered_centers = filtered_centers.exclude(pk=center.pk)
+            if pincode:
+                centers = CscCenter.objects.filter(zipcode=pincode, **filters)
 
-            filtered_centers = filtered_centers.order_by(listing)
+                if services:
+                    centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))
 
-            list_centers = []
-            for center in filtered_centers:
-                list_centers.append({
-                    "pk": center.pk,
-                    "full_name": center.full_name,
-                    "logo": center.logo.url if center.logo else None,
-                    "absolute_url": center.get_absolute_url,
-                    "partial_address": center.partial_address
-                })
+                if centers.exists() or not (state_name or district_name or block_name):
+                    return centers.order_by(listing)
 
-            data = {
-                'message': 'success',
-                "centers": list_centers,
-            }
+            if state_name:
+                state = get_object_or_404(State, state=state_name)
+                filters['state'] = state
 
-            return JsonResponse(data)
+            if district_name:
+                district = get_object_or_404(District, district=district_name)
+                filters['district'] = district
+
+            if block_name:
+                block = get_object_or_404(Block, block=block_name)
+                filters['block'] = block
+
+            centers = CscCenter.objects.filter(**filters).order_by(listing)
+
+            if services:
+                centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))
+
+            return centers
         
         except Exception as e:
-            logger.exception("Error in rendering filtered csc center search view: %s", e)
-            return JsonResponse({"error": "Error in rendering filtered csc center search view."})
-
+            logger.exception(f"Error in fetching queryset of search csc center view: {e}")
+            messages.error(self.request, "Server Error! Please try again later.")
+            return None
 
 @method_decorator(never_cache, name="dispatch")
-class NearMeCscCenterView(BaseHomeView, View):
+class NearMeCscCenterView(BaseHomeView, ListView):
     model = CscCenter
     template_name = 'home/list.html'
+    paginate_by = 9
+    context_object_name = "centers"    
     redirect_url = reverse_lazy('home:view')
 
-    def get(self, request, *args, **kwargs):
+    def get_county(self):
+        latitude = self.kwargs['latitude']
+        longitude = self.kwargs['longitude']
+
+        if latitude and longitude:            
+            api_key = '1b4ea0d7dc5f4cffb9dbd971a896a71c'
+
+            url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
+
+            response = requests.get(url)
+            data = response.json()
+
+            if data['results']:
+                county = data['results'][0]['components']['county']
+
+                return county
+            
+        return None
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         try:
-            latitude = self.kwargs['latitude']
-            longitude = self.kwargs['longitude']
+            services = self.request.GET.getlist('service', None)
 
-            context = self.get_context_data(**kwargs)
+            context["service_list"] = services
 
+            county = self.get_county()
 
-            if latitude and longitude:            
-                api_key = '1b4ea0d7dc5f4cffb9dbd971a896a71c'
-
-                url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
-
-                response = requests.get(url)
-                data = response.json()
-
-                if data['results']:
-                    county = data['results'][0]['components']['county']
-                    
-                    context.update({
-                        'location': county,
-                        'states': State.objects.all()
-                    })
-
-                    if county:
-                        centers = CscCenter.objects.filter(block__block = county, is_active = True)
-                        context['centers'] = centers
-                        return render(request, self.template_name, context)
-                    
+            if county:
+                context.update({
+                    'location': county,
+                    'states': State.objects.all(),
+                    'latitude': self.kwargs['latitude'],
+                    'longitude': self.kwargs['longitude']
+                })
         except Exception as e:
-            logger.exception("Error in getting location data: %s", e)
-            messages.warning(request, "Failed to load your location data.")
-            return redirect(self.redirect_url)  
+            logger.exception(f"Error in fetching context data of near me csc center view: {e}")
 
+        return context
+    
+    def get_queryset(self):
+        try:
+            county = self.get_county()
+
+            services = self.request.GET.getlist('service', None)
+
+            service_list = []
+
+            if services:
+                for service in services:
+                    try:
+                        service_obj = get_object_or_404(Service, slug = service)            
+                        service_list.append(service_obj.id)
+                    except Http404:
+                        continue
+            
+            if county:
+                centers = CscCenter.objects.filter(block__block = county, is_active = True)  
+
+                if services:
+                    centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))
+
+                return centers
+        except Exception as e:
+            logger.exception(f"Error in fetching queryset of near me csc center view: {e}")
+            messages.error(self.request, "Server Error! Please try again later.")
+        
+        return None
 
 class CscCenterDetailView(BaseHomeView, DetailView):
     model = CscCenter

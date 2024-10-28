@@ -3,10 +3,16 @@
 {% load crispy_forms_tags %}
 
 {% block title_prefix %}
-Blogs
+Add Blog
 {% endblock title_prefix %}
 
 {% block styles %}
+<!-- Ck Editor Start -->
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+<link rel="stylesheet" href="{% static 'ckeditor/ckeditor.css' %}">
+<!-- Ck Editor End -->
+
 <link rel="stylesheet" href="{% static 'w3/blog/css/create.css' %}">
 {% endblock styles %}
 

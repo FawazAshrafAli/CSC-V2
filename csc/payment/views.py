@@ -10,10 +10,12 @@ from django.conf import settings
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.contrib.auth import logout
 import logging
 
 from .models import Payment, Price
 from csc_center.models import CscCenter
+from authentication.models import User
 
 from .tasks import send_payment_success_email
 
@@ -129,6 +131,9 @@ class PaymentSuccessView(View):
 
                 send_payment_success_email.delay(payment.id, full_image_url)
                 messages.success(request, "Payment Completed. Your account is now activated.")
+                logout(request)
+                if not User.objects.filter(email = csc_center.email).exists():
+                    return redirect(reverse_lazy('authentication:user_registration', kwargs = {"email": csc_center.email}))
                 return redirect(self.success_url)
             else:
                 return JsonResponse({"status": "Payment failed!"})        

@@ -52,8 +52,11 @@
     }
 
     th,td {
-        text-align:center;
         vertical-align: top;
+    }
+
+    .text-center {
+        text-align: center;
     }
 </style>
 {% endblock styles %}
@@ -108,32 +111,34 @@
                                 <th>Owner</th>
                                 <th>Location</th>
                                 <th>Email</th>
-                                <th>Phone</th>
+                                <th class="text-center">Phone</th>
                                 <th>Reason</th>
+                                <th class="text-center">Date &amp; Time</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody id="center-tbody">
-                            {% if csc_centers and csc_centers|length != 0 %}
-                            {% for center in csc_centers %}
-                            <tr class="row-items" onclick="window.location='{% url 'csc_admin:rejected_csc_center' center.slug %}'" id="tbody-tr-{{center.pk}}">
+                            {% if actions and actions|length != 0 %}
+                            {% for action in actions %}
+                            <tr class="row-items" onclick="window.location='{% url 'csc_admin:rejected_csc_center' action.slug %}'" id="tbody-tr-{{action.pk}}">
                                 <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
-                                <td><small>&nbsp;{{ center.csc_center.name }}</small></td>
-                                <td><small>{{center.csc_center.owner}}</small></td>
-                                <td><small>{{center.csc_center.partial_address}}</small></td>
-                                <td><small>{{center.csc_center.email}}</small></td>
-                                <td><small>{{center.csc_center.contact_number}}</small></td>
-                                <td style="max-width:360px; text-align:left;"><small>{{center.rejection_reason}}</small></td>
+                                <td><small>&nbsp;{{ action.csc_center.name }}</small></td>
+                                <td><small>{{action.csc_center.owner}}</small></td>
+                                <td><small>{{action.csc_center.get_vertical_partial_address|safe}}</small></td>
+                                <td><small>{{action.csc_center.email}}</small></td>
+                                <td class="text-center"><small>{{action.csc_center.contact_number}}</small></td>
+                                <td style="max-width:360px;"><small>{{action.rejection_reason}}</small></td>
+                                <td class="text-center"><small>{{action.created}}</small></td>
                                 <style>
-                                    #tbody-tr-{{center.pk}}:hover #remove-btn-{{center.pk}} {
+                                    #tbody-tr-{{action.pk}}:hover #remove-btn-{{action.pk}} {
                                         height: 30px;
                                     }
                                 </style>
                                 <td style="position: relative;">
                                     <div style="position: absolute; right: 50px; top: 10px;">                                    
-                                        <button class="button gray remove-btn" type="button" style="display: flex; flex-direction: row; justify-content: space-around; align-items: center;"
-                                            onclick="event.stopPropagation(); toggleCscDeletion(`{{center.slug}}`, `{{center.full_name}}`);"
-                                            id="remove-btn-{{center.pk}}"
+                                        <button class="button gray remove-btn" type="button" style="display: flex; flex-direction: row; justify-content: space-around; align-items: action;"
+                                            onclick="event.stopPropagation(); toggleCscDeletion(`{{action.slug}}`, `{{action.full_name}}`);"
+                                            id="remove-btn-{{action.pk}}"
                                             ><i class="sl sl-icon-close"></i> Delete</button>
                                     </div>
                                 </td>

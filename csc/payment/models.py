@@ -16,7 +16,7 @@ class Price(models.Model):
 class Payment(models.Model):
     csc_center = models.ForeignKey(CscCenter, on_delete=models.CASCADE)
     order_id = models.CharField(max_length=100)
-    payment_id = models.CharField(max_length=100, null=True, blank=True)
+    payment_id = models.CharField(max_length=250, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, null=True, blank=True)
     card_last4 = models.CharField(max_length=4, null=True, blank=True)
