@@ -1,0 +1,262 @@
+{% extends "user_base/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_prefix %}Add Poster Footer{% endblock title_prefix %}
+
+{% block styles %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/4.0.13/css/froala_editor.pkgd.min.css" rel="stylesheet" />
+
+
+{% endblock styles %}
+
+{% block content %}
+
+<style>
+    h5 {
+		display: flex;
+	}
+	.invalid-span {
+		display: none;
+		font-style: italic;
+		color: red !important;
+	}
+	.is-invalid {
+		border: 1px solid red !important;
+	}
+	.is-valid {
+		border: 1px solid green !important;
+	}   
+
+    #content-div {
+        background-color: #fff;
+    }
+    #poster-pop-up-submit-btn {
+        color: #fff;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+        border: none;
+        margin-bottom: 5px;
+    }
+    #current-footer-div {
+        display: none;
+    }
+    #footer-image {
+        margin-bottom: 0;
+    }
+    #current-footer-link {
+        color: blue;
+        text-decoration: underline;
+    } 
+    #footer-remove-btn {
+        color: #fff;
+        background: linear-gradient(to bottom, darkred, red, darkred);
+        padding: 5px 10px;
+    }
+</style>
+
+<div id="titlebar">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2><i class="sl sl-icon-plus"></i> Add Poster Footer</h2>
+                <!-- Breadcrumbs -->
+                <nav id="breadcrumbs">
+                    <ul>
+                        <li><a href="{% url 'home:view' %}">Home</a></li>
+                        <li>Add Poster Footer</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    {% include "components/message.html" %}
+
+</div>
+
+<!-- Content
+================================================== -->
+<!-- Container -->
+<div class="row">
+    <div class="col-lg-12" id="payment-content"></div>
+</div>
+<div class="row">
+    <!-- Listings -->
+    <div class="col-lg-12 col-md-12">
+      <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">              
+        <h4>Add Poster Footer</h4>
+        <div class="container" id="content-div">
+            <div class="row" id="current-footer-div">
+                <br>
+                <div class="col-lg-12"> 
+                    <span id="current-footer"></span>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-lg-6">        
+                    <form method="post" action="{% url 'users:add_footer' %}" enctype="multipart/form-data" id="add-footer-form">
+                        {% csrf_token %}
+                        <div class="row submit-section" id="poster-footer-image">
+                            <div class="col-md-12" id="footer-div">
+                                <h5>Upload Footer <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                                <input type="file" name="footer" id="footer-image">                        
+                                <input type="hidden" name="center" id="center-input" placeholder="Center Name" readonly>                        
+                            </div>
+                        </div>          
+                        <br>             
+                        <div id="poster-pop-up-add-btn-div">
+                            <button id="poster-pop-up-submit-btn" type="button">Add Footer</button>
+                        </div>
+                    </form>                
+                    <br>
+                </div>
+                <div class="col-lg-6">
+                    <p style="margin: 0;"><small><b>Note:</b></p>
+                    <ul style="list-style: disc; margin-left: 15px; padding-right: 0;">
+                        <li style="padding: 0;">Footer image size should not exceed 100KB.<br>फुटर इमेज का आकार 100KB से अधिक नहीं होना चाहिए।</li>
+                        <li style="padding: 0;">Upload a footer image with a 3:10 ratio for best results (e.g., 144x480, 300x1000 pixels).<br>सर्वोत्तम परिणाम के लिए 3:10 अनुपात का फुटर इमेज अपलोड करें (जैसे, 144x480, 300x1000 पिक्सेल)।</li>
+                    </ul>
+                </div>
+                <!-- Switcher ON-OFF Content / End -->
+            </div>    
+            <!-- Section / End -->
+        </div>
+      </div>
+    </div>
+
+    
+</div>
+
+
+<!-- Content / End -->
+<!-- Container / End -->
+{% endblock content %}
+
+{% block scripts %}
+<!-- DropZone | Documentation: http://dropzonejs.com -->
+<script type="text/javascript" src="{% static 'scripts/dropzone.js' %}"></script>
+
+
+<!-- Style Switcher
+================================================== -->
+<script src="{% static 'scripts/switcher.js' %}"></script>
+
+<div id="style-switcher">
+    <h2>Color Switcher <a href="#"><i class="sl sl-icon-settings"></i></a></h2>
+
+    <div>
+        <ul class="colors" id="color1">
+            <li><a href="#" class="main" title="Main"></a></li>
+            <li><a href="#" class="blue" title="Blue"></a></li>
+            <li><a href="#" class="green" title="Green"></a></li>
+            <li><a href="#" class="orange" title="Orange"></a></li>
+            <li><a href="#" class="navy" title="Navy"></a></li>
+            <li><a href="#" class="yellow" title="Yellow"></a></li>
+            <li><a href="#" class="peach" title="Peach"></a></li>
+            <li><a href="#" class="beige" title="Beige"></a></li>
+            <li><a href="#" class="purple" title="Purple"></a></li>
+            <li><a href="#" class="celadon" title="Celadon"></a></li>
+            <li><a href="#" class="red" title="Red"></a></li>
+            <li><a href="#" class="brown" title="Brown"></a></li>
+            <li><a href="#" class="cherry" title="Cherry"></a></li>
+            <li><a href="#" class="cyan" title="Cyan"></a></li>
+            <li><a href="#" class="gray" title="Gray"></a></li>
+            <li><a href="#" class="olive" title="Olive"></a></li>
+        </ul>
+    </div>
+
+</div>
+<!-- Style Switcher / End -->
+<!-- Poster Pop Up Box -->
+<script>
+    $(document).ready(function () {
+        const center = localStorage.getItem('centerSlug');
+        const user = localStorage.getItem('cscUser');
+        let centerSlug;
+
+        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+            $('#center-input').val(center);
+            centerSlug = center;      
+        } else {
+            $('#center-input').val(`{{csc_center.slug}}`);
+            centerSlug = `{{csc_center.slug}}`;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: `/users/get_footer/`,
+            dataType: "json",
+            data : {"center_slug": centerSlug},
+            success: response => {
+                $('#payment-content').prepend(`
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+                  `)
+                if (response.footer) {
+                    $('#current-footer').html(`<b>Current footer</b>: <a href="${response.footer}" target="_blank" id="current-footer-link" >${response.footer_name}</a>&nbsp;<a href="/users/remove_footer/${response.footer_slug}" id="footer-remove-btn"><small>Remove</small></a>`);
+                    $('#current-footer-div').show();
+                } else {
+                    $('#current-footer-div').hide();
+                }
+
+                if (response.message) {
+                    console.log(response.message);
+                }
+            },
+            error: error => console.error("Error: ", error),
+
+        })
+
+        // Form Validation
+        
+		function validateFooter() {
+			const footerInput = $('#footer-image')[0];		
+			const footer = footerInput.files[0];
+
+			if (!footer) {
+				return false
+			}
+
+			if (footer && footer.size > 102400) {
+				return false								
+			}
+			return true
+		}
+
+        $("#footer-image").on('change', function () {
+			if (!validateFooter()) {
+				$(this).val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#footer-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Footer image cannot exceed 100 KB. Please upload a smaller image.\nफुटर इमेज 100 KB से अधिक नहीं हो सकती। कृपया एक छोटी इमेज अपलोड करें।").show();
+			} else {
+                $(this).removeClass("is-invalid").addClass("is-valid");
+				$(`#footer-div .invalid-span`).hide();
+			}
+		});
+
+        $('#poster-pop-up-submit-btn').click(function (e) {
+            e.preventDefault();
+            let formValid = true;
+
+            const footerInput = $('#footer-image')[0];
+            const footer = footerInput.files[0];
+
+            if (!footer || !validateFooter()) {
+                $('#footer-image').val('').removeClass("is-valid").addClass("is-invalid");
+                $(`#footer-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Footer image cannot exceed 100 KB. Please upload a smaller image.\nफुटर इमेज 100 KB से अधिक नहीं हो सकती। कृपया एक छोटी इमेज अपलोड करें।").show();
+                formValid = false;
+                
+            } else {
+                $('#footer-image').removeClass("is-invalid").addClass("is-valid");
+                $(`#footer-div .invalid-span`).hide();
+            }
+
+            if (formValid === true) {
+                $('#add-footer-form').submit();
+            }
+        })
+        
+    })
+</script>
+{% endblock scripts %}

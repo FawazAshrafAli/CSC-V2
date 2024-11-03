@@ -1,0 +1,64 @@
+#near-me {
+    color: blue;
+}
+#near-me:hover {
+    text-decoration: underline;
+}
+
+/* FAQ */
+#more-faq-div {
+    display: flex;
+    justify-content: center;
+}
+
+/* ************************ */
+
+.add-listing-headline {
+    background-color: inherit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 320px;
+    margin-bottom: 0;
+}
+
+.main-search-input {
+    margin-top: 0;
+}
+
+#pincode-input-div {
+    display: none;
+}
+
+#csc-near-me-div {
+    margin-top:5px;
+}
+
+#faqs-main-div {
+    background: #f1f1f1;
+}
+
+#main-description-div {
+    background: rgb(255 249 244);
+}
+
+.toggle-container {
+    display: none;
+}
+
+/* *********** */
+.product-grid {
+    height: 450px;
+    max-height: 450px;
+    width: 271px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.product-image {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}

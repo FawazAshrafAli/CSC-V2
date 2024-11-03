@@ -12,7 +12,7 @@ from .views import (
 
     AvailablePosterView, CreatePosterView, MyPosterListView,
     DeleteMyPosterView, MyPosterDetailView, DownloadPosterView,
-    GetQrCodeView,
+    GetQrCodeView, AddPosterFooterView, get_footer, RemoveFooterView,
 
     MyProfileView, UpdateProfileView, ChangePasswordView,
     )
@@ -38,6 +38,9 @@ urlpatterns = [
     path('download_poster/<str:slug>', DownloadPosterView.as_view(), name="download_poster"),
     path('delete_poster/<str:slug>', DeleteMyPosterView.as_view(), name="delete_poster"),
     path('get_qrcode/<str:slug>', GetQrCodeView.as_view(), name="get_qrcode"),
+    path('add_footer/', AddPosterFooterView.as_view(), name="add_footer"),
+    path('remove_footer/<str:slug>', RemoveFooterView.as_view(), name="remove_footer"),
+    path('get_footer/', get_footer, name="get_footer"),
 
     path('csc_centers/', CscCenterListView.as_view(), name="csc_centers"),
     path('add_csc/', AddCscCenterView.as_view(), name="add_csc"),

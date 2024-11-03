@@ -9,6 +9,21 @@
 
 {% block content %}
 <style>
+    h5 {
+		display: flex;
+	}
+	.invalid-span {
+		display: none;
+		font-style: italic;
+		color: red !important;
+	}
+	.is-invalid {
+		border: 1px solid red !important;
+	}
+	.is-valid {
+		border: 1px solid green !important;
+	}   
+
     #add-csc-btns-div {
         display: flex;
         justify-content: space-between;
@@ -59,13 +74,12 @@
                             </div>
                             <!-- Title -->
                             <div class="row with-forms">
-                                <div class="col-md-4">
-                                    <h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i></h5>
-                                    <input class="search-field" type="text" name="name"
-                                        placeholder="Name of your CSC" required/>
+                                <div class="col-md-4" id="name-div">
+                                    <h5>CSC Name <i class="tip" data-tip-content="Name of your CSC"></i><span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                                    <input class="search-field" type="text" name="name" id="name-input" placeholder="Name of your CSC" required/>															
                                 </div>
-                                <div class="col-md-4">
-                                    <h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i></h5>
+                                <div class="col-md-4" id="csc-type-div">
+                                    <h5>CSC Name Type <i class="tip" data-tip-content="CSC Name Type"></i><span class="invalid-span">&nbsp; Required!</span></h5>
                                     <select class="chosen-select" id="name-type-dropdown" name="type"
                                         data-placeholder="Common Service Centre (CSC)" required>
                                         <option label="CSC Name Type"></option>
@@ -73,21 +87,21 @@
                                         <option value="{{name_type.slug}}">{{name_type.type}}</option>
                                         {% endfor %}
                                     </select>
+                                    <span id="type-span"></span>
                                 </div>
-                                <div class="col-md-4">
-                                    <h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i></h5>
-                                    <input class="search-field" type="text" name="csc_reg_no"
+                                <div class="col-md-4" id="csc-reg-div">
+                                    <h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i><span class="invalid-span">&nbsp;</span></h5>
+                                    <input class="search-field" type="text" name="csc_reg_no" id="reg-no-input"
                                         placeholder="CSC Registration Number" required/>
                                 </div>
-                                <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>
-                                    Location Name</h5>
                             </div>
+                            <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>Location Name</h5>
                             <!-- Row -->
                             <div class="row with-forms">
                                 <!-- Type -->
-                                <div class="col-md-12">
-                                    <h5>Keywords <i class="tip"
-                                            data-tip-content="Maximum of 15 keywords related with your business"></i>
+                                <div class="col-md-12" id="keywords-div">
+                                    <h5>Keywords <i class="tip" data-tip-content="Maximum of 15 keywords related with your business"></i>
+                                        <span class="invalid-span">&nbsp; <i>Required!</i></span>
                                     </h5>
                                     <select data-placeholder="Select Keywords" name="keywords" class="chosen-select"
                                         multiple required>
@@ -109,8 +123,8 @@
                             <div class="submit-section">
                                 <div class="row with-forms">
                                     <!-- State -->
-                                    <div class="col-md-4">
-                                        <h5>State</h5>
+                                    <div class="col-md-4" id="state-div">
+                                        <h5>State <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <select class="chosen-select" name="state" id="state-dropdown"
                                             data-placeholder="Select State" required>
                                             <option label="Select State"></option>
@@ -119,15 +133,15 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <h5>District</h5>
+                                    <div class="col-md-4" id="district-div">
+                                        <h5>District <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <select class="chosen-select" name="district" id="district-dropdown"
                                             data-placeholder="Select District" required>
                                             <option label="Select District"></option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <h5>Block</h5>
+                                    <div class="col-md-4" id="block-div">
+                                        <h5>Block <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <select class="chosen-select" name="block" id="block-dropdown"
                                             data-placeholder="Select Block" required>
                                             <option label="Select Block"></option>
@@ -137,23 +151,23 @@
                                 <!-- Row -->
                                 <div class="row with-forms">
                                     <!-- City -->
-                                    <div class="col-md-6">
-                                        <h5>Location</h5>
-                                        <input type="text" name="location" placeholder="Enter Location" required>
+                                    <div class="col-md-6" id="location-div">
+                                        <h5>Location <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                                        <input type="text" name="location" id="location-input" placeholder="Enter Location" required>									
                                     </div>
                                     <!-- Address -->
-                                    <div class="col-md-6">
-                                        <h5>Zip-Code</h5>
+                                    <div class="col-md-6" id="zipcode-div">
+                                        <h5>Zip-Code <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <input type="text" name="zipcode" placeholder="Enter Pincode" required>
                                     </div>
                                     <!-- Zip-Code -->
-                                    <div class="col-md-6">
-                                        <h5>Landmark / Building Name</h5>
+                                    <div class="col-md-6" id="landmark-div">
+                                        <h5>Landmark / Building Name <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <input type="text" name="landmark_or_building_name"
                                             placeholder="e.g. 1st Floor, ABCD Building" required>
                                     </div>
-                                    <div class="col-md-6">
-                                        <h5>Address</h5>
+                                    <div class="col-md-6" id="address-div">
+                                        <h5>Address <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                         <input type="text" name="address" placeholder="e.g. 964 School Street" required>
                                     </div>
                                 </div>
@@ -169,18 +183,20 @@
                             </div>
                             <!-- Dropzone -->
                             <div class="row submit-section" id="dropzone-uploads">
-                                <div class="col-md-6">
-                                    <h5>Upload Logo</h5>
+                                <div class="col-md-6" id="logo-div">
+                                    <h5>Upload Logo <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                     <input type="file" name="logo" required>
+                                    <span><i>Note: Maximum logo size allowed: 20 KB.</i></span>
                                 </div>
-                                <div class="col-md-6">
-                                    <h5>Upload Banner</h5>
+                                <div class="col-md-6" id="banners-div">
+                                    <h5>Upload Banner <span class="invalid-span">&nbsp; <i>Required!</i></span></h5></h5>
                                     <input type="file" name="banner" multiple required>
-                                    <span><small>Note: While choosing files select multiple images by holding ctrl button.</small></span>
-                                </div>
+                                    <span><i>Note: Maximum size for each banner image is 20 KB.</i></span>
+                                </div>								
                             </div>
                         </div>
                         <!-- Section / End -->
+
                         <!-- Section -->
                         <div class="add-listing-section margin-top-45">
                             <!-- Headline -->
@@ -188,26 +204,26 @@
                                 <h3><i class="sl sl-icon-docs"></i> Details</h3>
                             </div>
                             <!-- Description -->
-                            <div class="form">
-                                <h5>Description</h5>
+                            <div class="form" id="description-div">
+                                <h5>Description <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary"
                                     spellcheck="true"></textarea>
                             </div>
                             <!-- Row -->
                         <div class="row with-forms">
                             <!-- Owner Name -->
-                            <div class="col-md-4">
-                                <h5>Owner Name</h5>
+                            <div class="col-md-4" id="owner-div">
+                                <h5>Owner Name <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="text" name="owner" placeholder="Owner Name" required>
                             </div>
                             <!-- Email Address -->
-                            <div class="col-md-4">
-                                <h5>E-Mail ID</h5>
+                            <div class="col-md-4" id="email-div">
+                                <h5>E-Mail ID <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="email" name="email" placeholder="E-Mail ID" required>
                             </div>
                             <!-- Website -->
-                            <div class="col-md-4">
-                                <h5>Website <span>(optional)</span></h5>
+                            <div class="col-md-4" id="website-div">
+                                <h5>Website<span>&nbsp;(optional)</span> <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="text" name="website" placeholder="www.domainname.com">
                             </div>
                         </div>
@@ -215,16 +231,16 @@
                         <!-- Row -->
                         <div class="row with-forms">
                             <!-- Phone -->
-                            <div class="col-md-4">
-                                <h5>Contact Number</h5>
+                            <div class="col-md-4" id="contact-div">
+                                <h5>Contact Number <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="text" name="contact_number" placeholder="Contact Number" required>
                             </div>
-                            <div class="col-md-4">
-                                <h5>Mobile Number</h5>
+                            <div class="col-md-4" id="mobile-div">
+                                <h5>Mobile Number <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="text" name="mobile_number" placeholder="Mobile Number" required>
                             </div>
-                            <div class="col-md-4">
-                                <h5>WhatsApp Number</h5>
+                            <div class="col-md-4" id="whatsapp-div">
+                                <h5>WhatsApp Number <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="text" name="whatsapp_number" placeholder="WhatsApp Number" required>
                             </div>
                                 <div class="col-md-12">
@@ -255,8 +271,8 @@
                             <div class="add-listing-headline">
                                 <h3><i class="sl sl-icon-clock"></i> Opening Hours</h3>
                                 <!-- Switcher -->
-                                <label class="switch"><input type="checkbox" checked><span
-                                        class="slider round"></span></label>
+                                <label class="switch"><input type="checkbox" name="show_opening_hours" checked><span
+                                    class="slider round"></span></label>
                             </div>
                             <!-- Switcher ON-OFF Content -->
                             <div class="switcher-content">
@@ -460,8 +476,8 @@
                             <div class="add-listing-headline">
                                 <h3><i class="sl sl-icon-book-open"></i> Social Media Links</h3>
                                 <!-- Switcher -->
-                                <label class="switch"><input type="checkbox" checked><span
-                                        class="slider round"></span></label>
+                                <label class="switch"><input type="checkbox" name="show_social_media_links" checked><span
+                                    class="slider round"></span></label>
                             </div>
                             <!-- Switcher ON-OFF Content -->
                             <div class="switcher-content">
@@ -503,22 +519,29 @@
                                 <h3><i class="sl sl-icon-pin"></i>Location Map</h3>
                             </div>
                             <div class="col-md-12">
-                                <div class="col-md-6">
+                                <div class="col-md-6" id="latitude-div">
+                                    <div style="position: absolute; right: 20px; top: 20%">
+                                        <span class="invalid-span">&nbsp; <i>Required!</i></span>
+                                    </div>
                                     <input type="text" name="latitude" id="latitude" placeholder="latitude" required>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6" id="longitude-div">
+                                    <div style="position: absolute; right: 20px; top: 20%">
+                                        <span class="invalid-span">&nbsp; <i>Required!</i></span>
+                                    </div>
                                     <input type="text" name="longitude" id="longitude" placeholder="longitude" required>
                                 </div>
+                                <span>Browse the map below, and click on the exact location of your CSC center to select it.</span>
                                 <div id="map" style="width: 100%; height: 400px"></div>
                             </div>
                         </div>                        
                         <div style="clear:both;"></div>
                     </div>
                     <!-- Section / End -->
-                     <div id="add-csc-btns-div">
+                    <div id="add-csc-btns-div">
                         <a href="#" id="preview-btn" class="button preview">Preview <i class="fa fa-arrow-circle-right"></i></a>
                         <button class="button preview" type="button">Submit</button>
-                     </div>
+                    </div>
                 </form>
                 <br>
             </div>
@@ -570,8 +593,8 @@
 <script>
 
     $(document).ready(function () {
-        let latitude = 51.958
-        let longitude = 9.141
+        let latitude = 28.6
+        let longitude = 77.2
 
         let currentLatitude = $('#latitude').val();
         let currentLongitude = $('#longitude').val();
@@ -651,36 +674,676 @@
 
 <script>
     $(document).ready(() => {
-        $('#preview-btn').click(function () {
-            if ($(this).html() != 'Edit Form') {
-                $('#add-csc-form input').prop('readonly', true);
-                $('#add-csc-form textarea').prop('readonly', true);
+        const namePattern = /^[\p{L}\s'-]+$/u;
+        const slugPattern = /^[a-zA-Z0-9_-]+$/;
+        const phonePattern = /^(?:\+91|91|0)?(?:[789]\d{9}|\(?\d{2,5}\)?\d{6,8})$/;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+		const websitePattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(\/[^\s]*)?$/;
+		const latitudePattern = /^-?\d+(\.\d+)?$/;
+		const longitudePattern = /^-?\d+(\.\d+)?$/;
+		const cscPattern = /^[A-Za-z0-9-_]+$/;
 
-                $('#dropzone-uploads').css('pointer-events', 'none');
-                $('#add-link-btn').css('pointer-events', 'none');
-                $('#map').css('pointer-events', 'none');
+		// ZIP Code validation function for India
+		function validateZipCode(zipcode) {
+			const zipRegex = /^\d+$/;
+			return zipRegex.test(zipcode);
+		}
+
+		// Owner name validation function
+		function validateOwner(owner) {
+			return namePattern.test(owner);
+		}
+
+		function validateEmail(email) {
+			return emailPattern.test(email);
+		}
+
+		function validateWebsite(website) {
+			return websitePattern.test(website)
+		}
+
+		function validatePhone(phone) {
+			return phonePattern.test(phone)
+		}
+
+		function validateLatitude(latitude) {
+			return latitudePattern.test(latitude)
+		}
+
+		function validateLongitude(longitude) {
+			return longitudePattern.test(longitude)
+		}
+
+		function validateCscReg(regNumber) {			
+			return cscPattern.test(regNumber);
+		}
+
+		// Input Validation
+		function validateInput(parentDiv) {
+			$(`${parentDiv} input, ${parentDiv} textarea`).on('input', function () {
+				const value = $(this).val().trim();
+
+				// Specific validation for ZIP code
+				if (parentDiv === "#zipcode-div") {
+					if (validateZipCode(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Please enter a valid 6-digit pincode").show();
+					}
+				} 
+				// Specific validation for Owner's Name
+				else if (parentDiv === "#owner-div") {
+					if (validateOwner(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid name using letters from any language, spaces, apostrophes, or hyphens.\nकृपया किसी भी भाषा के अक्षरों, स्पेस, अपॉस्ट्रॉफी, या हाइफ़न का उपयोग करके एक मान्य नाम दर्ज करें।").show();
+					}
+				} 
+
+				else if (parentDiv === "#email-div") {
+					if (validateEmail(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
+					}
+				} 
+
+				else if (parentDiv === "#website-div") {
+					if (!value) {
+						$(this).removeClass('is-invalid').removeClass('is-valid');
+						$(`${parentDiv} .invalid-span`).hide();
+					}
+					else if (validateWebsite(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).empty("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
+					}
+				} 
+
+				else if (parentDiv === "#csc-reg-div") {
+					if (!value) {
+						$(this).removeClass('is-invalid').removeClass('is-valid');
+						$(`${parentDiv} .invalid-span`).hide();
+					}
+					else if (validateCscReg(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).empty("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid CSC Registration Number in the format.\nकृपया उचित प्रारूप में एक मान्य CSC पंजीकरण संख्या दर्ज करें.").show();
+					}
+				} 
+
+				else if (parentDiv === "#contact-div" || parentDiv === "#mobile-div" || parentDiv === "#whatsapp-div") {
+					console.log("entered")
+					if (validatePhone(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please provide a valid phone number. It may start with +91, 91, or 0, and must be between 10 and 13 characters long.\nकृपया एक मान्य फोन नंबर प्रदान करें। यह +91, 91, या 0 से शुरू हो सकता है, और इसकी लंबाई 10 से 13 अक्षरों के बीच होनी चाहिए।").show();
+					}
+				} 
+
+				else if (parentDiv === "#latitude-div") {
+					if (validateLatitude(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
+					}
+				}
+
+				else if (parentDiv === "#longitude-div") {
+					if (validateLongitude(value)) {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
+					} else {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
+					}
+				} 
+
+				// General validation for other fields
+				else {
+					if (!value) {
+						$(this).removeClass('is-valid').addClass('is-invalid');
+						$(`${parentDiv} .invalid-span`).show();
+					} else {
+						$(this).removeClass('is-invalid').addClass('is-valid');
+						$(`${parentDiv} .invalid-span`).hide();
+					}
+				}
+			});
+		}
+
+		// Applying validation to different input fields
+		validateInput('#name-div');
+		validateInput('#location-div');
+		validateInput('#zipcode-div');
+		validateInput('#landmark-div');
+		validateInput('#address-div');
+		validateInput('#description-div');
+		validateInput('#owner-div');
+		validateInput('#email-div');
+		validateInput('#website-div');
+		validateInput('#contact-div');
+		validateInput('#mobile-div');
+		validateInput('#whatsapp-div');
+		validateInput('#latitude-div');
+		validateInput('#longitude-div');
+		validateInput('#csc-reg-div');
 
 
-                $('#add-csc-form input:checkbox').prop('disabled', true);
-                $('#add-csc-form select').prop('disabled', true).trigger('chosen:updated');
+		$('#map').click(function () {
+			let lat = $('#latitude-div input').val();
+			let long = $('#longitude-div input').val();
 
-                $(this).html('Edit Form');
-                $('#add-csc-btns-div button').show();
+			if (validateLatitude(lat)) {
+				$('#latitude-div input').removeClass('is-invalid').addClass('is-valid');
+				$(`#latitude-div .invalid-span`).html("&nbsp;").hide();
+			} else {
+				$('#latitude-div input').removeClass('is-valid').addClass('is-invalid');
+				$(`#latitude-div .invalid-span`).html("&nbsp; Required!").show();
+			}
+
+			if (validateLongitude(long)) {
+				$('#longitude-div input').removeClass('is-invalid').addClass('is-valid');
+				$(`#longitude-div .invalid-span`).html("&nbsp;").hide();
+			} else {
+				$('#longitude-div input').removeClass('is-valid').addClass('is-invalid');
+				$(`#longitude-div .invalid-span`).html("&nbsp; Required!").show();
+			}
+		})
+
+
+		function validateDropdowns(parentDiv) {
+			$(`${parentDiv} select`).on('change', function () {
+				const value = $(this).val();
+				if (!value){
+					if (parentDiv == '#keywords-div') {
+						$(`${parentDiv} .chosen-choices`).removeClass('is-valid').addClass('is-invalid');
+					} else {
+						$(`${parentDiv} .chosen-single`).removeClass('is-valid').addClass('is-invalid');
+					}
+					$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
+				} else {
+					if (parentDiv == '#keywords-div') {
+						$(`${parentDiv} .chosen-choices`).removeClass('is-invalid').addClass('is-valid');
+					} else {
+						$(`${parentDiv} .chosen-single`).removeClass('is-invalid').addClass('is-valid');
+					}					
+					$(`${parentDiv} .invalid-span`).hide();
+				}
+				$(`${parentDiv} select`).trigger('chosen:updated');
+			});
+		};
+
+		validateDropdowns("#csc-type-div");
+		validateDropdowns("#keywords-div");
+		validateDropdowns("#state-div");
+		validateDropdowns("#district-div");
+		validateDropdowns("#block-div");
+
+		$(".chosen-select").chosen();
+
+		$("#keywords-div").on('change', '.chosen-select', function () {
+            const value = $(this).val();
+
+            if (!value || value.length === 0) {
+                
+                $('#keywords-div .chosen-choices').removeClass('is-valid').addClass('is-invalid');
+                $('#keywords-div .invalid-span').show();
             } else {
-                $('#add-csc-form input').prop('readonly', false);
-                $('#add-csc-form textarea').prop('readonly', false);
+                
+                $('#keywords-div .chosen-choices').removeClass('is-invalid').addClass('is-valid');
+                $('#keywords-div .invalid-span').hide();
+            }
+            
+            $(this).trigger('chosen:updated');
+        });
 
-                $('#dropzone-uploads').css('pointer-events', 'auto');
-                $('#add-link-btn').css('pointer-events', 'auto');
-                $('#map').css('pointer-events', 'auto');
+		function validateLogo() {
+			const logoInput = $('#logo-div input')[0];		
+			const logo = logoInput.files[0];
+
+			if (!logo) {
+				return false
+			}
+
+			if (logo && logo.size > 20480) {
+				return false								
+			}
+			return true
+		}
+
+		$("#logo-div input").on('change', function () {
+			if (!validateLogo()) {
+				$('#logo-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#logo-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
+			} else {
+                $('#logo-div input').removeClass("is-invalid").addClass("is-valid");
+				$(`#logo-div .invalid-span`).hide();
+			}
+		});
 
 
-                $('#add-csc-form input:checkbox').prop('disabled', false);
-                $('#add-csc-form select').prop('disabled', false).trigger('chosen:updated');
+		function validateBannersLength(banners) {
+			if (banners.length > 4) {				
+				return false;
+			}
+			return true;
+		}
 
-                $(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
-                $('#add-csc-btns-div button').hide();
-            };
+		function validateBannersSize(banners) {
+			const totalSize = banners.reduce((acc, file) => acc + file.size, 0);
+
+			if (totalSize > 81920) {				
+				return false;
+			}
+			return true;
+		}
+
+		$("#banners-div input").on('change', function () {
+			const bannerInput = $('#banners-div input')[0];
+			const banners = Array.from(bannerInput.files);
+
+			if (!banners.length > 0 || !validateBannersLength(banners)) {
+				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
+			} else if (!banners.length > 0 || !validateBannersSize(banners)) {
+				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
+			} else {
+                $('#banners-div input').removeClass("is-invalid").addClass("is-valid");
+				$(`#banners-div .invalid-span`).hide();
+			}
+		});
+
+        function validateForm() {
+			let formValid = true
+
+			const name = $('#name-div input');
+            const nameValue = $('#name-div input').val().trim();
+
+			const location = $('#location-div input');
+            const locationValue = $('#location-div input').val().trim();
+
+			const zipcode = $('#zipcode-div input');
+            const zipcodeValue = $('#zipcode-div input').val().trim();
+
+			const landmark = $('#landmark-div input');
+            const landmarkValue = $('#landmark-div input').val().trim();
+
+			const address = $('#address-div input');
+            const addressValue = $('#address-div input').val().trim();
+
+			const description = $('#description-div textarea');
+            const descriptionValue = $('#description-div textarea').val().trim();
+
+			const owner = $('#owner-div input');
+            const ownerValue = $('#owner-div input').val().trim();
+
+			const email = $('#email-div input');
+            const emailValue = $('#email-div input').val().trim();
+
+			const website = $('#website-div input');
+            const websiteValue = $('#website-div input').val().trim();
+
+			const contact = $('#contact-div input');
+            const contactValue = $('#contact-div input').val().trim();
+
+			const mobile = $('#mobile-div input');
+            const mobileValue = $('#mobile-div input').val().trim();
+
+			const whatsapp = $('#whatsapp-div input');
+            const whatsappValue = $('#whatsapp-div input').val().trim();
+
+			const latitude = $('#latitude-div input');
+            const latitudeValue = $('#latitude-div input').val().trim();
+
+			const longitude = $('#longitude-div input');
+            const longitudeValue = $('#longitude-div input').val().trim();
+
+			const reg = $('#csc-reg-div input');
+            const regValue = $('#csc-reg-div input').val().trim();
+
+
+			const type = $("#csc-type-div select");
+			const keywords = $("#keywords-div select");
+			const state = $("#state-div select");
+			const district = $("#district-div select");
+			const block = $("#block-div select");
+
+			const logoInput = $('#logo-div input')[0];
+			const logo = logoInput.files[0];
+
+			const bannerInput = $('#banners-div input')[0];
+			const banners = Array.from(bannerInput.files);
+
+			// Check Name
+			if (!nameValue) {
+				$(name).removeClass('is-valid').addClass('is-invalid');
+				$(`#name-div .invalid-span`).html("&nbsp; Required!").show();
+				$(name).focus();
+				formValid = false;
+			} else {
+				$(name).removeClass('is-invalid').addClass('is-valid');
+				$(`#name-div .invalid-span`).hide();
+				$(name).blur();
+			}
+
+			if (!type.val()) {
+				$(type).removeClass('is-valid').addClass('is-invalid');
+				$(`#csc-type-div .invalid-span`).html("&nbsp; Required!").show();
+				$(`#csc-type-div .chosen-single`).removeClass('is-valid').addClass('is-invalid');
+				$(type).focus();
+				formValid = false;
+			} else {
+				$(type).removeClass('is-invalid').addClass('is-valid');
+				$(`#csc-type-div .invalid-span`).hide();
+				$(`#csc-type-div .chosen-single`).removeClass('is-invalid').addClass('is-valid');
+				$(type).blur();
+			}
+
+			// Check CSC Registration Number
+			if (regValue) {
+				if (!validateCscReg(regValue)) {
+					$(reg).removeClass('is-valid').addClass('is-invalid');
+					$(`#csc-reg-div .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid CSC Registration Number in the format.\nकृपया उचित प्रारूप में एक मान्य CSC पंजीकरण संख्या दर्ज करें.").show();
+					$(reg).focus();
+					formValid = false;
+				} else {
+					$(reg).removeClass('is-invalid').addClass('is-valid');
+					$(`#csc-reg-div .invalid-span`).hide();
+					$(reg).blur();
+				}
+			}
+			
+			$(".chosen-select").chosen();
+
+			if (!keywords.val() || keywords.val().length === 0) {
+				$(keywords).removeClass('is-valid').addClass('is-invalid');
+				$(`#keywords-div .invalid-span`).html("&nbsp; Required!").show();
+				$(`#keywords-div .chosen-choices`).removeClass('is-valid').addClass('is-invalid');
+				$(keywords).focus();
+				formValid = false;
+			} else {
+				$(keywords).removeClass('is-invalid').addClass('is-valid');
+				$(`#keywords-div .invalid-span`).hide();
+				$(`#keywords-div .chosen-choices`).removeClass('is-invalid').addClass('is-valid');
+				$(keywords).blur();
+			}
+
+			$(this).trigger('chosen:updated');
+
+
+			if (!state.val()) {
+				$(state).removeClass('is-valid').addClass('is-invalid');
+				$(`#state-div .invalid-span`).html("&nbsp; Required!").show();
+				$(`#state-div .chosen-single`).removeClass('is-valid').addClass('is-invalid');
+				$(state).focus();
+				formValid = false;
+			} else {
+				$(state).removeClass('is-invalid').addClass('is-valid');
+				$(`#state-div .invalid-span`).hide();
+				$(`#state-div .chosen-single`).removeClass('is-invalid').addClass('is-valid');
+				$(state).blur();
+			}
+
+			if (!district.val()) {
+				$(district).removeClass('is-valid').addClass('is-invalid');
+				$(`#district-div .invalid-span`).html("&nbsp; Required!").show();
+				$(`#district-div .chosen-single`).removeClass('is-valid').addClass('is-invalid');
+				$(district).focus();
+				formValid = false;
+			} else {
+				$(district).removeClass('is-invalid').addClass('is-valid');
+				$(`#district-div .invalid-span`).hide();
+				$(`#district-div .chosen-single`).removeClass('is-invalid').addClass('is-valid');
+				$(district).blur();
+			}
+
+			if (!block.val()) {
+				$(block).removeClass('is-valid').addClass('is-invalid');
+				$(`#block-div .invalid-span`).html("&nbsp; Required!").show();
+				$(`#block-div .chosen-single`).removeClass('is-valid').addClass('is-invalid');
+				$(block).focus();
+				formValid = false;
+			} else {
+				$(block).removeClass('is-invalid').addClass('is-valid');
+				$(`#block-div .invalid-span`).hide();
+				$(`#block-div .chosen-single`).removeClass('is-invalid').addClass('is-valid');
+				$(block).blur();
+			}
+
+			// Check Location
+			if (!locationValue) {
+				$(location).removeClass('is-valid').addClass('is-invalid');
+				$(`#location-div .invalid-span`).html("&nbsp;Required!").show();
+				$(location).focus();				
+				formValid = false;
+			} else {
+				$(location).removeClass('is-invalid').addClass('is-valid');
+				$(`#location-div .invalid-span`).hide();
+				$(location).blur();
+			}
+
+			// Check Zipcode
+			if (!zipcodeValue || !validateZipCode(zipcodeValue)) {
+				$(zipcode).removeClass('is-valid').addClass('is-invalid');
+				$(`#zipcode-div .invalid-span`).html("&nbsp; Please enter a valid 6-digit pincode").show();
+				$(zipcode).focus();
+				formValid = false;
+			} else {
+				$(zipcode).removeClass('is-invalid').addClass('is-valid');
+				$(`#zipcode-div .invalid-span`).hide();
+				$(zipcode).blur();
+			}			
+
+			// Check Landmark
+			if (!landmarkValue) {
+				$(landmark).removeClass('is-valid').addClass('is-invalid');
+				$(`#landmark-div .invalid-span`).html("&nbsp;Required!").show();
+				$(landmark).focus();
+				formValid = false;
+			} else {
+				$(landmark).removeClass('is-invalid').addClass('is-valid');
+				$(`#landmark-div .invalid-span`).hide();
+				$(landmark).blur();
+			}
+
+			// Check Address
+			if (!addressValue) {
+				$(address).removeClass('is-valid').addClass('is-invalid');
+				$(`#address-div .invalid-span`).html("&nbsp;Required!").show();
+				$(address).focus();
+				formValid = false;
+			} else {
+				$(address).removeClass('is-invalid').addClass('is-valid');
+				$(`#address-div .invalid-span`).hide();
+				$(address).blur();
+			}
+
+			if (!logo || !validateLogo()) {
+                $('#logo-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#logo-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
+				formValid = false;
+				
+			} else {
+                $('#logo-div input').removeClass("is-invalid").addClass("is-valid");
+				$(`#logo-div .invalid-span`).hide();
+			}
+
+			if (!banners.length > 0 || !validateBannersLength(banners)) {
+				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
+				formValid = false;
+			} else if (!banners.length > 0 || !validateBannersSize(banners)) {
+				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
+				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
+				formValid = false;
+			} else {
+                $('#banners-div input').removeClass("is-invalid").addClass("is-valid");
+				$(`#banners-div .invalid-span`).hide();
+			}			
+
+			// Check Description
+			if (!descriptionValue) {
+				$(description).removeClass('is-valid').addClass('is-invalid');
+				$(`#description-div .invalid-span`).html("&nbsp;Required!").show();
+				$(description).focus();
+				formValid = false;
+			} else {
+				$(description).removeClass('is-invalid').addClass('is-valid');
+				$(`#description-div .invalid-span`).hide();
+				$(description).blur();
+			}
+
+			// Check Owner
+			if (!ownerValue || !validateOwner(ownerValue)) {
+				$(owner).removeClass('is-valid').addClass('is-invalid');
+				$(`#owner-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid name using letters from any language, spaces, apostrophes, or hyphens.\nकृपया किसी भी भाषा के अक्षरों, स्पेस, अपॉस्ट्रॉफी, या हाइफ़न का उपयोग करके एक मान्य नाम दर्ज करें।").show();
+				$(owner).focus();
+				formValid = false;
+			} else {
+				$(owner).removeClass('is-invalid').addClass('is-valid');
+				$(`#owner-div .invalid-span`).hide();
+				$(owner).blur();
+			}
+
+			// Check Email
+			if (!emailValue || !validateEmail(emailValue)) {
+				$(email).removeClass('is-valid').addClass('is-invalid');
+				$(`#email-div .invalid-span`).html("&nbsp;Required!").show();
+				$(email).focus();
+				formValid = false;
+			} else {
+				$(email).removeClass('is-invalid').addClass('is-valid');
+				$(`#email-div .invalid-span`).hide();
+				$(email).blur();
+			}
+
+			// Check Website
+			if (websiteValue) {
+				if (!validateWebsite(websiteValue)) {
+					$(website).removeClass('is-valid').addClass('is-invalid');
+					$(`#website-div .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
+					$(website).focus();
+					formValid = false;
+				} else {
+					$(website).removeClass('is-invalid').addClass('is-valid');
+					$(`#website-div .invalid-span`).hide();
+					$(website).blur();
+				}
+			}
+
+			// Check Contact
+			if (!contactValue || !validatePhone(contactValue)) {
+				$(contact).removeClass('is-valid').addClass('is-invalid');
+				$(`#contact-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please provide a valid phone number. It may start with +91, 91, or 0, and must be between 10 and 13 characters long.\nकृपया एक मान्य फोन नंबर प्रदान करें। यह +91, 91, या 0 से शुरू हो सकता है, और इसकी लंबाई 10 से 13 अक्षरों के बीच होनी चाहिए।").show();
+				$(contact).focus();
+				formValid = false;
+			} else {
+				$(contact).removeClass('is-invalid').addClass('is-valid');
+				$(`#contact-div .invalid-span`).hide();
+				$(contact).blur();
+			}
+
+			// Check Mobile
+			if (!mobileValue || !validatePhone(mobileValue)) {
+				$(mobile).removeClass('is-valid').addClass('is-invalid');
+				$(`#mobile-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please provide a valid phone number. It may start with +91, 91, or 0, and must be between 10 and 13 characters long.\nकृपया एक मान्य फोन नंबर प्रदान करें। यह +91, 91, या 0 से शुरू हो सकता है, और इसकी लंबाई 10 से 13 अक्षरों के बीच होनी चाहिए।").show();
+				$(mobile).focus();
+				formValid = false;
+			} else {
+				$(mobile).removeClass('is-invalid').addClass('is-valid');
+				$(`#mobile-div .invalid-span`).hide();
+				$(mobile).blur();
+			}
+
+			// Check WhatsApp
+			if (!whatsappValue || !validatePhone(whatsappValue)) {
+				$(whatsapp).removeClass('is-valid').addClass('is-invalid');
+				$(`#whatsapp-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please provide a valid phone number. It may start with +91, 91, or 0, and must be between 10 and 13 characters long.\nकृपया एक मान्य फोन नंबर प्रदान करें। यह +91, 91, या 0 से शुरू हो सकता है, और इसकी लंबाई 10 से 13 अक्षरों के बीच होनी चाहिए।").show();
+				$(whatsapp).focus();
+				formValid = false;
+			} else {
+				$(whatsapp).removeClass('is-invalid').addClass('is-valid');
+				$(`#whatsapp-div .invalid-span`).hide();
+				$(whatsapp).blur();
+			}
+
+			// Check Latitude
+			if (!latitudeValue || !validateLatitude(latitudeValue)) {
+				$(latitude).removeClass('is-valid').addClass('is-invalid');
+				$(`#latitude-div .invalid-span`).html("&nbsp;Required!").show();
+				$(latitude).focus();
+				formValid = false;
+			} else {
+				$(latitude).removeClass('is-invalid').addClass('is-valid');
+				$(`#latitude-div .invalid-span`).hide();
+				$(latitude).blur();
+			}
+
+			// Check Longitude
+			if (!longitudeValue || !validateLongitude(longitudeValue)) {
+				$(longitude).removeClass('is-valid').addClass('is-invalid');
+				$(`#longitude-div .invalid-span`).html("&nbsp;Required!").show();
+				$(longitude).focus();
+				formValid = false;
+			} else {
+				$(longitude).removeClass('is-invalid').addClass('is-valid');
+				$(`#longitude-div .invalid-span`).hide();
+				$(longitude).blur();			
+			}
+			
+			return formValid
+
+		}
+
+
+        $('#preview-btn').click(function () {
+            if (validateForm()) {
+                if ($(this).html() != 'Edit Form') {
+                    $('#add-csc-form input').prop('readonly', true);
+                    $('#add-csc-form textarea').prop('readonly', true);
+    
+                    $('#dropzone-uploads').css('pointer-events', 'none');
+                    $('#add-link-btn').css('pointer-events', 'none');
+                    $('#map').css('pointer-events', 'none');
+    
+    
+                    $('#add-csc-form input:checkbox').prop('disabled', true);
+                    $('#add-csc-form select').prop('disabled', true).trigger('chosen:updated');
+    
+                    $(this).html('Edit Form');
+                    $('#add-csc-btns-div button').show();
+                } else {
+                    $('#add-csc-form input').prop('readonly', false);
+                    $('#add-csc-form textarea').prop('readonly', false);
+    
+                    $('#dropzone-uploads').css('pointer-events', 'auto');
+                    $('#add-link-btn').css('pointer-events', 'auto');
+                    $('#map').css('pointer-events', 'auto');
+    
+    
+                    $('#add-csc-form input:checkbox').prop('disabled', false);
+                    $('#add-csc-form select').prop('disabled', false).trigger('chosen:updated');
+    
+                    $(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
+                    $('#add-csc-btns-div button').hide();
+                };
+            }            
         });
     });
 
@@ -748,8 +1411,8 @@
                 if (response) {
     
                   $('#payment-content').prepend(`
-                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
                   `)
                 }
               },

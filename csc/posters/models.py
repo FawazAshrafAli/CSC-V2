@@ -68,4 +68,30 @@ class CustomPoster(models.Model):
     @property
     def get_absolute_url(self):
         return reverse("users:my_poster", kwargs={"slug": self.slug})
+
+
+class PosterFooter(models.Model):
+    csc_center = models.ForeignKey(CscCenter, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="poster_footer/", null=True, blank=True)
+    slug = models.SlugField(blank=True, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = f"{slugify(self.csc_center.name)}-footer"
+            slug = base_slug
+            count = 1
+            while PosterFooter.objects.filter(slug = slug).exists():
+                slug = f"{base_slug}-{count}"
+                count += 1
+
+            self.slug = slug
+        
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["created"]
+        db_table = "poster_footer"
     

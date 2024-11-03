@@ -258,8 +258,8 @@
           success: response => {
             if (response) {
               $('#payment-content').prepend(`
-                ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-                ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
               `)
             }
           },

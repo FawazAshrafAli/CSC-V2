@@ -1,0 +1,230 @@
+.django-ckeditor-widget {
+    display: block !important;
+}
+
+/* ************ */
+
+/* Messages */
+
+#message-div ul {
+    padding: 0;
+}
+#message-div ul li {
+    list-style: none;		
+}
+.alert {
+    z-index: 1500;
+    padding: 10px;
+}
+.alert-success {
+    background-color: #4CAF50;
+    color: #fff;		
+}
+.alert-danger {
+    background-color: darkred;
+    color: #fff;		
+}
+.alert-warning {
+    background-color: orange;
+    color: #fff;		
+}
+
+/* Pop Up Box */
+
+#pop-up-box {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    background: #f7f7f7;
+    box-shadow: 0 0 5px;
+    min-width: 390px;
+}
+
+#pop-up-box-heading {
+    background-color: #fff;
+    padding: 10px;
+    margin: 0 0 10px 0;
+}
+
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 24px;
+    color: red;
+    background-color: #fff;
+    border: none;
+    box-shadow: 0 0 1px #777;
+    padding: 0 7px;
+}
+
+.close-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 0, 0, 0.485);
+}
+
+#pop-up-form {
+    padding: 0 10px;
+    padding-bottom: 5px;
+}
+
+#pop-up-msg {
+    display: none;
+    padding-left: 10px;
+    font-size: small;
+}
+
+#pop-up-dropdown {
+    min-height: 150px;
+}
+
+#pop-up-btns {
+    float: right;
+    padding-bottom: 5px;
+}
+
+#pop-up-add-toggle {
+    color: #fff;
+    width: 75px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+    box-shadow: 0 0 5px #777;
+    border: none;
+}
+
+#pop-up-add-toggle:hover {
+    background: linear-gradient(to bottom, lime, green, darkgreen);
+}
+
+#pop-up-edit-toggle {
+    display: none;
+    color: #fff;
+    width: 75px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, coral, orange, coral);
+    box-shadow: 0 0 5px #777;
+    border: none;
+}
+
+#pop-up-edit-toggle:hover {
+    background: linear-gradient(to bottom, yellow, orange, coral);
+}
+
+#pop-up-delete-toggle {
+    display: none;
+    color: #fff;
+    width: 75px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, darkred, red, darkred);
+    box-shadow: 0 0 5px #777;
+    border: none;
+}
+
+#pop-up-delete-toggle:hover {
+    background: linear-gradient(to bottom, orange, red, darkred);
+}
+
+#pop-up-add-btn-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#pop-up-add-btn {
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, darkgreen, green, darkgreen);
+    border: none;
+    margin-bottom: 5px;
+}
+
+#pop-up-add-btn:hover {
+    background: linear-gradient(to bottom, lime, green, darkgreen);
+}
+
+#pop-up-edit-btn {
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, coral, orange, coral);
+    border: none;
+    margin-bottom: 5px;
+}
+
+#pop-up-edit-btn:hover {
+    background: linear-gradient(to bottom, yellow, orange, coral);
+}
+
+#pop-up-delete-btn {
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, darkred, red, darkred);
+    border: none;
+    margin-bottom: 5px;
+}
+
+#pop-up-delete-btn:hover {
+    background: linear-gradient(to bottom, orange, red, darkred);
+}
+
+#pop-up-cancel-btn, #pop-up-done-btn {
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, darkblue, blue, darkblue);
+    border: none;
+    margin-bottom: 5px;
+}
+
+#pop-up-cancel-btn:hover, #pop-up-done-btn:hover {
+    background: linear-gradient(to bottom, steelblue, blue, darkblue);
+}
+
+/* User */
+
+#user-dp {
+    min-width:35px;
+    min-height:35px;
+    max-width:35px;
+    max-height:35px;
+    object-fit: cover;
+    object-position: top;
+}
+
+/* **************** */
+
+.d-flex {
+    display: flex;
+}
+.justify-content-end {
+    justify-content: right;
+}
+.justify-content-between {
+    justify-content: space-between;
+}
+.align-items-center {
+    align-items: center;
+}
+.mb-0 {
+    margin-bottom: 0;
+}
+.required-field {
+    color:red
+}
+
+/* ************ */
+
+#offer-form-group {
+    width: 100px;
+}
+
+#offer-input {
+    width: 13px;
+    height: 13px;
+    margin-bottom: 0;
+}
+
+#date-input-div, #description-input-div {
+    display: none;
+}

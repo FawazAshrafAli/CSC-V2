@@ -16,10 +16,11 @@ from django.db.models import Q
 from datetime import datetime
 import logging
 import base64
+import re
 
 from payment.models import Payment
 from authentication.models import User
-from posters.models import Poster, CustomPoster
+from posters.models import Poster, CustomPoster, PosterFooter
 from products.models import Product, ProductEnquiry
 from services.models import Service, ServiceEnquiry
 from csc_center.models import (CscCenter, SocialMediaLink, State,
@@ -31,10 +32,11 @@ logger = logging.getLogger(__name__)
 def check_payment(center, data):
     try:
         if not center.is_active:
+            payment_url = reverse_lazy("payment:payment", kwargs = {'slug' : center.slug})
             if center.live_days < 15:
-                data['light_warning_message'] = f"You are on the 15 days trail period. Please make the payment in the next {15 - center.live_days} days to avoid suspension of your account."
+                data['light_warning_message'] = f"You are on the 15 days trail period. Please make the payment in the next {15 - center.live_days} days to avoid suspension of your account. &nbsp;<span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
             else:
-                data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account."
+                data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account. <span style='display: inline-block;'>Click <a href='#' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
             
         return data
     except Exception as e:
@@ -55,7 +57,7 @@ def check_payment_response(request):
     return data
 
 
-class BaseUserView(LoginRequiredMixin):
+class BaseUserView(LoginRequiredMixin, View):
     login_url = reverse_lazy('authentication:login')
 
     def dispatch(self, request, *args, **kwargs):
@@ -65,10 +67,11 @@ class BaseUserView(LoginRequiredMixin):
             return super().dispatch(request, *args, **kwargs)
         except Exception as e:
             logger.exception("Error in base admin view: %s", e)
-            return redirect(self.redirect_url)
+            return redirect(self.login_url)
 
     def get_context_data(self, **kwargs):
-        context = {}    
+        # context = {}    
+        context = super().get_context_data(**kwargs)
         try:            
             centers = CscCenter.objects.filter(email = self.request.user.email)
             context["csc_center"] = CscCenter.objects.filter(email = self.request.user.email).first()
@@ -159,7 +162,7 @@ class GetCenterDataView(BaseUserView, View):
 
 
 # Service
-class BaseServiceView(BaseUserView):
+class BaseServiceView(BaseUserView, View):
     model = CscCenter
 
     def get_context_data(self, **kwargs):
@@ -321,8 +324,6 @@ class GetCurrentCscCenterView(CscCenterBaseView, View):
         except Http404:
             data = {"error": "Invalid csc center"}
 
-        print(data)
-
         return JsonResponse(data)
             
 
@@ -363,8 +364,8 @@ class DetailCscCenterView(CscCenterBaseView, DetailView):
 
 class AddCscCenterView(CscCenterBaseView, CreateView):
     template_name = 'user_csc_center/create.html'
-    success_url = reverse_lazy('users:add_csc')
-    redirect_url = success_url
+    success_url = reverse_lazy('authentication:login')
+    redirect_url = reverse_lazy("users:add_csc")
     fields = "__all__"
     
     def get_context_data(self, **kwargs):
@@ -418,46 +419,44 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
             if show_opening_hours: 
                 show_opening_hours = show_opening_hours.strip()
 
-            if show_opening_hours:
-                mon_opening_time = request.POST.get('mon_opening_time')
-                tue_opening_time = request.POST.get('tue_opening_time')
-                wed_opening_time = request.POST.get('wed_opening_time')
-                thu_opening_time = request.POST.get('thu_opening_time')
-                fri_opening_time = request.POST.get('fri_opening_time')
-                sat_opening_time = request.POST.get('sat_opening_time')
-                sun_opening_time = request.POST.get('sun_opening_time')
+            mon_opening_time = request.POST.get('mon_opening_time')
+            tue_opening_time = request.POST.get('tue_opening_time')
+            wed_opening_time = request.POST.get('wed_opening_time')
+            thu_opening_time = request.POST.get('thu_opening_time')
+            fri_opening_time = request.POST.get('fri_opening_time')
+            sat_opening_time = request.POST.get('sat_opening_time')
+            sun_opening_time = request.POST.get('sun_opening_time')
 
-                mon_closing_time = request.POST.get('mon_closing_time')
-                tue_closing_time = request.POST.get('tue_closing_time')
-                wed_closing_time = request.POST.get('wed_closing_time')
-                thu_closing_time = request.POST.get('thu_closing_time')
-                fri_closing_time = request.POST.get('fri_closing_time')
-                sat_closing_time = request.POST.get('sat_closing_time')
-                sun_closing_time = request.POST.get('sun_closing_time')
+            mon_closing_time = request.POST.get('mon_closing_time')
+            tue_closing_time = request.POST.get('tue_closing_time')
+            wed_closing_time = request.POST.get('wed_closing_time')
+            thu_closing_time = request.POST.get('thu_closing_time')
+            fri_closing_time = request.POST.get('fri_closing_time')
+            sat_closing_time = request.POST.get('sat_closing_time')
+            sun_closing_time = request.POST.get('sun_closing_time')
 
-                mon_opening_time = mon_opening_time if mon_opening_time.strip() else None
-                tue_opening_time = tue_opening_time if tue_opening_time.strip() else None
-                wed_opening_time = wed_opening_time if wed_opening_time.strip() else None
-                thu_opening_time = thu_opening_time if thu_opening_time.strip() else None
-                fri_opening_time = fri_opening_time if fri_opening_time.strip() else None
-                sat_opening_time = sat_opening_time if sat_opening_time.strip() else None
-                sun_opening_time = sun_opening_time if sun_opening_time.strip() else None
-                
-                mon_closing_time = mon_closing_time if mon_closing_time.strip() else None
-                tue_closing_time = tue_closing_time if tue_closing_time.strip() else None
-                wed_closing_time = wed_closing_time if wed_closing_time.strip() else None
-                thu_closing_time = thu_closing_time if thu_closing_time.strip() else None
-                fri_closing_time = fri_closing_time if fri_closing_time.strip() else None
-                sat_closing_time = sat_closing_time if sat_closing_time.strip() else None
-                sun_closing_time = sun_closing_time if sun_closing_time.strip() else None
+            mon_opening_time = mon_opening_time.strip() if mon_opening_time else None
+            tue_opening_time = tue_opening_time.strip() if tue_opening_time else None
+            wed_opening_time = wed_opening_time.strip() if wed_opening_time else None
+            thu_opening_time = thu_opening_time.strip() if thu_opening_time else None
+            fri_opening_time = fri_opening_time.strip() if fri_opening_time else None
+            sat_opening_time = sat_opening_time.strip() if sat_opening_time else None
+            sun_opening_time = sun_opening_time.strip() if sun_opening_time else None
+    
+            mon_closing_time =         mon_closing_time.strip() if mon_closing_time else None
+            tue_closing_time = tue_closing_time.strip() if tue_closing_time else None
+            wed_closing_time = wed_closing_time.strip() if wed_closing_time else None
+            thu_closing_time = thu_closing_time.strip() if thu_closing_time else None
+            fri_closing_time = fri_closing_time.strip() if fri_closing_time else None
+            sat_closing_time = sat_closing_time.strip() if sat_closing_time else None
+            sun_closing_time = sun_closing_time.strip() if sun_closing_time else None
 
             show_social_media_links = request.POST.get('show_social_media_links')
             if show_social_media_links:
                 show_social_media_links = show_social_media_links.strip()
 
-            if show_social_media_links:
-                social_medias = request.POST.getlist('social_medias')
-                social_links = request.POST.getlist('social_links')
+            social_medias = request.POST.getlist('social_medias', None)
+            social_links = request.POST.getlist('social_links', None)
 
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
@@ -501,7 +500,7 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
                 thu_closing_time = thu_closing_time, fri_closing_time = fri_closing_time, 
                 sat_closing_time = sat_closing_time, sun_closing_time = sun_closing_time, 
                 latitude = latitude.strip() if latitude else None, longitude = longitude.strip() if longitude else None
-            )               
+            )
             
             # after creation of object
             self.object.keywords.set(keywords)
@@ -532,82 +531,22 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
                         self.object.save()
 
             messages.success(request, "Added CSC center")
-            if not User.objects.filter(email = email).exists():            
-                return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))         
+
+            if not User.objects.filter(email = email).exists():
+                logout(request)        
+                return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
+            elif request.user.email and request.user.email == email:
+                return redirect(reverse_lazy("users:home"))
+            else:
+                logout(request)
             
             return redirect(self.success_url)
+            
         except Exception as e:
             msg = "Failed to add csc center"
             logger.exception(f"{msg}: {e}")
             messages.error(request, msg)
             return redirect(self.redirect_url)
-
-        try:
-            district = get_object_or_404(District, district = district)
-        except Http404:
-            messages.error(request, 'Invalid District')
-            return redirect(self.redirect_url)
-        
-        try:
-            block = get_object_or_404(Block, block = block)
-        except Http404:
-            messages.error(request, 'Invalid Block')
-            return redirect(self.redirect_url)
-        
-        self.object = CscCenter.objects.create(
-            name = name, type = type, state = state,
-            district = district,block = block,location = location,
-            zipcode = zipcode, landmark_or_building_name = landmark_or_building_name,
-            street = street, logo = logo,
-            description = description, contact_number = contact_number,
-            mobile_number = mobile_number, whatsapp_number = whatsapp_number, owner = owner,
-            email = email, website = website, mon_opening_time = mon_opening_time, 
-            tue_opening_time = tue_opening_time, wed_opening_time = wed_opening_time, 
-            thu_opening_time = thu_opening_time, fri_opening_time = fri_opening_time, 
-            sat_opening_time = sat_opening_time, sun_opening_time = sun_opening_time, 
-            mon_closing_time = mon_closing_time,tue_closing_time = tue_closing_time,
-            wed_closing_time = wed_closing_time,thu_closing_time = thu_closing_time,
-            fri_closing_time = fri_closing_time,sat_closing_time = sat_closing_time,
-            sun_closing_time = sun_closing_time, latitude = latitude,
-            longitude = longitude
-        )
-
-        if not User.objects.filter(email = email).exists():
-            User.objects.create_user(username = email, email = email, password = contact_number)              
-        
-        # after creation of object
-        self.object.keywords.set(keywords)
-        self.object.services.set(services)
-        self.object.products.set(products)
-        self.object.save()
-
-        if banners:
-            for banner in banners:
-                banner_obj, created = Banner.objects.get_or_create(csc_center = self.object, banner_image = banner)
-                self.object.banners.add(banner_obj)
-            self.object.save()
-
-        if social_medias and social_links:
-            social_media_length = len(social_medias)
-            if social_media_length > 0:
-                social_media_list = []
-                for i in range(social_media_length):
-                    if social_medias[i] and social_links[i]:
-                        social_media_link, created = SocialMediaLink.objects.get_or_create(
-                            csc_center_id = self.object,
-                            social_media_name = social_medias[i],
-                            social_media_link = social_links[i]
-                        )
-                        social_media_list.append(social_media_link)
-                
-                    self.object.social_media_links.set(social_media_list)
-                    self.object.save()
-
-        messages.success(request, "Added CSC center")
-        if not User.objects.filter(email = email).exists():            
-            return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
-        
-        return redirect(self.success_url)
     
 
 @method_decorator(never_cache, name="dispatch")
@@ -617,6 +556,7 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
     context_object_name = 'center_obj'
     fields = "__all__"
     slug_url_kwarg = 'slug'
+    success_url = redirect_url = reverse_lazy("users:csc_centers")
 
     def get_object(self, **kwargs):
         try:
@@ -624,10 +564,21 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
             return self.object
         except Http404:
             messages.error(self.request, "Invalid CSC center")
-            return redirect(reverse_lazy('users:csc_centers'))
+            return redirect(self.redirect_url)
         
     def get_success_url(self):
-        return reverse_lazy('users:csc_center', kwargs = {'slug': self.kwargs.get('slug')})
+        try:
+            return reverse_lazy('users:csc_center', kwargs = {'slug': self.kwargs.get('slug')})
+        except Exception as e:
+            logger.exception("Error in fetching success url of update csc center view: {e}")            
+            return redirect(self.success_url)
+    
+    def get_redirect_url(self):
+        try:
+            return reverse_lazy('users:update_csc', kwargs = {'slug': self.kwargs.get('slug')})
+        except Exception as e:
+            logger.exception("Error in fetching redirect url of update csc center view: {e}")
+            return redirect(self.redirect_url)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -658,7 +609,7 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
         try:
             name = request.POST.get('name')
             type = request.POST.get('type')
-            csc_reg_name = request.POST.get('csc_reg_name')
+            csc_reg_no = request.POST.get('csc_reg_no')
             keywords = request.POST.getlist('keywords')
 
             state = request.POST.get('state')
@@ -680,49 +631,51 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
             products = request.POST.getlist('products')
 
             show_opening_hours = request.POST.get('show_opening_hours')
-            
-            show_opening_hours = show_opening_hours.strip() if show_opening_hours else None
 
             if show_opening_hours:
-                mon_opening_time = request.POST.get('mon_opening_time')
-                tue_opening_time = request.POST.get('tue_opening_time')
-                wed_opening_time = request.POST.get('wed_opening_time')
-                thu_opening_time = request.POST.get('thu_opening_time')
-                fri_opening_time = request.POST.get('fri_opening_time')
-                sat_opening_time = request.POST.get('sat_opening_time')
-                sun_opening_time = request.POST.get('sun_opening_time')
+                show_opening_hours = show_opening_hours.strip()
 
-                mon_closing_time = request.POST.get('mon_closing_time')
-                tue_closing_time = request.POST.get('tue_closing_time')
-                wed_closing_time = request.POST.get('wed_closing_time')
-                thu_closing_time = request.POST.get('thu_closing_time')
-                fri_closing_time = request.POST.get('fri_closing_time')
-                sat_closing_time = request.POST.get('sat_closing_time')
-                sun_closing_time = request.POST.get('sun_closing_time')
+            mon_opening_time = request.POST.get('mon_opening_time')
+            tue_opening_time = request.POST.get('tue_opening_time')
+            wed_opening_time = request.POST.get('wed_opening_time')
+            thu_opening_time = request.POST.get('thu_opening_time')
+            fri_opening_time = request.POST.get('fri_opening_time')
+            sat_opening_time = request.POST.get('sat_opening_time')
+            sun_opening_time = request.POST.get('sun_opening_time')
 
-                mon_opening_time = mon_opening_time.strip() if mon_opening_time else None
-                tue_opening_time = tue_opening_time.strip() if tue_opening_time else None
-                wed_opening_time = wed_opening_time.strip() if wed_opening_time else None
-                thu_opening_time = thu_opening_time.strip() if thu_opening_time else None
-                fri_opening_time = fri_opening_time.strip() if fri_opening_time else None
-                sat_opening_time = sat_opening_time.strip() if sat_opening_time else None
-                sun_opening_time = sun_opening_time.strip() if sun_opening_time else None
-                
-                mon_closing_time = mon_closing_time.strip() if mon_closing_time else None
-                tue_closing_time = tue_closing_time.strip() if tue_closing_time else None
-                wed_closing_time = wed_closing_time.strip() if wed_closing_time else None
-                thu_closing_time = thu_closing_time.strip() if thu_closing_time else None
-                fri_closing_time = fri_closing_time.strip() if fri_closing_time else None
-                sat_closing_time = sat_closing_time.strip() if sat_closing_time else None
-                sun_closing_time = sun_closing_time.strip() if sun_closing_time else None
+            mon_closing_time = request.POST.get('mon_closing_time')
+            tue_closing_time = request.POST.get('tue_closing_time')
+            wed_closing_time = request.POST.get('wed_closing_time')
+            thu_closing_time = request.POST.get('thu_closing_time')
+            fri_closing_time = request.POST.get('fri_closing_time')
+            sat_closing_time = request.POST.get('sat_closing_time')
+            sun_closing_time = request.POST.get('sun_closing_time')
+
+            mon_opening_time = mon_opening_time.strip() if mon_opening_time else None
+            tue_opening_time = tue_opening_time.strip() if tue_opening_time else None
+            wed_opening_time = wed_opening_time.strip() if wed_opening_time else None
+            thu_opening_time = thu_opening_time.strip() if thu_opening_time else None
+            fri_opening_time = fri_opening_time.strip() if fri_opening_time else None
+            sat_opening_time = sat_opening_time.strip() if sat_opening_time else None
+            sun_opening_time = sun_opening_time.strip() if sun_opening_time else None
+            
+            mon_closing_time = mon_closing_time.strip() if mon_closing_time else None
+            tue_closing_time = tue_closing_time.strip() if tue_closing_time else None
+            wed_closing_time = wed_closing_time.strip() if wed_closing_time else None
+            thu_closing_time = thu_closing_time.strip() if thu_closing_time else None
+            fri_closing_time = fri_closing_time.strip() if fri_closing_time else None
+            sat_closing_time = sat_closing_time.strip() if sat_closing_time else None
+            sun_closing_time = sun_closing_time.strip() if sun_closing_time else None
 
             show_social_media_links = request.POST.get('show_social_media_links')
 
             show_social_media_links = show_social_media_links.strip() if show_social_media_links else None
 
             if show_social_media_links:
-                social_medias = request.POST.getlist('social_medias')
-                social_links = request.POST.getlist('social_links')
+                show_social_media_links = show_social_media_links.strip()
+
+            social_medias = request.POST.getlist('social_medias')
+            social_links = request.POST.getlist('social_links')
 
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
@@ -731,25 +684,25 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
                 type = get_object_or_404(CscNameType, slug = type.strip())
             except Http404:
                 messages.error(request, 'Invalid CSC Name Type')
-                return redirect(reverse_lazy('users:add_csc'))
+                return redirect(self.get_redirect_url())
 
             try:
                 state = get_object_or_404(State, state = state.strip())
             except Http404:
                 messages.error(request, 'Invalid State')
-                return redirect(reverse_lazy('users:add_csc'))
+                return redirect(self.get_redirect_url())
 
             try:
                 district = get_object_or_404(District, district = district.strip())
             except Http404:
                 messages.error(request, 'Invalid District')
-                return redirect(reverse_lazy('users:add_csc'))
+                return redirect(self.get_redirect_url())
             
             try:
                 block = get_object_or_404(Block, block = block.strip())
             except Http404:
                 messages.error(request, 'Invalid Block')
-                return redirect(reverse_lazy('users:add_csc'))
+                return redirect(self.get_redirect_url())
             
             self.object = self.get_object()
 
@@ -757,7 +710,7 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
                 self.object.name = name.strip()
             if type:
                 self.object.type = type
-            self.object.csc_reg_no = csc_reg_name.strip() if csc_reg_name else None
+            self.object.csc_reg_no = csc_reg_no.strip() if csc_reg_no else None
             if state:
                 self.object.state = state
             if district:
@@ -777,6 +730,7 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
                 self.object.logo = logo
 
             if banners:
+                self.object.banners.clear()
                 for banner in banners:
                     banner_obj, created = Banner.objects.get_or_create(csc_center = self.object, banner_image = banner)
                     self.object.banners.add(banner_obj)
@@ -858,12 +812,11 @@ class UpdateCscCenterView(CscCenterBaseView, UpdateView):
             for error in errors:
                 print(f"Error on field - {field}: {error}")
         return super().form_invalid(form)
-        
-
+    
 
 ###################### Posters ################################
 
-class BasePosterView(BaseUserView):
+class BasePosterView(BaseUserView, View):
     model = Poster
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -899,6 +852,44 @@ class AvailablePosterView(BasePosterView, ListView):
             try:
                 center = get_object_or_404(CscCenter, slug = center_slug, email = request.user.email)
 
+                data["centerName"] = f"{center.name} {center.type.type}"
+
+                center_street = []
+                if center.landmark_or_building_name:
+                    center_street.append(center.landmark_or_building_name)
+                if center.street:
+                    center_street.append(center.street)
+
+                center_street = list(set(center_street))
+
+                data["centerStreet"] = ", ".join(center_street) if center_street else None
+
+                data["centerLocation"] = f"{center.location}, {center.block.block}" if center.location else center.block.block
+
+                contact_numbers = [f"{center.contact_number}", f"{center.mobile_number}", f"{center.whatsapp_number}"]
+                
+                for i in range(len(contact_numbers)):
+                    contact_numbers[i] = re.sub(r"^(\+91-|\+|-|91)", "", contact_numbers[i])
+
+                    if not contact_numbers[i].startswith("0"):
+                        contact_numbers[i] = contact_numbers[i][-10:]
+
+                contact_numbers = list(set(contact_numbers))
+                if contact_numbers:
+                    contact_numbers = " | ".join(contact_numbers[:2]) if len(contact_numbers) > 1 else contact_numbers[0]
+
+                data["centerContacts"] = contact_numbers if contact_numbers else None
+
+
+                data["centerLogo"] = center.logo.url if center.logo else None
+
+
+                data["centerQrCode"] = center.qr_code_image.url if center.qr_code_image else None
+                
+                poster_objs = PosterFooter.objects.filter(csc_center = center)
+                
+                data["centerFooter"] = poster_objs.first().image.url if poster_objs.exists() else None
+
                 data = check_payment(center, data)
 
                 posters = self.model.objects.filter(state = center.state) if center else None
@@ -916,8 +907,10 @@ class AvailablePosterView(BasePosterView, ListView):
                 if posters:
                     list_posters = []
                     for poster in posters:
-                        list_posters.append({"title": poster.title, "slug": poster.slug, "service": poster.service.first_name, "poster": poster.poster.url if poster.poster else None})
+                        list_posters.append({"title": poster.title, "slug": poster.slug, "service": poster.service.slug, "poster": poster.poster.url if poster.poster else None})
                     data["posters"] = list_posters
+                else:
+                    data["posters"] = []
             except Http404:
                 data = {'error': 'Not an active csc center'}
 
@@ -988,7 +981,86 @@ class MyPosterDetailView(BasePosterView, DetailView):
         context = super().get_context_data(**kwargs)
         context['poster'] = self.get_object()
         return context
+    
+class BasePosterFooterView(BasePosterView, View):
+    model = PosterFooter
+    success_url = redirect_url = reverse_lazy("users:add_footer")
 
+
+class AddPosterFooterView(BasePosterFooterView, CreateView):
+    template_name = "user_posters/create_footer.html"
+    fields = ["csc_center", "image"]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            center_slug = request.POST.get("center")
+            center = get_object_or_404(CscCenter, slug = center_slug)
+            footer = request.FILES.get("footer")
+
+            if not footer:
+                messages.error(request, "Error! Please provide a footer image and try again")
+                return redirect(self.redirect_url)
+            
+            self.model.objects.update_or_create(csc_center = center, defaults={"image" : footer})
+            messages.success(request, "Success! Added poster footer.")
+            return redirect(self.success_url)
+        
+        except Http404:
+            messages.error(request, "Error in identifying your csc center.")
+
+        except Exception as e:
+            logger.exception(f"Error in post function of add poster footer function: {e}")
+
+        return redirect(self.success_url)
+
+
+def get_footer(request):
+    data = {}
+    try:
+        center_slug = request.GET.get("center_slug")
+        center = get_object_or_404(CscCenter, slug = center_slug)
+
+
+        try:
+            footer = get_object_or_404(PosterFooter, csc_center = center)
+            data = {
+                "footer": footer.image.url,
+                "footer_name": footer.image.name,
+                "footer_slug": footer.slug
+            }
+        except Http404:
+            data = {"message": "Footer not found."}
+    
+        data = check_payment(center, data)
+    except Http404:
+        data = {"message": "Failed to identify the csc center."}
+
+    except Exception as e:
+        logger.exception(f"Error in getting footer: {e}")
+        data = {"message": "Error in getting footer"}
+
+    return JsonResponse(data)
+
+
+class RemoveFooterView(BasePosterFooterView, View):
+    def get_object(self):
+        try:
+            return get_object_or_404(self.model, slug = self.kwargs.get("slug"))
+        except Http404:
+            messages.error(self.request, "Invalid footer.")
+            return redirect(self.redirect_url)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+            self.object.delete()
+            messages.success(request, "Success! Deleted footer image")
+            return redirect(self.success_url)
+        except Exception as e:
+            messages.error("Failed! Footer image deletion failed")
+            logger.exception(f"Error in deleting footer image: {e}")
+            return redirect(self.redirect_url)
+    
 
 class CreatePosterView(BasePosterView, CreateView):
     model = Poster
@@ -1039,6 +1111,7 @@ class SavePosterView(BasePosterView, View):
             image = request.POST.get('image')
             title =request.POST.get('title')
             service_slug = request.POST.get('service')
+
             try:
                 service = get_object_or_404(Service, slug = service_slug)
             except Http404:
@@ -1289,6 +1362,8 @@ class OrderHistoryListView(OrderHistoryBaseView, ListView):
                     })
 
                 data["payments"] = list_payments
+
+                data = check_payment_response(request)
 
             except Exception as e:
                 print(f"Error: {e}")

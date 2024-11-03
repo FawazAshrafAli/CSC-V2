@@ -6,7 +6,7 @@ from datetime import datetime
 from math import ceil, floor
 from django.http import Http404
 from django.db.models import Q
-from django.utils import timezone
+from django.contrib.auth import logout
 import logging
 import uuid
 import time
@@ -25,7 +25,7 @@ class AddCscCenterView(BaseView, CreateView):
     model = CscCenter
     template_name = 'csc_center/add.html'
     success_url = reverse_lazy('authentication:login')
-    redirect_url = success_url
+    redirect_url = reverse_lazy("csc_center:add_csc")
     fields = "__all__"
     
     def get_context_data(self, **kwargs):
@@ -82,46 +82,44 @@ class AddCscCenterView(BaseView, CreateView):
             if show_opening_hours: 
                 show_opening_hours = show_opening_hours.strip()
 
-            if show_opening_hours:
-                mon_opening_time = request.POST.get('mon_opening_time')
-                tue_opening_time = request.POST.get('tue_opening_time')
-                wed_opening_time = request.POST.get('wed_opening_time')
-                thu_opening_time = request.POST.get('thu_opening_time')
-                fri_opening_time = request.POST.get('fri_opening_time')
-                sat_opening_time = request.POST.get('sat_opening_time')
-                sun_opening_time = request.POST.get('sun_opening_time')
+            mon_opening_time = request.POST.get('mon_opening_time')
+            tue_opening_time = request.POST.get('tue_opening_time')
+            wed_opening_time = request.POST.get('wed_opening_time')
+            thu_opening_time = request.POST.get('thu_opening_time')
+            fri_opening_time = request.POST.get('fri_opening_time')
+            sat_opening_time = request.POST.get('sat_opening_time')
+            sun_opening_time = request.POST.get('sun_opening_time')
 
-                mon_closing_time = request.POST.get('mon_closing_time')
-                tue_closing_time = request.POST.get('tue_closing_time')
-                wed_closing_time = request.POST.get('wed_closing_time')
-                thu_closing_time = request.POST.get('thu_closing_time')
-                fri_closing_time = request.POST.get('fri_closing_time')
-                sat_closing_time = request.POST.get('sat_closing_time')
-                sun_closing_time = request.POST.get('sun_closing_time')
+            mon_closing_time = request.POST.get('mon_closing_time')
+            tue_closing_time = request.POST.get('tue_closing_time')
+            wed_closing_time = request.POST.get('wed_closing_time')
+            thu_closing_time = request.POST.get('thu_closing_time')
+            fri_closing_time = request.POST.get('fri_closing_time')
+            sat_closing_time = request.POST.get('sat_closing_time')
+            sun_closing_time = request.POST.get('sun_closing_time')
 
-                mon_opening_time = mon_opening_time if mon_opening_time.strip() else None
-                tue_opening_time = tue_opening_time if tue_opening_time.strip() else None
-                wed_opening_time = wed_opening_time if wed_opening_time.strip() else None
-                thu_opening_time = thu_opening_time if thu_opening_time.strip() else None
-                fri_opening_time = fri_opening_time if fri_opening_time.strip() else None
-                sat_opening_time = sat_opening_time if sat_opening_time.strip() else None
-                sun_opening_time = sun_opening_time if sun_opening_time.strip() else None
-                
-                mon_closing_time = mon_closing_time if mon_closing_time.strip() else None
-                tue_closing_time = tue_closing_time if tue_closing_time.strip() else None
-                wed_closing_time = wed_closing_time if wed_closing_time.strip() else None
-                thu_closing_time = thu_closing_time if thu_closing_time.strip() else None
-                fri_closing_time = fri_closing_time if fri_closing_time.strip() else None
-                sat_closing_time = sat_closing_time if sat_closing_time.strip() else None
-                sun_closing_time = sun_closing_time if sun_closing_time.strip() else None
+            mon_opening_time = mon_opening_time.strip() if mon_opening_time else None
+            tue_opening_time = tue_opening_time.strip() if tue_opening_time else None
+            wed_opening_time = wed_opening_time.strip() if wed_opening_time else None
+            thu_opening_time = thu_opening_time.strip() if thu_opening_time else None
+            fri_opening_time = fri_opening_time.strip() if fri_opening_time else None
+            sat_opening_time = sat_opening_time.strip() if sat_opening_time else None
+            sun_opening_time = sun_opening_time.strip() if sun_opening_time else None
+    
+            mon_closing_time =         mon_closing_time.strip() if mon_closing_time else None
+            tue_closing_time = tue_closing_time.strip() if tue_closing_time else None
+            wed_closing_time = wed_closing_time.strip() if wed_closing_time else None
+            thu_closing_time = thu_closing_time.strip() if thu_closing_time else None
+            fri_closing_time = fri_closing_time.strip() if fri_closing_time else None
+            sat_closing_time = sat_closing_time.strip() if sat_closing_time else None
+            sun_closing_time = sun_closing_time.strip() if sun_closing_time else None
 
             show_social_media_links = request.POST.get('show_social_media_links')
             if show_social_media_links:
                 show_social_media_links = show_social_media_links.strip()
 
-            if show_social_media_links:
-                social_medias = request.POST.getlist('social_medias')
-                social_links = request.POST.getlist('social_links')
+            social_medias = request.POST.getlist('social_medias')
+            social_links = request.POST.getlist('social_links')
 
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
@@ -197,8 +195,13 @@ class AddCscCenterView(BaseView, CreateView):
 
             messages.success(request, "Added CSC center")
 
-            if not User.objects.filter(email = email).exists():            
+            if not User.objects.filter(email = email).exists():
+                logout(request)        
                 return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
+            elif request.user.email and request.user.email == email:
+                return redirect(reverse_lazy("users:home"))
+            else:
+                logout(request)
             
             return redirect(self.success_url)
         except Exception as e:

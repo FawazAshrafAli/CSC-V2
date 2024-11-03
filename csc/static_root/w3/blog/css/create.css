@@ -1,0 +1,37 @@
+#heading-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and (width <= 720px) {
+    #heading-div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ***************** */
+
+#blog-category-form {
+    display: none;
+}
+#blog-form-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.button-pill {
+    border: none;
+    border-radius: 50px;
+    background: radial-gradient(red, darkred);
+    color: white;
+    font-weight: bolder;
+    padding: 8px 20px;
+}
+.button-pill:hover {
+    background: radial-gradient(orangered, red);
+}
+
+/* **************** */

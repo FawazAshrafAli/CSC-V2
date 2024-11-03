@@ -64,7 +64,11 @@
 <div id="payment-content">
     <div class="row">
         <!-- Listings -->
-        <div class="col-lg-12 col-md-12">
+          <div class="col-lg-12 col-md-12">
+            <div class="row">
+              <div class="col-lg-12" id="payment-content">
+              </div>
+          </div>
           <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">              
           <h4>Order History</h4>
           <br>
@@ -132,6 +136,10 @@
           data: {'center_slug': center},
 
           success: response => {
+            $('#payment-content').prepend(`
+              ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+              ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+            `)
             if (response) {
               $('#payment-tbody').empty();
               $(`#center-dropdown option[value='${center}']`).prop('selected', true).trigger('chosen:updated');

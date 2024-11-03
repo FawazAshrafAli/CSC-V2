@@ -77,8 +77,8 @@
                         <div class="product-grid">
                             <div class="product-image">
                                 <div class="image">
-                                    <img class="pic-1" src="{% if center.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
-                                    <img class="pic-2" src="{% if center.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                    <img class="pic-1" src="{% if center_obj.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
+                                    <img class="pic-2" src="{% if center_obj.logo %} {{center_obj.logo.url}} {% else %} {% static 'w3/images/no_image.png' %}  {% endif %}">
                                 </div>                                                    
                             </div>
                             <div class="product-content">
@@ -98,7 +98,14 @@
                                 <td>:</td>
                                 <td>{{center_obj.full_name}}</td>
                             </tr>
-                            {% if center.website %}
+                            {% if center_obj.csc_reg_no %}
+                            <tr>
+                                <th>CSC Reg No.</th>
+                                <td>:</td>
+                                <td>{{center_obj.csc_reg_no}}</td>
+                            </tr>
+                            {% endif %}
+                            {% if center_obj.website %}
                             <tr>
                                 <th>Website</th>
                                 <td>:</td>
@@ -212,8 +219,8 @@
                 if (response) {
     
                   $('#payment-content').html(`
-                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
                   `)
                 }
               },
@@ -227,7 +234,7 @@
         if (user == `{{request.user.username}}` && center) {      
         checkPayment(center);
         } else {
-        checkPayment(`{{center.slug}}`);        
+        checkPayment(`{{center_obj.slug}}`);        
         }
     })
 

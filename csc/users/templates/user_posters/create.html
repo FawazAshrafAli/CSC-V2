@@ -179,6 +179,8 @@
 <!-- Content
 ================================================== -->
 <!-- Container -->
+
+
 <div class="container">
     <div class="row">
         <div class="col-lg-12">
@@ -198,9 +200,7 @@
                             <input type="file" name="logo" id="footer-image">
                         </div>
                     </div>   
-                    <div id="poster-footer-text" style="display: none;">
-                        {% comment %} {{form|crispy}}
-                        {{form.media}} {% endcomment %}
+                    <div id="poster-footer-text" style="display: none;">                        
                         <textarea id="froala-editor"></textarea>
                     </div>                                      
                     <div id="poster-pop-up-add-btn-div">
@@ -325,11 +325,7 @@
         var canvas = $('#poster-canvas')[0];
         var context = canvas.getContext('2d', { willReadFrequently: true });
         var mainImage = new Image();
-        mainImage.src = `{{poster.poster.url}}`; // URL of the pre-existing image
-
-        // var scaleFactor = 2;  // Increase the scale factor to improve quality
-        // canvas.width = canvas.width * scaleFactor;
-        // canvas.height = canvas.height * scaleFactor;        
+        mainImage.src = `{{poster.poster.url}}`; // URL of the pre-existing image   
 
         mainImage.onload = function() {
             context.drawImage(mainImage, 0, 0, canvas.width, canvas.height);

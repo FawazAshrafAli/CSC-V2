@@ -75,8 +75,7 @@
 
 
 <div class="row">
-    <div class="col-lg-12 col-md-12" id="payment-content">
-    </div>
+    <div class="col-lg-12 col-md-12" id="payment-content"></div>
 </div>
 <div class="row" style="background-color: #fff;">
     <!-- Listings -->
@@ -276,6 +275,42 @@
             }).save();
 
         });
+
+        // Check Payment
+        function checkPayment(center) {
+            $.ajax({
+              type: 'GET',
+              url: `/users/check_payment/`,
+              dataType: 'json',
+              data: {'center_slug': center},
+              success: response => {
+                if (response) {
+    
+                  $('#payment-content').html(`
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+                  `)
+
+                  if (response.light_warning_message || response.hard_warning_message) {
+                    localStorage.setItem('unpaidCsc', true);
+                  } else {
+                    localStorage.removeItem('unpaidCsc');
+                  }
+                }
+              },
+              error: error => console.error("Error: ", error),
+            })
+        };
+    
+        const center =  localStorage.getItem('centerSlug');
+        const user = localStorage.getItem('cscUser');
+
+        if (user == `{{request.user.username}}` && center) {      
+        checkPayment(center);
+        } else {
+        checkPayment(`{{center.slug}}`);
+        }
+
     });
 </script>
 {% endblock scripts %}

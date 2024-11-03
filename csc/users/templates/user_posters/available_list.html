@@ -8,36 +8,62 @@
 
 <!-- Table Styles -->
 <style>
-    #poster-table {
-        min-width: 100%;
-        background-color: #fff;
+    input[type="checkbox"] {
+      width: 15px;
+      margin: 0;
+      padding: 0;
     }
-    #poster-table tr {
-        border-bottom: 1px solid silver;
+    #checkbox-label {
+      margin-bottom: 0;
+      padding-left: 5px;
+    }    
+
+    .d-flex {
+      display: flex;
     }
-    #poster-table tbody tr{
-        cursor: pointer;
+    .flex-row {
+      flex-direction: row;
     }
-    #poster-table tbody tr:hover {
-        color: blue;
+    .justify-content-end {
+      justify-content: right;
     }
-    #poster-table td:first-child,
-    #poster-table th:first-child,
-    #td-image,
-    #th-image {
-        text-align: center;
+    .justify-content-between {
+      justify-content: space-between;
     }
-    #poster-table img {
-        padding: 3px 0;
-        height: 50px;
+    .align-items-center {
+      align-items: center;
     }
-    #poster-table button {
-        height: 0;
-        padding: 0 10px;
+    .preview-btn {
+      border: none;
+      box-shadow: 0 0 5px #777;
+      background-color: #24a0ed;
+      color: #fff;
     }
-    #poster-table tbody tr:hover button {
-        height: 100%;
-        padding: 5px 10px;
+    #poster-pop-up-box {
+      display: none;
+      position: absolute;
+      border: 1px solid #777;
+      z-index:99999;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+      transition-timing-function: ease-in-out;
+      transition-duration: 50ms;
+      background-color: #fff;
+    }
+    #poster-pop-up-box canvas {
+      border-bottom: 1px solid silver;
+    }
+    #save-poster-btn, #close-btn {
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    #close-btn {
+      border: none;
+      box-shadow: 0 0 5px #777;
+      background-color: #fff;
+      color: #777;      
     }
 </style>
 {% endblock styles %}
@@ -74,6 +100,23 @@
 </div>
 
 <div class="row">
+  <!-- Model End-->
+  <div id="poster-pop-up-box">
+    <canvas id="poster-canvas" width="480" height="720"></canvas>
+
+    <div class="d-flex flex-row justify-content-between align-items-center">
+      <div class="d-flex flex-row align-items-center" style="padding-left: 10px;">
+        <input type="checkbox" name="custom_poster" id="custom-poster">
+        <label for="custom-poster" id="checkbox-label">Custom Poster</label>
+      </div>
+      <div class="pop-up-footer d-flex justify-content-end">
+        <button type="submit" id="save-poster-btn" class="preview-btn"> Save</button>
+        <button type="button" id="close-btn" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Copyrights -->
   <div class="col-md-12">
     <div class="copyrights">© 2021 CSCIndia. All Rights Reserved.| Powered by <a href="https://www.zentrix.in/" target="_blank">Zentrix Technologies</a></div>
@@ -84,6 +127,7 @@
 
 {% block scripts %}
 <script>
+
 	function toggleServiceDeletion(posterId, posterTitle) {
 		$('#delete-confirmation-box form').prop('action', `/admin/delete_poster/${posterId}`);
 		$('#poster-name').html(posterTitle);
@@ -102,8 +146,8 @@
         <!-- Listings -->
         <div class="col-lg-12 col-md-12">
           <div class="dashboard-list-box margin-top-0" id="validity-message" style="background-color: #fff;">
-            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
           </div>
         </div>
         <div class="col-lg-12 col-md-12">
@@ -137,30 +181,14 @@
             </div>
 
             <br>
-            <table id="poster-table">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th id="th-image">Image</th>
-                  <th style="text-align:center">Title</th>
-                  <th style="text-align:center">Service</th>
-                  <th></th>
-                </tr>
-              </thead>          
-              <tbody id="poster-tbody">
-                {% for poster in posters %}
-                <tr class="row-items" onclick="window.location='#'">
-                  <td>{{ forloop.counter }}</td>
-                  <td id="td-image">
-                    <img src="{% if poster.poster %} {{poster.poster.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Product Image">
-                  </td>
-                  <td style="text-align:center">{{ poster.title }}</td>
-                  <td style="text-align:center">{{ poster.service.first_name }}</td>
-                  <td style="text-align: right; padding-right: 10px;"><a href="{% url 'users:create_poster' poster.slug %}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>                        				
+            
+          
+          <div class="poster-listing" style="margin-top: 5px;">
+          
+          </div>
+
+
+            
           </div>
           <!-- Pagination -->
           <div class="clearfix"></div>
@@ -186,38 +214,247 @@
           </div>
         </div>
       </div>
+
+      
     `)
   }
 
     $(document).ready(function () {
-      function getAvalablePosters(center) {
+      window.getPoster = function(imageUrl) {
+        $('#poster-pop-up-box').fadeIn();
+        var canvas = $('#poster-canvas')[0];
+        var context = canvas.getContext('2d', { willReadFrequently: true });
+
+        const footerWidth = canvas.width;
+        const footerHeight = canvas.height * 0.2;
+
+        function renderCscDetails() {
+          let centerName;
+          let centerStreet;
+          let centerLocation;
+          let centerContacts;
+
+          centerName = localStorage.getItem('centerName');
+          centerStreet = localStorage.getItem('centerStreet');
+          centerLocation = localStorage.getItem('centerLocation');
+          centerContacts = localStorage.getItem('centerContacts');
+
+          if (centerName) {
+            context.font = "24px Times New Roman";
+            context.fillStyle = "black";
+            context.textAlign = "center";
+            context.fillText(centerName, 335, canvas.height - (footerHeight/1.5));
+
+            let distance = 20;
+            context.font = "17px Times New Roman";
+
+            let combonents = [centerStreet, centerLocation, centerContacts]
+
+            combonents.forEach(combonent => {
+              if (combonent) {
+                context.fillText(combonent, 335, canvas.height - (footerHeight/1.5) + distance);
+                distance += 20;
+              }
+            });              
+          }
+        }
+
+        var mainImage = new Image();
+        mainImage.src = imageUrl;
+        
+        mainImage.onload = function() {
+            context.drawImage(mainImage, 0, 0, canvas.width, canvas.height);
+        };
+
+        const logoImage = new Image();
+        const qrImage = new Image();
+        const footerImage = new Image();
+        
+        let centerLogo;
+        let centerQrCode;
+        let centerFooter;
+
+        centerLogo = localStorage.getItem('centerLogo');
+        centerQrCode = localStorage.getItem('centerQrCode');                     
+
+        function defaultFooter () {
+          let xDistance = 10;
+
+          if (centerLogo) {
+            logoImage.src = centerLogo;
+          }
+
+          if (centerQrCode) {
+            qrImage.src = centerQrCode;
+          }  
+
+          if (!centerLogo && centerQrCode) {
+            qrImage.onload = function() {
+              context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+              context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
+              renderCscDetails();
+            };
+          }
+          logoImage.onload = function() {
+            context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+
+            if (logoImage.src) {
+              context.drawImage(logoImage, xDistance, canvas.height - 100, 50, 50);
+              xDistance += 50;
+            }
+
+            qrImage.onload = function() {
+                context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
+            };
+
+            renderCscDetails();
+          };
+        }
+
+        defaultFooter();
+        
+        $(document).on('change', '#custom-poster', function () {
+          if ($(this).is(':checked')) {
+            centerFooter = localStorage.getItem('centerFooter');
+          
+            if (centerFooter) {
+              context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+              footerImage.src = centerFooter;
+              
+              footerImage.onload = function() {
+                context.drawImage(footerImage, 0, canvas.height - footerHeight, footerWidth, footerHeight);
+              };
+            } else {
+              window.alert("Custom footer not set. Please add a custom footer to proceed.\nकस्टम फुटर सेट नहीं है। कृपया आगे बढ़ने के लिए कस्टम फुटर जोड़ें।")
+              $(this).prop('checked', false);
+            }
+          } else {
+            defaultFooter();
+          }         
+        })
+
+
+        logoImage.onerror = qrImage.onerror = function() {
+            console.error("Failed to load image from localStorage.");
+        };
+
+      }
+
+      // Save Poster
+      $(document).on('click', '#save-poster-btn', function () {
+          const canvas = $('#poster-canvas')[0];
+          const imageData = canvas.toDataURL('image/jpg', 1.0);
+
+          let csc_center;
+
+          if (localStorage.getItem('cscUser') == `{{request.user.username}}` && localStorage.getItem('centerSlug')) {
+              csc_center = localStorage.getItem('centerSlug');
+          } else {
+              csc_center = `{{center.slug}}`;
+          }
+
+          $.ajax({
+              type: 'POST',
+              url: '/users/save_poster/',
+              dataType: 'json',
+              data: {
+                  'image': imageData,
+                  'csrfmiddlewaretoken': '{{csrf_token}}',
+                  'title': localStorage.getItem('posterTitle'),
+                  'csc_center': csc_center,
+                  'service': localStorage.getItem('posterService')
+              },
+              success: response => {
+                  if (response.message) {
+                      console.log(response.message)
+                  }
+                  if (response.success_url) {
+                      window.location=`${response.success_url}`;
+                  }
+              },
+              error: error => console.error('Error: ', error),
+          })
+        })
+
+        function removeCenterDetails() {
+          localStorage.removeItem("centerName");
+          localStorage.removeItem("centerStreet");
+          localStorage.removeItem("centerLocation");
+          localStorage.removeItem("centerContacts");
+          localStorage.removeItem("centerLogo");
+          localStorage.removeItem("centerQrCode");
+          localStorage.removeItem("centerFooter");
+        }
+
+        function successAction(response, message) {
+          defaultPosterView(response);
+
+          $('#validity-message').html(`
+            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+          `)
+
+          if (response.centerName) {
+            localStorage.setItem('centerName', response.centerName);
+          }
+          if (response.centerStreet) {
+            localStorage.setItem('centerStreet', response.centerStreet);
+          }
+          if (response.centerLocation) {
+            localStorage.setItem('centerLocation', response.centerLocation);
+          }
+          if (response.centerContacts) {
+            localStorage.setItem('centerContacts', response.centerContacts);
+          }
+          if (response.centerLogo) {
+            localStorage.setItem('centerLogo', response.centerLogo);
+          }
+          if (response.centerQrCode) {
+            localStorage.setItem('centerQrCode', response.centerQrCode);
+          }
+          if (response.centerFooter) {
+            localStorage.setItem('centerFooter', response.centerFooter);
+          }
+
+          if (response.posters && response.posters.length > 0) {
+            
+            $('.poster-listing').empty();
+            response.posters.forEach((poster, index) => {                  
+              $('.poster-listing').append(`                  
+
+              <div class="col-lg-2 col-md-2">
+                <div class="product-grid" style="background-color: #fff;">
+                  <div class="product-image">
+                    <a href="#" class="image">
+                      <img class="pic-1" src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}">
+                      <img class="pic-2" src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}">
+                    </a>
+                  </div>
+                  <div class="product-content" style="background-color: #fff;">
+                    <h6 class="title"><a href="#">${poster.title}</a></h6>
+                    <button class="preview-btn" onclick="getPoster('${poster.poster ? poster.poster : '/static/w3/images/no_image.png'}'); localStorage.setItem('posterTitle', '${poster.title}'); localStorage.setItem('posterService', '${poster.service}');">Preview</button>
+
+                  </div></div>
+              </div>
+              `)
+            })
+          } else {
+            $('.poster-listing').html(`<br><h4 style="color: red; text-align: center;">${message}</h4><br>`);
+          }
+          paginator();
+        }
+
+      function getAvalablePosters(center) {        
+        removeCenterDetails();
+        message = "No Posters Available"
+
         $.ajax({
           type: 'GET',
           url: `/users/available_posters/`,
           dataType: 'json',
           data: {'center_slug': center},
           success: response => {
-            if (response) {              
-              defaultPosterView(response);
-              if (response.posters) {
-                response.posters.forEach((poster, index) => {
-                  $('#poster-tbody').append(`
-                    <tr class="row-items">
-                      <td>${ index + 1 }</td>
-                      <td id="td-image">
-                        <img src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}" alt="Product Image">
-                      </td>
-                      <td style="text-align:center">${ poster.title }</td>
-                      <td style="text-align:center">${ poster.service }</td>
-                      <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
-                    </tr>
-                  `);
-                })
-              } 
-            } else {
-              $('#poster-content').html(`<h3 style="color:red;">Your current csc center is not yet activated.</h3>`);
-            }
-            paginator();
+            successAction(response, message)
           },
           error: error => {
             console.error('Error: ', error);
@@ -238,6 +475,10 @@
       // Filtering using service
       function fetchFilteredPosters(center) {
         const serviceSlug = $('#service-dropdown').val();
+
+        removeCenterDetails();
+        message = "Posters are unavailable for the selected service";
+
         $.ajax({
           type: 'GET',
           url: '/users/available_posters/',
@@ -247,35 +488,14 @@
             'service_slug': serviceSlug
           },
           success: response => {
-            $('#validity-message').html(`
-              ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-            `)
-            if (response.posters) {
-              $('#poster-tbody').empty();
-              $.each(response.posters, (index, poster) => {
-                const html = `<tr class="row-items">
-                  <td>${ index + 1 }</td>
-                  <td id="td-image">
-                    <img src="${ poster.poster ? poster.poster : 'static/w3/images/no_image.png' }" alt="Poster Image">
-                  </td>
-                  <td style="text-align:center">${ poster.title }</td>
-                  <td style="text-align:center">${ poster.service }</td>
-                  <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
-                </tr>`;
-                $('#poster-tbody').append(html);
-              })
-            } else {
-              $('#poster-tbody').html('<tr><td colspan="5" style="color: red">Posters are unavailable for the selected service</td></tr>')
-            }
-            paginator();
+            successAction(response, message);
           },
           error: error => console.error("Error: ", error),
         });
       }
       
       $(document).on('change', '#service-dropdown', function () {
-        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
+        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {          
           fetchFilteredPosters(center);
         } else {
           fetchFilteredPosters(`{{csc_center.slug}}`)
@@ -286,7 +506,10 @@
       // Search Functionality Start
       function searchPosters(center) {
         const query = $('#search-input').val();
-        console.log(query)
+
+        removeCenterDetails();
+        message = `No posters for query: '${query}`
+
         $.ajax({
           type: 'GET',
           url: '/users/available_posters/',
@@ -296,30 +519,19 @@
             'query': query
           },
           success: response => {
-            if (response.posters) {
-              $('#poster-tbody').empty();
-              $.each(response.posters, (index, poster) => {
-                const html = `<tr class="row-items">
-                  <td>${ index + 1 }</td>
-                  <td id="td-image">
-                    <img src="${ poster.poster ? poster.poster : 'static/w3/images/no_image.png' }" alt="Poster Image">
-                  </td>
-                  <td style="text-align:center">${ poster.title }</td>
-                  <td style="text-align:center">${ poster.service }</td>
-                  <td style="text-align: right; padding-right: 10px;"><a href="/users/create_poster/${poster.slug}" class="button gray"><i class="sl sl-icon-plus"></i> Create Poster</a></td>
-                </tr>`;
-                $('#poster-tbody').append(html);
-              })
-            } else {
-              $('#poster-tbody').html(`<tr><td colspan="5" style="color: red">No posters for query: '${query}'</td></tr>`)
-            }
-            paginator();
+            successAction(response, message);
           },
           error: error => console.error("Error: ", error),
         });
       }
 
       
+      // Close Poster Pop Up
+      $(document).on('click', '#close-btn', function (e) {
+        $('#poster-pop-up-box').fadeOut();
+      })
+
+      // Initiate poster searching
       $(document).on('submit', '#poster-search-form', function (e) {
         e.preventDefault();
         
@@ -330,22 +542,11 @@
         }
       })
 
-      $(document).on('input', '#search-input', function (e) {
-        e.preventDefault();
-        
-        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
-          searchPosters(center);
-        } else {
-          searchPosters(`{{center.slug}}`);
-        }
-      })
-      // Search Functionality End
-
       // Filtering End
 
       // Pagination
       function paginator () {
-        let itemsPerPage = 10;
+        let itemsPerPage = 18;
         let currentPage = 1;
         let totalItems = $('.row-items').length;
         let totalPages = Math.ceil(totalItems / itemsPerPage);

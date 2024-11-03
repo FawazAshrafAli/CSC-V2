@@ -174,6 +174,15 @@
 
             
             if (unpaid && (unpaid == true || unpaid == 'true')) {
+                let paymentUrl;
+
+                if (user == `{{request.user.username}}` && center) {      
+                    paymentUrl = `/payment/${center}`;
+                } else {
+                    let centerSlug;
+                    centerSlug = `{{center.slug}}`;
+                    paymentUrl = `/payment/${centerSlug}`;
+                }
                 
                 $('#pop-up-message').html(`
                     <div style="display: flex; justify-content: flex-end;">
@@ -183,7 +192,7 @@
                     <h5>Please complete the payment for getting access to poster downloading.<h5>
                     <br>
                     <div style="text-align: center;;">
-                        <a href="#" class="button" style="text-transform: uppercase;">Complete Payment</a>
+                        <a href="${paymentUrl}" class="button" style="text-transform: uppercase;" id="complete-payment-btn">Complete Payment</a>
                     </div>
                 `)
                 $('#pop-up-message').show()
@@ -226,8 +235,8 @@
                 if (response) {
     
                   $('#payment-content').html(`
-                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
-                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} <span style="display: inline-block;">Click <a href="#" style="color: blue; text-decoration: underline;">Pay Now</a> for payment</span></h5></div>`: ''}
+                    ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+                    ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
                   `)
 
                   if (response.light_warning_message || response.hard_warning_message) {
@@ -247,8 +256,9 @@
         if (user == `{{request.user.username}}` && center) {      
         checkPayment(center);
         } else {
-        checkPayment(`{{center.slug}}`);        
+        checkPayment(`{{center.slug}}`);
         }
+
     });
 </script>
 {% endblock scripts %}
