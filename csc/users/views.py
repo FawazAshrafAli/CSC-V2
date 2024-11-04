@@ -1,4 +1,3 @@
-from django.db.models.base import Model as Model
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView, ListView, View, CreateView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,22 +8,18 @@ from datetime import datetime
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
-from django.core.files.base import ContentFile
-from django.http import HttpResponse
 from django.contrib.auth import authenticate, logout
-from django.db.models import Q
 from datetime import datetime
 import logging
-import base64
 import re
 
 from payment.models import Payment
 from authentication.models import User
-from posters.models import Poster, CustomPoster, PosterFooter
+from posters.models import Poster, PosterFooter
 from products.models import Product, ProductEnquiry
 from services.models import Service, ServiceEnquiry
 from csc_center.models import (CscCenter, SocialMediaLink, State,
-                                District, Block, CscKeyword, 
+                                District, Block, CscKeyword,
                                 CscNameType, Banner)
 
 logger = logging.getLogger(__name__)
@@ -848,7 +843,6 @@ class AvailablePosterView(BasePosterView, ListView):
             data = {}
             center_slug = request.GET.get('center_slug')
             service_slug = request.GET.get('service_slug')
-            query = request.GET.get('query')
             try:
                 center = get_object_or_404(CscCenter, slug = center_slug, email = request.user.email)
 
@@ -901,9 +895,6 @@ class AvailablePosterView(BasePosterView, ListView):
                     except Http404:
                         pass
 
-                if query:
-                    posters = posters.filter(Q(title__icontains = query) | Q(service__name__icontains = query))
-
                 if posters:
                     list_posters = []
                     for poster in posters:
@@ -917,70 +908,6 @@ class AvailablePosterView(BasePosterView, ListView):
             return JsonResponse(data)
         return super().get(request, *args, **kwargs)
 
-
-class MyPosterListView(BasePosterView, ListView):
-    context_object_name = 'posters'
-    template_name = "user_posters/my_list.html"
-
-    def get_queryset(self):
-        csc_center = CscCenter.objects.filter(email = self.request.user.email, is_active = True).first()
-        return CustomPoster.objects.filter(csc_center = csc_center)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context[f"{self.context_object_name}"] = self.get_queryset()
-        return context
-    
-    def get(self, request, *args, **kwargs):
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            center_slug = request.GET.get('center_slug')
-            data = {}
-            try:
-                center = get_object_or_404(CscCenter, slug = center_slug, email = request.user.email)
-
-                data = check_payment(center, data)
-
-                posters = CustomPoster.objects.filter(csc_center = center)
-
-                if posters and posters.count() > 0:
-                    poster_list = []
-                    for count, poster in enumerate(posters):
-                        poster_list.append({
-                            'title': poster.title, 
-                            'poster': poster.poster.url if poster.poster else None,
-                            'service': poster.service.first_name,
-                            'slug': poster.slug, 
-                            'count': count+1,
-                            'get_absolute_url': poster.get_absolute_url if poster.get_absolute_url else '#',
-                            })
-                    data['posters'] = poster_list                
-
-            except Http404:
-                data['error'] = "Invalid csc center."
-
-            return JsonResponse(data)
-        return super().get(request, *args, **kwargs)
-
-    
-class MyPosterDetailView(BasePosterView, DetailView):
-    model = CustomPoster
-    context_object_name = 'poster'
-    template_name = "user_posters/my_detail.html"
-    success_url = reverse_lazy('users:my_posters')
-    redirect_url = success_url
-    slug_url_kwarg = 'slug'
-
-    def get_object(self):
-        try:
-            return get_object_or_404(self.model, slug = self.kwargs.get('slug'))
-        except Http404:
-            messages.error(self.request, "Invalid Poster")
-            return redirect(self.redirect_url)
-        
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['poster'] = self.get_object()
-        return context
     
 class BasePosterFooterView(BasePosterView, View):
     model = PosterFooter
@@ -1099,88 +1026,7 @@ class GetQrCodeView(BasePosterView, DetailView):
         qr_code = self.object.qr_code_image.url
         center = self.object.name
 
-        return JsonResponse({'qr_code': qr_code, 'center': center})
-
-
-class SavePosterView(BasePosterView, View):
-    success_url = reverse_lazy('users:my_posters')
-    redirect_url = reverse_lazy('users:available_posters')
-    
-    def post(self, request, *args, **kwargs):
-        try:
-            image = request.POST.get('image')
-            title =request.POST.get('title')
-            service_slug = request.POST.get('service')
-
-            try:
-                service = get_object_or_404(Service, slug = service_slug)
-            except Http404:
-                messages.error(request, "Invalid Service")
-                return redirect(self.redirect_url)
-            if CscCenter.objects.filter(email = request.user.email).count() > 1:
-                csc_center = request.POST.get('csc_center')
-                try:
-                    csc_center = get_object_or_404(CscCenter, slug = csc_center)
-                except Http404:
-                    return JsonResponse({"message": "Invalid csc center"})
-            else:
-                csc_center = CscCenter.objects.filter(email = request.user.email).first()
-
-            format, imgstr = image.split(';base64,')
-            # ext = format.split('/')[-1]  # Get the file extension (e.g., 'png')
-            ext = 'jpg'
-
-            # Decode the base64 string
-            image = ContentFile(base64.b64decode(imgstr), name='my_1poster_image.' + ext)
-
-            CustomPoster.objects.create(csc_center = csc_center, poster = image, title = title, service = service)
-
-            return JsonResponse({'message': 'Success', 'success_url': '/users/my_posters'})
-        except Exception as e:
-            print(f"Exception: {e}")
-            return JsonResponse({"message": 'Poster creation failed'})
-
-
-class DeleteMyPosterView(BasePosterView, View):
-    success_url = reverse_lazy('users:my_posters')
-    redirect_url = success_url
-
-    def get_object(self):
-        try:
-            return get_object_or_404(CustomPoster, slug = self.kwargs.get('slug'))
-        except Http404:
-            messages.error(self.request, "Invalid poster")
-            return redirect(self.redirect_url)
-        
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        messages.success(request, "Deleted Poster")
-        return redirect(self.success_url)
-    
-
-class DownloadPosterView(BasePosterView, View):
-    model = CustomPoster
-
-    def get_object(self):
-        try:
-            return get_object_or_404(self.model, slug = self.kwargs.get('slug'))
-        except Http404:
-            pass
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        if self.object.poster:
-            image_file = self.object.poster.file
-            image_content = image_file.read()
-
-            response = HttpResponse(image_content, content_type='image/jpeg')
-
-            response['Content-Disposition'] = f'attachment; filename="{self.object.title}.jpg"'
-            
-            return response
-        
+        return JsonResponse({'qr_code': qr_code, 'center': center})    
 
 
 ########## Poster End ##########

@@ -166,7 +166,7 @@
 
 						<li><a href="{% url 'users:csc_centers' %}" {% if center_page %} class="current" {% endif %}>CSC Centers</a></li>
 
-						<li><a href="{% url 'users:my_posters' %}" {% if poster_page %} class="current" {% endif %}>Posters</a></li>
+						<li><a href="{% url 'users:available_posters' %}" {% if poster_page %} class="current" {% endif %}>Posters</a></li>
 						
 						<li><a href="{% url 'users:service_enquiries' %}" {% if service_page %} class="current" {% endif %}>Service Enquiries</a></li>
 
@@ -236,7 +236,6 @@
 
 				<li {% if poster_page %} class="active" {% endif %} ><a><i class="fa fa-image"></i> Posters</a>
 					<ul>
-						<li><a href="{% url 'users:my_posters' %}">My Posters</a></li>
 						<li><a href="{% url 'users:available_posters' %}">Available Posters</a></li>
 						<li><a href="{% url 'users:add_footer' %}">Add Poster Footer</a></li>
 					</ul>	

@@ -24,6 +24,9 @@
     .flex-row {
       flex-direction: row;
     }
+    .flex-column {
+      flex-direction: column;
+    }
     .justify-content-end {
       justify-content: right;
     }
@@ -55,7 +58,7 @@
     #poster-pop-up-box canvas {
       border-bottom: 1px solid silver;
     }
-    #save-poster-btn, #close-btn {
+    #download-poster-btn, #close-btn {
       margin-right: 5px;
       margin-bottom: 5px;
     }
@@ -79,7 +82,7 @@
 				<nav id="breadcrumbs">
 					<ul>
 						<li><a href="{% url 'csc_admin:home' %}">Home</a></li>						
-						<li>Available Available Posters</li>
+						<li>Available Posters</li>
 					</ul>
 				</nav>
 			</div>
@@ -110,7 +113,7 @@
         <label for="custom-poster" id="checkbox-label">Custom Poster</label>
       </div>
       <div class="pop-up-footer d-flex justify-content-end">
-        <button type="submit" id="save-poster-btn" class="preview-btn"> Save</button>
+        <button type="submit" id="download-poster-btn" class="preview-btn"> Download</button>
         <button type="button" id="close-btn" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -170,25 +173,10 @@
                 </div>
                 <!-- Sort by / End -->
               </div>
-              </div>
-
-            <div class="row">
-              <div class="col-md-12" style="display: flex; justify-content: flex-end;">
-                <form method="#" id="poster-search-form" class="search-poster-input" style="height: 35px; padding: 0 10px; width: 360px;">                  
-                  <input style="height: 35px; margin-bottom: 0; border-radius: 50px;" class="search-field" type="text" placeholder="Search Posters" name="q" id="search-input" value="{{query}}" />		
-                </form>
-              </div>
-            </div>
-
-            <br>
-            
+              </div>            
           
-          <div class="poster-listing" style="margin-top: 5px;">
-          
-          </div>
+            <div class="poster-listing" style="margin-top: 5px;"></div>
 
-
-            
           </div>
           <!-- Pagination -->
           <div class="clearfix"></div>
@@ -228,11 +216,18 @@
         const footerWidth = canvas.width;
         const footerHeight = canvas.height * 0.2;
 
+        function clearFooter() {
+          context.fillStyle = "white";
+          context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+          context.fillRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+        }
+
         function renderCscDetails() {
           let centerName;
           let centerStreet;
           let centerLocation;
           let centerContacts;
+          const textOrgin = 300;
 
           centerName = localStorage.getItem('centerName');
           centerStreet = localStorage.getItem('centerStreet');
@@ -240,19 +235,19 @@
           centerContacts = localStorage.getItem('centerContacts');
 
           if (centerName) {
-            context.font = "24px Times New Roman";
+            context.font = "20px Times New Roman";
             context.fillStyle = "black";
             context.textAlign = "center";
-            context.fillText(centerName, 335, canvas.height - (footerHeight/1.5));
+            context.fillText(centerName, textOrgin, canvas.height - (footerHeight/1.5));
 
             let distance = 20;
-            context.font = "17px Times New Roman";
+            context.font = "15px Times New Roman";
 
             let combonents = [centerStreet, centerLocation, centerContacts]
 
             combonents.forEach(combonent => {
               if (combonent) {
-                context.fillText(combonent, 335, canvas.height - (footerHeight/1.5) + distance);
+                context.fillText(combonent, textOrgin, canvas.height - (footerHeight/1.5) + distance);
                 distance += 20;
               }
             });              
@@ -286,25 +281,25 @@
 
           if (centerQrCode) {
             qrImage.src = centerQrCode;
-          }  
+          }
 
           if (!centerLogo && centerQrCode) {
             qrImage.onload = function() {
-              context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+              clearFooter();
               context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
               renderCscDetails();
             };
           }
           logoImage.onload = function() {
-            context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+            clearFooter();
 
             if (logoImage.src) {
               context.drawImage(logoImage, xDistance, canvas.height - 100, 50, 50);
               xDistance += 50;
             }
 
-            qrImage.onload = function() {
-                context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
+            qrImage.onload = function() {              
+              context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
             };
 
             renderCscDetails();
@@ -337,44 +332,28 @@
         logoImage.onerror = qrImage.onerror = function() {
             console.error("Failed to load image from localStorage.");
         };
-
       }
 
-      // Save Poster
-      $(document).on('click', '#save-poster-btn', function () {
-          const canvas = $('#poster-canvas')[0];
-          const imageData = canvas.toDataURL('image/jpg', 1.0);
+      $(document).on('click', '#download-poster-btn', function () {
+        const canvas = $('#poster-canvas')[0];
+        const imageData = canvas.toDataURL('image/jpeg', 1.0);  // Get image data in JPEG format
+    
+        // Create a temporary download link
+        const link = document.createElement('a');
+        link.href = imageData;
 
-          let csc_center;
-
-          if (localStorage.getItem('cscUser') == `{{request.user.username}}` && localStorage.getItem('centerSlug')) {
-              csc_center = localStorage.getItem('centerSlug');
-          } else {
-              csc_center = `{{center.slug}}`;
-          }
-
-          $.ajax({
-              type: 'POST',
-              url: '/users/save_poster/',
-              dataType: 'json',
-              data: {
-                  'image': imageData,
-                  'csrfmiddlewaretoken': '{{csrf_token}}',
-                  'title': localStorage.getItem('posterTitle'),
-                  'csc_center': csc_center,
-                  'service': localStorage.getItem('posterService')
-              },
-              success: response => {
-                  if (response.message) {
-                      console.log(response.message)
-                  }
-                  if (response.success_url) {
-                      window.location=`${response.success_url}`;
-                  }
-              },
-              error: error => console.error('Error: ', error),
-          })
-        })
+        const posterTitle = localStorage.getItem('posterTitle');
+    
+        // Set a default filename for the downloaded image
+        link.download = `${posterTitle}.jpg`;
+    
+        // Append link to the body temporarily and trigger download
+        document.body.appendChild(link);
+        link.click();
+    
+        // Clean up by removing the temporary link from the DOM
+        document.body.removeChild(link);
+    });
 
         function removeCenterDetails() {
           localStorage.removeItem("centerName");
@@ -422,8 +401,8 @@
             response.posters.forEach((poster, index) => {                  
               $('.poster-listing').append(`                  
 
-              <div class="col-lg-2 col-md-2">
-                <div class="product-grid" style="background-color: #fff;">
+              <div class="col-lg-3 col-md-3" style="padding: 0px;">
+                <div class="product-grid d-flex flex-column justify-content-between" style="background-color: #fff; height: 505px;">
                   <div class="product-image">
                     <a href="#" class="image">
                       <img class="pic-1" src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}">
@@ -502,51 +481,17 @@
         }
 
       });
-
-      // Search Functionality Start
-      function searchPosters(center) {
-        const query = $('#search-input').val();
-
-        removeCenterDetails();
-        message = `No posters for query: '${query}`
-
-        $.ajax({
-          type: 'GET',
-          url: '/users/available_posters/',
-          dataType: 'json',
-          data: {
-            'center_slug': center,
-            'query': query
-          },
-          success: response => {
-            successAction(response, message);
-          },
-          error: error => console.error("Error: ", error),
-        });
-      }
-
       
       // Close Poster Pop Up
       $(document).on('click', '#close-btn', function (e) {
         $('#poster-pop-up-box').fadeOut();
-      })
-
-      // Initiate poster searching
-      $(document).on('submit', '#poster-search-form', function (e) {
-        e.preventDefault();
-        
-        if (user == `{{request.user.email}}` && center != `{{center.slug}}` ) {
-          searchPosters(center);
-        } else {
-          searchPosters(`{{center.slug}}`);
-        }
-      })
+      })      
 
       // Filtering End
 
       // Pagination
       function paginator () {
-        let itemsPerPage = 18;
+        let itemsPerPage = 12;
         let currentPage = 1;
         let totalItems = $('.row-items').length;
         let totalPages = Math.ceil(totalItems / itemsPerPage);

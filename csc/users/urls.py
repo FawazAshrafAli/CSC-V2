@@ -7,11 +7,10 @@ from .views import (
     ProductEnquiryListView, DeleteProductEnquiryView, 
     
     CscCenterListView, AddCscCenterView, DetailCscCenterView, 
-    UpdateCscCenterView, SavePosterView, GetCurrentCscCenterView,
+    UpdateCscCenterView, GetCurrentCscCenterView,
     GetCenterDataView,
 
-    AvailablePosterView, CreatePosterView, MyPosterListView,
-    DeleteMyPosterView, MyPosterDetailView, DownloadPosterView,
+    AvailablePosterView, CreatePosterView,
     GetQrCodeView, AddPosterFooterView, get_footer, RemoveFooterView,
 
     MyProfileView, UpdateProfileView, ChangePasswordView,
@@ -30,13 +29,8 @@ urlpatterns = [
     path('product_enquiries/', ProductEnquiryListView.as_view(), name="product_enquiries"),
     path('delete_product_enquiry/<str:slug>', DeleteProductEnquiryView.as_view(), name="delete_product_enquiry"),    
 
-    path('available_posters/', AvailablePosterView.as_view(), name="available_posters"),
-    path('my_posters/', MyPosterListView.as_view(), name="my_posters"),
-    path('my_poster/<str:slug>', MyPosterDetailView.as_view(), name="my_poster"),
-    path('create_poster/<str:slug>', CreatePosterView.as_view(), name="create_poster"),
-    path('save_poster/', SavePosterView.as_view(), name="save_poster"),
-    path('download_poster/<str:slug>', DownloadPosterView.as_view(), name="download_poster"),
-    path('delete_poster/<str:slug>', DeleteMyPosterView.as_view(), name="delete_poster"),
+    path('available_posters/', AvailablePosterView.as_view(), name="available_posters"),    
+    path('create_poster/<str:slug>', CreatePosterView.as_view(), name="create_poster"),    
     path('get_qrcode/<str:slug>', GetQrCodeView.as_view(), name="get_qrcode"),
     path('add_footer/', AddPosterFooterView.as_view(), name="add_footer"),
     path('remove_footer/<str:slug>', RemoveFooterView.as_view(), name="remove_footer"),
