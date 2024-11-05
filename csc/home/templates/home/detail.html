@@ -264,8 +264,21 @@
               </script>
 {% endblock schema_markup %}
 
-{% block content %}
+{% block styles %}
 <style>
+    .d-flex {
+        display: flex;
+    }
+    .justify-content-between {
+        justify-content: space-between;
+    }
+    .justify-content-center {
+        justify-content: center;
+    }
+    .align-items-center {
+        align-items: center;
+    }
+
     #pop-up-box {
         display: none;
         position:fixed;
@@ -336,9 +349,7 @@
     #pop-up-cancel-btn:hover {
         background: linear-gradient(to bottom, steelblue, blue, darkblue);
     }
-</style>
 
-<style>
     .product-grid {
         height: 450px;
         max-height: 450px;
@@ -355,10 +366,95 @@
         height: 100%;
     }
 
+
+    #share-tab-div {
+        position: relative;
+        display: none;
+    }
+    #share-tab-outer-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height: 120px;
+
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;
+    }
+    #share-tab-heading-div {
+        text-align: center;
+        width: 360px;
+
+    }    
+    #share-tab {
+        display: flex;
+        width: 360px;
+        height: 80px;
+        padding-top: 20px;        
+        background-color: #fff;
+        box-shadow: 0px 0px 3px #777;
+        border-radius: 5px;
+
+        justify-content: space-evenly;
+        align-items: center;
+    }
+    .share-anchor {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .share-anchor span {
+        margin: 0;
+        padding: 0;
+    }
+    .share-btn-tiles {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        box-shadow: 0 0 5px #777;
+    }
+    .share-btn-tiles:hover {
+        transform: scale(1.1);
+    }
+    #cancel-div {
+        width: 360px;
+    }
+    #cancel-btn {
+        width: 100%;
+        border: none;
+        box-shadow: 0 0 2px #777;
+        background-color: #fff;
+        padding: 1px 10px;
+        color: #333;
+    }
+    #cancel-btn:hover {
+        background: linear-gradient(to bottom, darkred, red) ;
+        color: #fff;
+    }
 </style>
+{% endblock styles %}
+
+{% block content %}
 
 <!-- Slider
 ================================================== -->
+<div id="share-tab-div">
+    <div id="share-tab-outer-div">        
+        <div id="share-tab">
+                    
+        </div>
+        <div id="cancel-div">
+            <button id="cancel-btn">CANCEL</button>
+        </div>
+    </div>
+</div>
 
 <section style="padding: 0; margin: 0; bottom: 0; position: relative; top: 0px; ">
 
@@ -718,7 +814,15 @@
                     {% endfor %}                    
                 </ul>
             </div>
-            {% endif %}            
+            {% endif %}      
+            
+            <div class="boxed-widget margin-top-35 d-flex justify-content-center">                
+                <div class="d-flex justify-content-between align-items-center" style="width: 240px;">
+                    <button id="share-url-btn" style="background-color: #24a0ed; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share Url</button>
+                    <button id="share-qr-btn" onclick="shareCurrentPage()" style="background-color: teal; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share QR</button>
+                </div>
+
+            </div>
 
 
 
@@ -885,5 +989,87 @@
         $('#pop-up-form').prop('action', `/product_request/${centerSlug}`);
         $('#pop-up-box').show();
     }
+
+    function copyUrl() {
+        // Create a temporary input element to hold the URL
+        const tempInput = document.createElement("input");
+        tempInput.value = window.location.href;
+        document.body.appendChild(tempInput);
+        
+        // Select and copy the URL
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand("copy");
+        
+        // Remove the temporary input element
+        document.body.removeChild(tempInput);
+        
+        // Optional: Alert or notify the user
+        alert("URL copied to clipboard!");
+    }
+
+    // Share tab visibility
+    $(document).on("keydown", function(event) {
+        if (event.key === "Escape") {
+            $('#share-tab-div').hide();
+        }
+    });
+
+    $('#cancel-btn').click(() => $('#share-tab-div').hide());
+
+    $('#share-url-btn').click(() => {
+        $('#share-tab').html(
+            `<a href="#" class="share-anchor" id="facebook-url-anchor" target="_blank" title="Facebook" onclick="$('#share-tab-div').hide(); window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank')">
+                <div class="share-btn-tiles" style="background-color: #1877F2;">
+                    <i class="fa fa-facebook" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Facebook</small></span>
+            </a>
+            <a href="#" class="share-anchor" id="twitter-url-anchor" onclick="$('#share-tab-div').hide(); window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=Check%20this%20out!', '_blank')" title="Twitter">
+                <div class="share-btn-tiles" style="background-color: #1DA1F2;">
+                    <i class="fa fa-twitter" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Twitter</small></span>
+            </a>
+            <a class="share-anchor" id="whatsapp-url-anchor" target="_blank" href="https://api.whatsapp.com/send?text=Check%20this%20out!%20" onclick="$('#share-tab-div').hide(); this.href += encodeURIComponent(window.location.href)" title="Whatsapp">
+                <div class="share-btn-tiles" style="background-color: #25D366;">
+                    <i class="fa fa-whatsapp" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Whatsapp</small></span>
+            </a>
+            <a href="#" class="share-anchor" title="Copy Url" onclick="$('#share-tab-div').hide(); copyUrl()">
+                <div class="share-btn-tiles" style="background-color: grey;">
+                    <i class="fa fa-copy" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Copy Url</small></span>
+            </a>`
+        )
+        $('#share-tab-div').show()
+    });
+
+    $('#share-qr-btn').click(() => {
+        $('#share-tab').html(
+            `<a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://{{request.get_host}}{{center.qr_code_image.url}}`)}" class="share-anchor" id="facebook-qr-anchor" target="_blank" title="Facebook")">
+                <div class="share-btn-tiles" style="background-color: #1877F2;">
+                    <i class="fa fa-facebook" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Facebook</small></span>
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Check%20this%20QR%20Code!%20${encodeURIComponent(`https://{{request.get_host}}{{center.qr_code_image.url}}`)}" target="_blank" class="share-anchor" id="twitter-qr-anchor" title="Twitter">
+                <div class="share-btn-tiles" style="background-color: #1DA1F2;">
+                    <i class="fa fa-twitter" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Twitter</small></span>
+            </a>
+            <a class="share-anchor" id="whatsapp-qr-anchor" target="_blank" href="https://api.whatsapp.com/send?text=Check%20this%20QR%20Code!%20${encodeURIComponent(`https://{{request.get_host}}{{center.qr_code_image.url}}`)}" title="Whatsapp">
+                <div class="share-btn-tiles" style="background-color: #25D366;">
+                    <i class="fa fa-whatsapp" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Whatsapp</small></span>
+            </a>`
+        )
+        $('#share-tab-div').show()
+    });
+
 </script>
 {% endblock scripts %}
