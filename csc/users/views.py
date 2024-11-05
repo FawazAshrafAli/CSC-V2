@@ -349,7 +349,7 @@ class DetailCscCenterView(CscCenterBaseView, DetailView):
             return get_object_or_404(CscCenter, slug = self.kwargs['slug'])
         except Http404:
             messages.error(self.request, 'Invalid CSC center')
-            return redirect(reverse_lazy('user:csc_centers'))
+            return redirect(reverse_lazy('users:csc_centers'))
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -502,6 +502,29 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
             self.object.services.set(services)
             self.object.products.set(products)
             self.object.save()
+
+            current_keywords = self.object.keywords.all()
+            keyword_count = current_keywords.count()
+            keywords_needed = 4 - keyword_count
+
+            if keywords_needed > 0:
+                additional_keywords = CscKeyword.objects.exclude(id__in=current_keywords.values_list('id', flat=True))
+                keywords_to_add = additional_keywords[:keywords_needed]
+                self.object.keywords.add(*keywords_to_add)
+                self.object.save()
+
+            current_services = self.object.services.all()
+            service_count = current_services.count()
+            services_needed = 20 - service_count
+
+            if services_needed > 0:
+                additional_services = Service.objects.exclude(id__in=current_services.values_list('id', flat=True))
+
+                services_to_add = additional_services[:services_needed]
+                
+                self.object.services.add(*services_to_add)
+
+                self.object.save()
 
             if banners:
                 for banner in banners:
