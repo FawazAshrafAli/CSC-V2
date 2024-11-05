@@ -105,7 +105,7 @@
 <div class="row">
   <!-- Model End-->
   <div id="poster-pop-up-box">
-    <canvas id="poster-canvas" width="480" height="720"></canvas>
+    <canvas id="poster-canvas" width="480" height="600"></canvas>
 
     <div class="d-flex flex-row justify-content-between align-items-center">
       <div class="d-flex flex-row align-items-center" style="padding-left: 10px;">
@@ -213,13 +213,15 @@
         var canvas = $('#poster-canvas')[0];
         var context = canvas.getContext('2d', { willReadFrequently: true });
 
+
         const footerWidth = canvas.width;
-        const footerHeight = canvas.height * 0.2;
+        const footerHeight = canvas.width * 0.25;
 
         function clearFooter() {
           context.fillStyle = "white";
-          context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
-          context.fillRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+
+          context.clearRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
+          context.fillRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
         }
 
         function renderCscDetails() {
@@ -238,7 +240,7 @@
             context.font = "20px Times New Roman";
             context.fillStyle = "black";
             context.textAlign = "center";
-            context.fillText(centerName, textOrgin, canvas.height - (footerHeight/1.5));
+            context.fillText(centerName, textOrgin, canvas.height - (footerHeight/1.4));
 
             let distance = 20;
             context.font = "15px Times New Roman";
@@ -247,7 +249,7 @@
 
             combonents.forEach(combonent => {
               if (combonent) {
-                context.fillText(combonent, textOrgin, canvas.height - (footerHeight/1.5) + distance);
+                context.fillText(combonent, textOrgin, canvas.height - (footerHeight/1.4) + distance);
                 distance += 20;
               }
             });              
@@ -258,7 +260,7 @@
         mainImage.src = imageUrl;
         
         mainImage.onload = function() {
-            context.drawImage(mainImage, 0, 0, canvas.width, canvas.height);
+            context.drawImage(mainImage, 0, 0, canvas.width, canvas.width);
         };
 
         const logoImage = new Image();
@@ -286,7 +288,7 @@
           if (!centerLogo && centerQrCode) {
             qrImage.onload = function() {
               clearFooter();
-              context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
+              context.drawImage(qrImage, xDistance, canvas.height - 93, 65, 65);
               renderCscDetails();
             };
           }
@@ -294,12 +296,12 @@
             clearFooter();
 
             if (logoImage.src) {
-              context.drawImage(logoImage, xDistance, canvas.height - 100, 50, 50);
+              context.drawImage(logoImage, xDistance, canvas.height - 85, 50, 50);
               xDistance += 50;
             }
 
             qrImage.onload = function() {              
-              context.drawImage(qrImage, xDistance, canvas.height - 105, 60, 60);
+              context.drawImage(qrImage, xDistance, canvas.height - 93, 65, 65);
             };
 
             renderCscDetails();
@@ -402,7 +404,7 @@
               $('.poster-listing').append(`                  
 
               <div class="col-lg-3 col-md-3" style="padding: 0px;">
-                <div class="product-grid d-flex flex-column justify-content-between" style="background-color: #fff; height: 505px;">
+                <div class="product-grid d-flex flex-column justify-content-between" style="background-color: #fff; height: 376.1px;">
                   <div class="product-image">
                     <a href="#" class="image">
                       <img class="pic-1" src="${ poster.poster ? poster.poster : '/static/w3/images/no_image.png'}">
