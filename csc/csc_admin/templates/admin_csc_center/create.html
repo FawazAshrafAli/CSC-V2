@@ -590,74 +590,94 @@
 <script>
 
     $(document).ready(function () {
-        let latitude = 51.958
-        let longitude = 9.141
+        let latitude = 28.6;
+		let longitude = 77.2;
 
-        let currentLatitude = $('#latitude').val();
-        let currentLongitude = $('#longitude').val();
+		let currentLatitude = $('#latitude').val();
+		let currentLongitude = $('#longitude').val();
 
-        if (currentLatitude) {
-            latitude = currentLatitude
-        }
+		if (currentLatitude) {
+			latitude = currentLatitude;
+		}
 
-        if (currentLongitude) {
-            longitude = currentLongitude
-        } 
-        
-        let mapOptions = {
-            center: [latitude, longitude],
-            zoom: 10
-        }
+		if (currentLongitude) {
+			longitude = currentLongitude;
+		} 
 
-        let map = new L.map('map', mapOptions);
+		let mapOptions = {
+			center: [latitude, longitude],
+			zoom: 10 // This is the initial zoom level
+		};
 
-        let layer = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-        map.addLayer(layer);
+		let map = new L.map('map', mapOptions);
 
+		// Add the tile layer with noWrap set to true
+		let layer = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			noWrap: true // Prevent map wrapping (repeating)
+		});
+		map.addLayer(layer);
 
-        let marker = null;
-        marker = L.marker([latitude, longitude]).addTo(map);
+		// Set max bounds to restrict movement
+		let southWest = L.latLng(-90, -180); // Example southwest corner (whole world bounds)
+		let northEast = L.latLng(90, 180); // Example northeast corner (whole world bounds)
+		let bounds = L.latLngBounds(southWest, northEast);
+		map.setMaxBounds(bounds); // Restrict panning within defined bounds
 
-        function markOnMap(event=undefined, latitude, longitude) {
-                if (marker !== null) {
-                    map.removeLayer(marker);
-                }
+		// Create a marker and add it to the map
+		let marker = L.marker([latitude, longitude]).addTo(map);
 
-                let markingLatitude;
-                let markingLongitude;
+		function markOnMap(event = undefined, latitude, longitude) {
+			if (marker !== null) {
+				map.removeLayer(marker);
+			}
 
-                if (latitude) {
-                    markingLatitude = latitude;
-                }
-                
-                if (longitude) {
-                    markingLongitude = longitude;
-                } 
-                
-                
-                if (!latitude && !longitude && event) {
-                    markingLatitude = event.latlng.lat;
-                    markingLongitude = event.latlng.lng;
-                }
+			let markingLatitude;
+			let markingLongitude;
 
-                marker = L.marker([markingLatitude, markingLongitude]).addTo(map);       
+			if (latitude) {
+				markingLatitude = latitude;
+			}
+			
+			if (longitude) {
+				markingLongitude = longitude;
+			} 
+			
+			if (!latitude && !longitude && event) {
+				markingLatitude = event.latlng.lat;
+				markingLongitude = event.latlng.lng;
+			}
 
-                document.getElementById('latitude').value = markingLatitude;
-                document.getElementById('longitude').value = markingLongitude;
-            }
+			marker = L.marker([markingLatitude, markingLongitude]).addTo(map);       
 
-        map.on('click', (event) => {            
-            markOnMap(event);
-        })
+			// Update the latitude and longitude input fields
+			document.getElementById('latitude').value = markingLatitude;
+			document.getElementById('longitude').value = markingLongitude;
+		}
 
-        $('#latitude, #longitude').on('change', function() {
-            let changedLatitude = parseFloat($('#latitude').val());
-            let changedLongitude = parseFloat($('#longitude').val());
+		// Handle map click to mark the location
+		map.on('click', (event) => {            
+			markOnMap(event);
+		});
 
-            if (!isNaN(changedLatitude) && !isNaN(changedLongitude)) {
-                markOnMap(undefined, changedLatitude, changedLongitude);
-            }
-        });
+		// Update marker position when latitude or longitude changes
+		$('#latitude, #longitude').on('change', function() {
+			let changedLatitude = parseFloat($('#latitude').val());
+			let changedLongitude = parseFloat($('#longitude').val());
+
+			if (!isNaN(changedLatitude) && !isNaN(changedLongitude)) {
+				markOnMap(undefined, changedLatitude, changedLongitude);
+			}
+		});
+
+		// Set zoom levels
+		map.setMinZoom(2); // Set minimum zoom level to 3 (allow zooming out more)
+		map.setMaxZoom(19); // Set maximum zoom level to 19
+
+		// Prevent the map from being dragged outside the bounds
+		map.on('drag', function() {
+			map.panInsideBounds(bounds);
+		});
     })
 
 </script>
