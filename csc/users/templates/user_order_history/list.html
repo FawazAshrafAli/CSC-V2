@@ -61,7 +61,7 @@
   {% include "components/message.html" %}
 </div>
 
-<div id="payment-content">
+<div>
     <div class="row">
         <!-- Listings -->
           <div class="col-lg-12 col-md-12">
@@ -140,13 +140,12 @@
               ${ response.light_warning_message ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
               ${ response.hard_warning_message ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
             `)
-            if (response) {
-              $('#payment-tbody').empty();
-              $(`#center-dropdown option[value='${center}']`).prop('selected', true).trigger('chosen:updated');
+            $('#payment-tbody').empty();
+            $(`#center-dropdown option[value='${center}']`).prop('selected', true).trigger('chosen:updated');
 
-              if (response.payments && response.payments.length > 0) {
-                response.payments.forEach((payment, index) => {
-                  let html = `<tr class="row-items" onclick="window.location='/users/order_history/${payment.payment_id}'">
+            if (response.payments && response.payments.length > 0) {
+              response.payments.forEach((payment, index) => {
+                let html = `<tr class="row-items" onclick="window.location='/users/order_history/${payment.payment_id}'">
                   <td>${ index + 1 }</td>
                   <!-- <td>${ payment.center }</td> -->
                   <td style="text-align:center">${ payment.order_id }</td>
@@ -154,12 +153,11 @@
                   <td style="text-align:center">${ payment.amount }</td>
                   <td style="text-align:center">${ payment.created }</td>                  
                 </tr>`
-                  $('#payment-tbody').append(html);
-                })
-              } else {
-                $('#payment-tbody').html(`<tr><td colspan="6" style="color:red; text-transform: capitalize;">No payment to display</tr>`);
-              } 
-            }
+                $('#payment-tbody').append(html);
+              })
+            } else {
+              $('#payment-tbody').html(`<tr><td colspan="6" style="color:red; text-transform: capitalize;">No payment to display</tr>`);
+            } 
             paginator();
           },
           error: error => console.error("Error: ", error),

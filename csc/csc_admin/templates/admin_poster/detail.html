@@ -82,7 +82,7 @@
                         <tr>
                             <th>State</th>
                             <th>&nbsp;:&nbsp;</th>
-                            <td>{{poster.state}}</td>
+                            <td>{% if poster.state %}{{poster.state.state}}{% else %}All States{% endif %}</td>
                         </tr>
                         <tr>
                             <th>Service</th>

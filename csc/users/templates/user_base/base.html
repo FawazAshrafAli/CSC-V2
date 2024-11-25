@@ -191,7 +191,7 @@
 					<div class="user-menu">
 						<div class="user-name" id="current-csc-center"><span><img src="{% if request.user.image %} {{request.user.image.url}} {% else %} {% static 'images/dashboard-avatar.jpg' %} {% endif %}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> Loading . . .</div>
 						<ul>
-							<li><a href="#" id="switch-csc-btn"><i class="fa fa-exchange-alt"></i> Switch Center</a></li>							
+							<li><a href="#" id="switch-csc-btn"><i class="fas fa-exchange-alt"></i> Switch Center</a></li>							
 							<li><a href="{% url 'users:my_profile' %}"><i class="sl sl-icon-user"></i> My Profile</a></li>
 							<li><a href="{% url 'authentication:logout' %}"><i class="sl sl-icon-power"></i> Logout</a></li>
 						</ul>
@@ -241,9 +241,9 @@
 					</ul>	
 				</li>
 
-				<li {% if service_page %} class="active" {% endif %}><a href="{% url 'users:service_enquiries' %}"><i class="fa fa-handshake"></i> Service Enquiries</a></li>				
+				<li {% if service_page %} class="active" {% endif %}><a href="{% url 'users:service_enquiries' %}"><i class="fas fa-handshake"></i> Service Enquiries</a></li>				
 
-				<li {% if product_page %} class="active" {% endif %}><a href="{% url 'users:product_enquiries' %}"><i class="fa fa-box"></i> Product Enquiries</a></li>
+				<li {% if product_page %} class="active" {% endif %}><a href="{% url 'users:product_enquiries' %}"><i class="fas fa-box"></i> Product Enquiries</a></li>
 
 				<li {% if order_page %} class="active" {% endif %}><a href="{% url 'users:order_histories' %}"><i class="fa fa-history"></i> Order History</a></li>
 

@@ -103,6 +103,13 @@
                             <td>:</td>
                             <td>{{center.full_name}}</td>
                         </tr>
+                        {% if center.csc_reg_no %}
+                        <tr>
+                            <th>CSC Reg No.</th>
+                            <td>:</td>
+                            <td>{{center.csc_reg_no}}</td>
+                        </tr>
+                        {% endif %}
                         {% if center.website %}
                         <tr>
                             <th>Website</th>

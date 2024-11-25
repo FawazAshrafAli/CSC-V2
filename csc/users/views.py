@@ -10,6 +10,7 @@ from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.contrib.auth import authenticate, logout
 from datetime import datetime
+from django.db.models import Q
 import logging
 import re
 
@@ -28,10 +29,11 @@ def check_payment(center, data):
     try:
         if not center.is_active:
             payment_url = reverse_lazy("payment:payment", kwargs = {'slug' : center.slug})
+            print(payment_url)
             if center.live_days < 15:
                 data['light_warning_message'] = f"You are on the 15 days trail period. Please make the payment in the next {15 - center.live_days} days to avoid suspension of your account. &nbsp;<span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
             else:
-                data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account. <span style='display: inline-block;'>Click <a href='#' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
+                data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account. <span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
             
         return data
     except Exception as e:
@@ -858,7 +860,7 @@ class AvailablePosterView(BasePosterView, ListView):
     def get_queryset(self):
         center = CscCenter.objects.filter(email = self.request.user.email, is_active = True).first()
         if center:
-            return self.model.objects.filter(state = center.state)
+            return self.model.objects.filter(Q(state = center.state) | Q(state__isnull = True))
         return None
     
     def get(self, request, *args, **kwargs):
@@ -909,7 +911,7 @@ class AvailablePosterView(BasePosterView, ListView):
 
                 data = check_payment(center, data)
 
-                posters = self.model.objects.filter(state = center.state) if center else None
+                posters = self.model.objects.filter(Q(state = center.state) | Q(state__isnull = True)) if center else None
 
                 if service_slug:
                     try:
@@ -1115,10 +1117,12 @@ class UpdateProfileView(MyProfileView, UpdateView):
             name_parts = name.split(' ')
 
             first_name = name_parts[0] if len(name_parts) > 0 else None
-            last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else None
-
             self.object.first_name = first_name
-            self.object.last_name = last_name            
+
+            if len(name_parts) > 1:
+                last_name = " ".join(name_parts[1:])
+                self.object.last_name = last_name            
+
             self.object.notes = notes
             self.object.twitter = twitter
             self.object.facebook = facebook
@@ -1146,7 +1150,7 @@ class UpdateProfileView(MyProfileView, UpdateView):
             messages.success(request, "Updated user profile details.")
             return redirect(self.get_success_url())
         except Exception as e:
-            print(f"Exception: {e}")
+            logger.exception(f"Error in updating profile view: {e}")
             return redirect(self.redirect_url)
         
 
@@ -1202,22 +1206,17 @@ class OrderHistoryBaseView(BaseUserView):
 
 class OrderHistoryListView(OrderHistoryBaseView, ListView):
     model = Payment
-    template_name = "user_order_history/list.html"
-
-    def get_queryset(self):
-        try:
-            return self.model.objects.filter(csc_center__email = self.request.user.email, status = "Completed")
-        except Http404:
-            messages.error(self.request, "Invalid CSC Center")
-            return redirect(reverse_lazy('users:login'))
+    template_name = "user_order_history/list.html"    
         
     def get(self, request, *args, **kwargs):
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             data = {}
             try:
+                data = check_payment_response(request)
                 center_slug = request.GET.get('center_slug')
 
                 payments = self.model.objects.filter(csc_center__slug = center_slug, status = "Completed").order_by("-created")
+                print(payments)
 
                 list_payments = []
 
@@ -1232,10 +1231,9 @@ class OrderHistoryListView(OrderHistoryBaseView, ListView):
 
                 data["payments"] = list_payments
 
-                data = check_payment_response(request)
 
             except Exception as e:
-                print(f"Error: {e}")
+                logger.exception(f"Error in fetching order history: {e}")
                 data["error"] = f"{e}"
 
             return JsonResponse(data)

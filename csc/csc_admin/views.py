@@ -1591,7 +1591,7 @@ class UpdateCscCenterView(BaseAdminCscCenterView, UpdateView):
                 self.object.street = street.strip()
                 
             if logo:
-                self.object.logo = logo
+                self.object.logo = logo            
 
             if banners:
                 for banner in banners:
@@ -2329,13 +2329,18 @@ class CreatePosterView(BasePosterView, CreateView):
             title = request.POST.get('title').strip()
             poster = request.FILES.get('poster')
             state_id = request.POST.get('state').strip()
-            service_slug = request.POST.get('service').strip() 
+            service_slug = request.POST.get('service').strip()
 
-            try:
-                state = get_object_or_404(State, pk = state_id)
-            except Http404:
-                messages.error(request, 'Invalid State')
+            if not state_id:
+                messages.error(request, "State is required.")
                 return redirect(self.redirect_url)
+
+            if state_id != "all":
+                try:
+                    state = get_object_or_404(State, pk = state_id)
+                except Http404:
+                    messages.error(request, 'Invalid State')
+                    return redirect(self.redirect_url)
             
             try:
                 service = get_object_or_404(Service, slug = service_slug)
@@ -2344,7 +2349,7 @@ class CreatePosterView(BasePosterView, CreateView):
                 return redirect(self.redirect_url)
 
             if title:
-                self.poster = self.model.objects.create(title = title, poster = poster, state = state, service = service)            
+                self.poster = self.model.objects.create(title = title, poster = poster, state = state if state_id != "all" else None, service = service)            
                 messages.success(request, 'Added Poster')
                 return redirect(self.success_url)
             else:
@@ -2399,27 +2404,28 @@ class UpdatePosterView(BasePosterView, UpdateView):
             title = request.POST.get('title').strip()
             poster = request.FILES.get('poster')
             state_id = request.POST.get('state').strip()
-            service_slug = request.POST.get('service').strip() 
-
-            try:
-                state = get_object_or_404(State, pk = state_id)
-            except Http404:
-                messages.error(request, 'Invalid State')
+            service_slug = request.POST.get('service').strip()
+            
+            if not title:
+                messages.warning(request, 'Title is required.')            
                 return redirect(self.redirect_url)
+
+            if not state_id:
+                messages.error(request, "State is required.")
+                return redirect(self.redirect_url)
+
+            if state_id != "all" :
+                try:
+                    state = get_object_or_404(State, pk = state_id)
+                except Http404:
+                    messages.error(request, 'Invalid State')
+                    return redirect(self.redirect_url)
             
             try:
                 service = get_object_or_404(Service, slug = service_slug)
             except Http404:
                 messages.error(request, 'Invalid Service')
-                return redirect(self.redirect_url)
-
-            if not title:
-                messages.warning(request, 'Title is required.')            
-                return redirect(self.redirect_url)
-            
-            if not state:
-                messages.warning(request, 'State is required.')            
-                return redirect(self.redirect_url)
+                return redirect(self.redirect_url)            
             
             if not service:
                 messages.warning(request, 'Service is required.')            
@@ -2430,7 +2436,7 @@ class UpdatePosterView(BasePosterView, UpdateView):
 
             self.object.title = title
             self.object.poster = poster
-            self.object.state = state
+            self.object.state = state if state_id != "all" else None
             self.object.service = service
             self.object.save()
 

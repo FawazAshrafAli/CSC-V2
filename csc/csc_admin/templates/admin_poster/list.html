@@ -109,7 +109,7 @@
 								<img src="{% if poster.poster %} {{poster.poster.url}} {% else %} {% static 'w3/images/no_image.png' %} {% endif %}" alt="Product Image">
 							</td>
 							<td style="text-align:center">{{ poster.title }}</td>
-              <td style="text-align:center">{{poster.state.state}}</td>
+              <td style="text-align:center">{% if poster.state %}{{poster.state.state}}{% else %}All States{% endif %}</td>
               <td style="text-align:center">{{poster.service.first_name}}</td>
 							<td style="text-align: right; padding-right: 10px;"><button class="button gray" onclick="event.stopPropagation(); toggleServiceDeletion(`{{poster.slug}}`, `{{poster.title}}`)"><i class="sl sl-icon-close"></i> Delete</button></td>
 						</tr>

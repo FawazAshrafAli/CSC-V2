@@ -14,7 +14,7 @@ class CscCenterAction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):        
         if not self.slug:
             base_slug = slugify(self.csc_center.slug)
             slug = base_slug

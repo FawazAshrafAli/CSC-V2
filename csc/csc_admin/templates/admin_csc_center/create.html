@@ -69,6 +69,9 @@
                         <div class="add-listing-headline">
                             <h3><i class="sl sl-icon-doc"></i> Basic Informations</h3>
                         </div>
+                        <div>
+                            <p style="box-shadow: 0 0 1px silver; padding: 0 5px;"><small><i class="fa fa-exclamation-triangle"></i>&nbsp;<strong>Important:</strong> This is NOT official from CSC, a VLE initiative only. This form is NOT to create new CSC ID, only to add running CSC in the locator. This portal supports CSC VLEs through digital marketing.</small><p>
+                        </div>
                         <!-- Title -->
                         <div class="row with-forms">
                             <div class="col-md-4" id="name-div">
@@ -87,7 +90,7 @@
                                 <span id="type-span"></span>
                             </div>
                             <div class="col-md-4" id="csc-reg-div">
-                                <h5>CSC REG No. (optional) <i class="tip" data-tip-content="CSC Registration Number"></i><span class="invalid-span">&nbsp;</span></h5>
+                                <h5>CSC REG No. <i class="tip" data-tip-content="CSC Registration Number"></i><span class="invalid-span">&nbsp;</span></h5>
                                 <input class="search-field" type="text" name="csc_reg_no" id="reg-no-input"
                                     placeholder="CSC Registration Number" required/>
                             </div>
@@ -159,7 +162,7 @@
                                 </div>
                                 <!-- Zip-Code -->
                                 <div class="col-md-6" id="landmark-div">
-                                    <h5>Landmark / Building Name <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                                    <h5>Landmark / Building Name<span>&nbsp;(optional)</span><span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                     <input type="text" name="landmark_or_building_name"
                                         placeholder="e.g. 1st Floor, ABCD Building" required>
                                 </div>
@@ -181,12 +184,12 @@
                         <!-- Dropzone -->
                         <div class="row submit-section" id="dropzone-uploads">
                             <div class="col-md-6" id="logo-div">
-                                <h5>Upload Logo <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                                <h5>Upload Logo<span>&nbsp;(optional)</span><span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                                 <input type="file" name="logo" required>
                                 <span><i>Note: Maximum logo size allowed: 20 KB.</i></span>
                             </div>
                             <div class="col-md-6" id="banners-div">
-                                <h5>Upload Banner <span class="invalid-span">&nbsp; <i>Required!</i></span></h5></h5>
+                                <h5>Upload Banner<span>&nbsp;(optional)</span><span class="invalid-span">&nbsp; <i>Required!</i></span></h5></h5>
                                 <input type="file" name="banner" multiple required>
                                 <span><i>Note: Maximum size for each banner image is 20 KB.</i></span>
                             </div>								
@@ -202,7 +205,7 @@
                         </div>
                         <!-- Description -->
                         <div class="form" id="description-div">
-                            <h5>Description <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+                            <h5>Description<span>&nbsp;(optional)</span><span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
                             <textarea class="WYSIWYG" name="description" cols="40" rows="3" id="summary"
                                 spellcheck="true"></textarea>
                         </div>
@@ -698,7 +701,7 @@
 		const websitePattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(\/[^\s]*)?$/;
 		const latitudePattern = /^-?\d+(\.\d+)?$/;
 		const longitudePattern = /^-?\d+(\.\d+)?$/;
-		const cscPattern = /^[A-Za-z0-9-_]+$/;
+		const cscPattern = /^[\s\S]{12}$/;
 
 		// ZIP Code validation function for India
 		function validateZipCode(zipcode) {
@@ -783,24 +786,20 @@
 						$(this).removeClass('is-valid').addClass('is-invalid');
 						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
 					}
-				} 
+				}
 
 				else if (parentDiv === "#csc-reg-div") {
-					if (!value) {
-						$(this).removeClass('is-invalid').removeClass('is-valid');
-						$(`${parentDiv} .invalid-span`).hide();
-					}
-					else if (validateCscReg(value)) {
+					if (validateCscReg(value)) {
 						$(this).removeClass('is-invalid').addClass('is-valid');
-						$(`${parentDiv} .invalid-span`).empty("&nbsp; Required!").hide();
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
 					} else {
 						$(this).removeClass('is-valid').addClass('is-invalid');
-						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid CSC Registration Number in the format.\nकृपया उचित प्रारूप में एक मान्य CSC पंजीकरण संख्या दर्ज करें.").show();
+						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid 12-character CSC registration number.\nकृपया एक मान्य 12-अक्षरों का सीएससी पंजीकरण नंबर दर्ज करें।").show();
 					}
-				} 
+				}
+				
 
 				else if (parentDiv === "#contact-div" || parentDiv === "#mobile-div" || parentDiv === "#whatsapp-div") {
-					console.log("entered")
 					if (validatePhone(value)) {
 						$(this).removeClass('is-invalid').addClass('is-valid');
 						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").hide();
@@ -843,13 +842,12 @@
 			});
 		}
 
+
 		// Applying validation to different input fields
 		validateInput('#name-div');
 		validateInput('#location-div');
 		validateInput('#zipcode-div');
-		validateInput('#landmark-div');
 		validateInput('#address-div');
-		validateInput('#description-div');
 		validateInput('#owner-div');
 		validateInput('#email-div');
 		validateInput('#website-div');
@@ -933,23 +931,26 @@
 			const logoInput = $('#logo-div input')[0];		
 			const logo = logoInput.files[0];
 
-			if (!logo) {
-				return false
-			}
-
 			if (logo && logo.size > 20480) {
 				return false								
 			}
 			return true
 		}
 
+		$("#logo-div input").on('click', function () {
+			$('#logo-div input').removeClass("is-invalid").removeClass("is-valid");
+			$(`#logo-div .invalid-span`).hide();
+		});
+
 		$("#logo-div input").on('change', function () {
-			if (!validateLogo()) {
-				$('#logo-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#logo-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
-			} else {
-                $('#logo-div input').removeClass("is-invalid").addClass("is-valid");
-				$(`#logo-div .invalid-span`).hide();
+			if ($('#logo-div input')[0].files[0]) {
+				if (!validateLogo()) {
+					$('#logo-div input').removeClass("is-valid").addClass("is-invalid");
+					$(`#logo-div .invalid-span`).html("&nbsp; Invalid!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
+				} else {
+					$('#logo-div input').removeClass("is-invalid").addClass("is-valid");
+					$(`#logo-div .invalid-span`).hide();
+				}
 			}
 		});
 
@@ -970,19 +971,26 @@
 			return true;
 		}
 
+		$("#banners-div input").on('click', function () {
+			$('#banners-div input').removeClass("is-invalid").removeClass("is-valid");
+			$(`#banners-div .invalid-span`).hide();
+		});
+
 		$("#banners-div input").on('change', function () {
 			const bannerInput = $('#banners-div input')[0];
 			const banners = Array.from(bannerInput.files);
 
-			if (!banners.length > 0 || !validateBannersLength(banners)) {
-				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
-			} else if (!banners.length > 0 || !validateBannersSize(banners)) {
-				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
-			} else {
-                $('#banners-div input').removeClass("is-invalid").addClass("is-valid");
-				$(`#banners-div .invalid-span`).hide();
+			if (banners.length > 0) {
+				if (!validateBannersLength(banners)) {
+					$('#banners-div input').removeClass("is-valid").addClass("is-invalid");
+					$(`#banners-div .invalid-span`).html("&nbsp; Invalid!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
+				} else if (!validateBannersSize(banners)) {
+					$('#banners-div input').removeClass("is-valid").addClass("is-invalid");
+					$(`#banners-div .invalid-span`).html("&nbsp; Invalid!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
+				} else {
+					$('#banners-div input').removeClass("is-invalid").addClass("is-valid");
+					$(`#banners-div .invalid-span`).hide();
+				}
 			}
 		});
 
@@ -998,14 +1006,8 @@
 			const zipcode = $('#zipcode-div input');
             const zipcodeValue = $('#zipcode-div input').val().trim();
 
-			const landmark = $('#landmark-div input');
-            const landmarkValue = $('#landmark-div input').val().trim();
-
 			const address = $('#address-div input');
             const addressValue = $('#address-div input').val().trim();
-
-			const description = $('#description-div textarea');
-            const descriptionValue = $('#description-div textarea').val().trim();
 
 			const owner = $('#owner-div input');
             const ownerValue = $('#owner-div input').val().trim();
@@ -1034,14 +1036,13 @@
 			const reg = $('#csc-reg-div input');
             const regValue = $('#csc-reg-div input').val().trim();
 
-
 			const type = $("#csc-type-div select");
 			const keywords = $("#keywords-div select");
 			const state = $("#state-div select");
 			const district = $("#district-div select");
 			const block = $("#block-div select");
 
-			const logoInput = $('#logo-div input')[0];
+            const logoInput = $('#logo-div input')[0];
 			const logo = logoInput.files[0];
 
 			const bannerInput = $('#banners-div input')[0];
@@ -1073,19 +1074,17 @@
 			}
 
 			// Check CSC Registration Number
-			if (regValue) {
-				if (!validateCscReg(regValue)) {
-					$(reg).removeClass('is-valid').addClass('is-invalid');
-					$(`#csc-reg-div .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid CSC Registration Number in the format.\nकृपया उचित प्रारूप में एक मान्य CSC पंजीकरण संख्या दर्ज करें.").show();
-					$(reg).focus();
-					formValid = false;
-				} else {
-					$(reg).removeClass('is-invalid').addClass('is-valid');
-					$(`#csc-reg-div .invalid-span`).hide();
-					$(reg).blur();
-				}
+			if (!regValue || !validateCscReg(regValue)) {
+				$(reg).removeClass('is-valid').addClass('is-invalid');
+				$(`#csc-reg-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid 12-character CSC registration number.\nकृपया एक मान्य 12-अक्षरों का सीएससी पंजीकरण नंबर दर्ज करें।").show();
+				$(reg).focus();
+				formValid = false;
+			} else {
+				$(reg).removeClass('is-invalid').addClass('is-valid');
+				$(`#csc-reg-div .invalid-span`).hide();
+				$(reg).blur();
 			}
-			
+
 			$(".chosen-select").chosen();
 
 			if (!keywords.val() || keywords.val().length === 0) {
@@ -1165,19 +1164,7 @@
 				$(zipcode).removeClass('is-invalid').addClass('is-valid');
 				$(`#zipcode-div .invalid-span`).hide();
 				$(zipcode).blur();
-			}			
-
-			// Check Landmark
-			if (!landmarkValue) {
-				$(landmark).removeClass('is-valid').addClass('is-invalid');
-				$(`#landmark-div .invalid-span`).html("&nbsp;Required!").show();
-				$(landmark).focus();
-				formValid = false;
-			} else {
-				$(landmark).removeClass('is-invalid').addClass('is-valid');
-				$(`#landmark-div .invalid-span`).hide();
-				$(landmark).blur();
-			}
+			}					
 
 			// Check Address
 			if (!addressValue) {
@@ -1191,39 +1178,33 @@
 				$(address).blur();
 			}
 
-			if (!logo || !validateLogo()) {
-                $('#logo-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#logo-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
-				formValid = false;
-				
-			} else {
-                $('#logo-div input').removeClass("is-invalid").addClass("is-valid");
-				$(`#logo-div .invalid-span`).hide();
+            if (logo) {
+				if (!validateLogo()) {
+					$('#logo-div input').removeClass("is-valid").addClass("is-invalid");
+					$('#current-csc-logo').empty().hide();
+					$(`#logo-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Logo image cannot exceed 20 KB. Please upload a smaller image.\nलोगो छवि का आकार 20 KB से अधिक नहीं होना चाहिए। कृपया एक छोटी छवि अपलोड करें।").show();
+					formValid = false;				
+				} else {
+					$('#logo-div input').removeClass("is-invalid").addClass("is-valid");
+					$(`#logo-div .invalid-span`).hide();
+				}
 			}
-
-			if (!banners.length > 0 || !validateBannersLength(banners)) {
-				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
-				formValid = false;
-			} else if (!banners.length > 0 || !validateBannersSize(banners)) {
-				$('#banners-div input').val('').removeClass("is-valid").addClass("is-invalid");
-				$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
-				formValid = false;
-			} else {
-                $('#banners-div input').removeClass("is-invalid").addClass("is-valid");
-				$(`#banners-div .invalid-span`).hide();
-			}			
-
-			// Check Description
-			if (!descriptionValue) {
-				$(description).removeClass('is-valid').addClass('is-invalid');
-				$(`#description-div .invalid-span`).html("&nbsp;Required!").show();
-				$(description).focus();
-				formValid = false;
-			} else {
-				$(description).removeClass('is-invalid').addClass('is-valid');
-				$(`#description-div .invalid-span`).hide();
-				$(description).blur();
+			
+			if (banners.length > 0) {
+				if (!validateBannersLength(banners)) {
+					$('#banners-div input').removeClass("is-valid").addClass("is-invalid");
+					$('#current-csc-banner').empty().hide();
+					$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "You can only upload a maximum of 4 banner images..\nआप अधिकतम 4 बैनर छवियां ही अपलोड कर सकते हैं।").show();
+					formValid = false;
+				} else if (!validateBannersSize(banners)) {
+					$('#banners-div input').removeClass("is-valid").addClass("is-invalid");
+					$('#current-csc-banner').empty().hide();
+					$(`#banners-div .invalid-span`).html("&nbsp; Required!&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "The combined size of banner images must be 80 KB or less. Please upload smaller images.\nबैनर छवियों का कुल आकार 80 KB या इससे कम होना चाहिए। कृपया छोटी छवियां अपलोड करें।").show();
+					formValid = false;
+				} else {
+					$('#banners-div input').removeClass("is-invalid").addClass("is-valid");
+					$(`#banners-div .invalid-span`).hide();
+				}
 			}
 
 			// Check Owner
@@ -1327,6 +1308,7 @@
 			return formValid
 
 		}
+
 
         $('#preview-btn').click(function () {
             if (validateForm()) {                

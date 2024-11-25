@@ -67,6 +67,7 @@
                                 <h5>State <i class="tip" data-tip-content="State"></i></h5>
                                 <select class="chosen-select" name="state" data-placeholder="Select State" required>
                                     <option label="Select State"></option>
+                                    <option value="all" {% if not poster.state %} selected {% endif %}>All States</option>
                                     {% for state in states %}
                                     <option value="{{state.pk}}" {% if poster.state.pk == state.pk %} selected {% endif %}>{{state.state}}</option>
                                     {% endfor %}
