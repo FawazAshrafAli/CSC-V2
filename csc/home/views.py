@@ -203,7 +203,7 @@ class NearMeCscCenterView(BaseHomeView, ListView):
         longitude = self.kwargs['longitude']
 
         if latitude and longitude:            
-            api_key = 'ed920c06eb494333b0bb90f234ad6553'
+            api_key = '#'
 
             url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
 
