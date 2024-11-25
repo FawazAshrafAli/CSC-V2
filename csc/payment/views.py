@@ -10,19 +10,21 @@ from django.conf import settings
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.utils import timezone
-from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 import logging
 
 from .models import Payment, Price
 from csc_center.models import CscCenter
-from authentication.models import User
+from users.views import BaseUserView
 
 from .tasks import send_payment_success_email
 
 logger = logging.getLogger(__name__)
 
+
 @method_decorator(never_cache, name="dispatch")
-class PaymentView(CreateView):
+class PaymentView(BaseUserView, CreateView):
     model = Payment
     fields = "__all__"
     template_name = 'payment.html'
@@ -65,7 +67,8 @@ class PaymentView(CreateView):
                 "razorpay_key_id": settings.RAZORPAY_KEY_ID,
                 "amount": amount,
                 "currency": currency,
-                "csc_center": csc_center
+                "csc_center": csc_center,
+                "user_center": csc_center,
             })
         
         except Exception as e:
@@ -78,6 +81,11 @@ class PaymentView(CreateView):
             csc_center = get_object_or_404(CscCenter, slug = self.kwargs.get('slug'))
             if csc_center.is_active == True:
                 return redirect(reverse_lazy('home:error404'))
+            
+            session_expiry = request.session.get_expiry_age()            
+            cache.set('current_session_expiry', session_expiry, timeout=None)            
+            request.session.set_expiry(2419200)
+
         except Http404:
             return redirect(self.redirect_url)
         except Exception as e:
@@ -85,24 +93,27 @@ class PaymentView(CreateView):
             messages.error(request, "Error in fetching csc center object")
             return redirect(self.redirect_url)
         return super().get(request, *args, **kwargs)
+    
 
-
+@method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
-class PaymentSuccessView(View):
+class PaymentSuccessView(BaseUserView, View):
     success_url = reverse_lazy('users:home')
     
     def post(self, request, *args, **kwargs):
-        try:
+        try:            
+            session_expiry = cache.get('current_session_expiry')
+            request.session.set_expiry(session_expiry)
+
             razorpay_payment_id = request.POST.get('razorpay_payment_id')
             razorpay_order_id = request.POST.get('razorpay_order_id')
             csc_center = request.POST.get('csc_center')
-            
+
             try:
                 csc_center = get_object_or_404(CscCenter, slug = csc_center)
             except Http404:
                 pass
                 
-
             if not razorpay_payment_id or not razorpay_order_id or not csc_center:
                 return JsonResponse({"status": "Payment failed!", "message": "Missing payment or order ID"}, status=400)    
 
@@ -131,18 +142,15 @@ class PaymentSuccessView(View):
 
                 send_payment_success_email.delay(payment.id, full_image_url)
                 messages.success(request, "Payment Completed. Your account is now activated.")
-                logout(request)
-                if not User.objects.filter(email = csc_center.email).exists():
-                    return redirect(reverse_lazy('authentication:user_registration', kwargs = {"email": csc_center.email}))
                 return redirect(self.success_url)
             else:
                 return JsonResponse({"status": "Payment failed!"})        
-            
-        except Http404:
+                
+        except Http404:            
             return JsonResponse({"status": "Invalid order!"})
         
         except Exception as e:
-            logger.exception("Error in payment completion")
+            logger.exception(f"Error in payment completion: {e}")
             return JsonResponse({"error": "Error in payment completion"})
 
 

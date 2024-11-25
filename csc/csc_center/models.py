@@ -149,21 +149,18 @@ class Banner(models.Model):
 def csc_id_generator():
     str_id = "CSC"
     
-    # Get the maximum ID currently in use
     last_center = CscCenter.objects.aggregate(Max('id'))
     max_id = last_center['id__max']
 
     max_id = max_id[3:] if type(max_id) == str and max_id.startswith('CSC') else max_id
     
-    # Determine the next integer ID based on the maximum ID found
     if max_id is not None and int(max_id) > 22789:
         int_id = int(max_id) + 1
     else:
-        int_id = 22800  # Start from 22800 if no valid IDs exist or the maximum is below threshold
+        int_id = 22800
     
     combined_id = f"{str_id}{int_id}"
 
-    # Ensure the combined ID is unique
     while CscCenter.objects.filter(id=combined_id).exists():
         int_id += 1 
         combined_id = f"{str_id}{int_id}"
@@ -172,7 +169,7 @@ def csc_id_generator():
 
 class CscCenter(models.Model):
     id = models.CharField(max_length=50, primary_key=True, default=csc_id_generator)
-    csc_reg_no = models.CharField(max_length = 50, null = True, blank = True)
+    csc_reg_no = models.CharField(max_length = 50, null=True, blank=True)
     qr_code_image = models.ImageField(upload_to='csc_qr_codes/', blank=True, null=True)
 
     name = models.CharField(max_length=150)
@@ -185,13 +182,13 @@ class CscCenter(models.Model):
     block = models.ForeignKey(Block, on_delete=models.CASCADE)
     location = models.TextField()
     zipcode = models.CharField(max_length=15)
-    landmark_or_building_name = models.CharField(max_length=100)
+    landmark_or_building_name = models.CharField(max_length=100, null=True, blank=True)
     street = models.CharField(max_length=500)
     
-    logo = models.ImageField(upload_to='csc_center_logos/')
+    logo = models.ImageField(upload_to='csc_center_logos/', blank=True, null=True)
     banners = models.ManyToManyField(Banner)
 
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     owner = models.CharField(max_length=150)
     email = models.EmailField(max_length=100)
     website = models.URLField(max_length=100, null=True, blank=True)
@@ -252,7 +249,7 @@ class CscCenter(models.Model):
             self.pk = f"CSC{str(base_id)}"
 
         if self.keywords.all().count() < 1:
-            self.keywords.add(CscKeyword.objects.earliest('created'))
+            self.keywords.add(CscKeyword.objects.earliest('created'))        
 
         if not self.slug:
             if self.name:
@@ -270,6 +267,9 @@ class CscCenter(models.Model):
                     self.slug = slug
             else:
                 self.slug = str(uuid.uuid4())
+
+        if not self.logo:
+            self.logo = "../static/w3/images/csc_default.jpeg"
 
         super().save(*args, **kwargs)
 

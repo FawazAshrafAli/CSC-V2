@@ -15,6 +15,9 @@ from pathlib import Path
 from django.contrib import messages
 from celery.schedules import crontab
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 APPEND_SLASH = True
 
@@ -109,13 +112,28 @@ WSGI_APPLICATION = 'csc.wsgi.application'
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'csc',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#             # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES', innodb_strict_mode=1",
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'csc',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': '127.0.0.1',
+        'NAME': os.getenv('DATABASE_NAME', 'mydb'),
+        'USER': os.getenv('DATABASE_USER', 'myuser'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'mypassword'),
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),  # Set to 'db' for docker-compose
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
@@ -364,3 +382,8 @@ RAZORPAY_KEY_SECRET = "p90CiA9zQAcNEI74kjLvpph5"
 
 
 MAX_UPLOAD_SIZE = 5242880  # 5 MB limit (in bytes)
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 1209600 
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE =True

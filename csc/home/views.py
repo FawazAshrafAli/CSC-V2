@@ -29,7 +29,7 @@ class Error404(TemplateView):
 @method_decorator(never_cache, name="dispatch")
 class BaseHomeView(View):
     def get_context_data(self, **kwargs):
-        context = {}
+        # context = {}
         context = super().get_context_data(**kwargs)
 
         try:
@@ -203,15 +203,17 @@ class NearMeCscCenterView(BaseHomeView, ListView):
         longitude = self.kwargs['longitude']
 
         if latitude and longitude:            
-            api_key = '1b4ea0d7dc5f4cffb9dbd971a896a71c'
+            api_key = 'ed920c06eb494333b0bb90f234ad6553'
 
             url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
 
             response = requests.get(url)
+            print(response)
             data = response.json()
 
             if data['results']:
                 county = data['results'][0]['components']['county']
+
 
                 return county
             

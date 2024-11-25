@@ -8,6 +8,7 @@ from django.http import Http404
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+from django.conf import settings
 import logging
 import uuid
 
@@ -25,7 +26,7 @@ class AuthenticationView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         try:
-            if request.user.is_authenticated:
+            if request.user.is_authenticated:                
                 if request.user.is_superuser:
                     return redirect(self.admin_success_url)
                 else:
@@ -58,9 +59,10 @@ class AuthenticationView(TemplateView):
                     login(request, user) 
                     if user.is_superuser or user.email_verified:
                         if remember_me:
-                            request.session.set_expiry(1209600)
+                            request.session.set_expiry(settings.SESSION_COOKIE_AGE)
                         else:
-                            request.session.set_expiry(0)
+                            request.session.set_expiry(0) 
+
                     if user.is_superuser:                        
                         return redirect(self.admin_success_url)
                     elif user.email_verified:

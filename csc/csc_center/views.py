@@ -152,7 +152,7 @@ class AddCscCenterView(BaseView, CreateView):
                 name = name.strip() if name else None, type = type, csc_reg_no = csc_reg_no.strip() if csc_reg_no else None, 
                 state = state, district = district, block = block, location = location.strip() if location else None,
                 zipcode = zipcode.strip() if zipcode else None, landmark_or_building_name = landmark_or_building_name.strip() if landmark_or_building_name else None,
-                street = street.strip() if street else None, logo = logo, description = description.strip() if description else None, contact_number = contact_number.strip() if contact_number else None,
+                street = street.strip() if street else None, logo = logo if logo else "/static/w3/images/csc_default.jpeg", description = description.strip() if description else None, contact_number = contact_number.strip() if contact_number else None,
                 owner = owner.strip() if owner else None, email = email.strip() if email else None, website = website.strip() if website else None, 
                 mobile_number = mobile_number.strip() if mobile_number else None, whatsapp_number = whatsapp_number.strip() if whatsapp_number else None,
                 mon_opening_time = mon_opening_time, tue_opening_time = tue_opening_time, 

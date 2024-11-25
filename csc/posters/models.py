@@ -10,7 +10,7 @@ from csc_center.models import State
 class Poster(models.Model):
     title = models.CharField(max_length=100)
     poster = models.ImageField(upload_to="posters/")
-    state = models.ForeignKey(State, on_delete=models.CASCADE)
+    state = models.ForeignKey(State, on_delete=models.CASCADE, blank=True, null=True)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
 
     slug = models.SlugField(blank=True, null=True)
