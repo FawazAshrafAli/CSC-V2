@@ -10,6 +10,7 @@ from django.contrib.auth import logout
 import logging
 import uuid
 import time
+import sys
 
 from .models import CscCenter, CscKeyword, CscNameType, State, District, Block, SocialMediaLink, Banner
 from services.models import Service
@@ -169,6 +170,7 @@ class AddCscCenterView(BaseView, CreateView):
             self.object.keywords.set(keywords)
             self.object.services.set(services)
             self.object.products.set(products)
+            self.object.inactive_date = self.object.created.date()
             self.object.save()
 
             current_keywords = self.object.keywords.all()
@@ -522,3 +524,45 @@ def generate_name_from_slug():
 
     except Exception as e:
         logger.exception(f"Error in name center using slug. Exception: {e}")
+
+
+def success(msg):
+    GREEN = "\033[92m"
+    RESET = "\033[0m"
+
+    sys.stdout.write(f"{GREEN}\n{msg}\n{RESET}")
+
+def error(msg):
+    RED = "\033[91m"
+    RESET = "\033[0m"
+
+    sys.stdout.write(f"{RED}\n{msg}\n{RESET}")
+
+def activate_and_delete_dummy_payments():
+    try:
+        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')
+        
+        payment_implemented_date = datetime.strptime("30-12-2024", "%d-%m-%Y").date()
+
+        sys.stdout.write(f"\nActivating and deleting dummy payments . . .\n")    
+
+        csv_center_ids = [f"CSC{row['ID']}" for _, row in csv_data.iterrows()]
+        activated_count = CscCenter.objects.filter(pk__in=csv_center_ids).update(is_active=True, payment_implemented_date = payment_implemented_date)
+
+        for center in CscCenter.objects.filter(payment_implemented_date__isnull = True):
+            center.inactive_date == 
+            center.save() 
+
+        success(f"Activated {activated_count} CSC inactive centers")
+
+        payments = Payment.objects.filter(csc_center__pk__in = csv_center_ids)
+        payment_count = payments.count()
+
+        payments.delete()
+        
+        success(f"Deleted {payment_count} dummy payments")
+
+        success(f"All Done!")
+    except Exception as e:
+        error(f"Error in activating csc centers and destroying dummy payments: \n{e}")
+    

@@ -226,6 +226,9 @@ class CscCenter(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    payment_implemented_date = models.DateField(blank=True, null=True)
+    inactive_date = models.DateField(blank=True, null=True)
+
     is_active = models.BooleanField(default=False)
 
     status = models.CharField(max_length=100, default="Not Viewed")
@@ -270,6 +273,9 @@ class CscCenter(models.Model):
 
         if not self.logo:
             self.logo = "../static/w3/images/csc_default.jpeg"
+
+        if not self.payment_implemented_date:
+            self.payment_implemented_date = self.created.date()
 
         super().save(*args, **kwargs)
 
@@ -378,9 +384,12 @@ class CscCenter(models.Model):
     
     @property
     def live_days(self):
-        today = timezone.now().date()
-        created_date = self.created.date()
-        return (today - created_date).days
+        if not self.is_active:
+            today = timezone.now().date()
+            if self.inactive_date:
+                inactive_date = self.inactive_date
+                return (today - inactive_date).days
+        return None
     
     def generate_qr_code_image(self):
         url = self.get_absolute_url  

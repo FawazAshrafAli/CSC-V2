@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 from django.contrib import messages
 from celery.schedules import crontab
-from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -168,10 +167,10 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Kolkata'
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -203,15 +202,6 @@ MESSAGE_TAGS = {
 }
 
 MESSAGE_COOKIE_AGE = 5
-
-# Email Response
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
-EMAIL_PORT = 587  # You can also try using port 465 with SSL/TLS
-EMAIL_USE_TLS = True  # Use TLS (True/False)
-EMAIL_HOST_USER = 'w3digitalpmna@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'kznq nfik tmpc fqlj'  # Replace with your email password
-
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -254,7 +244,6 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'check_csc_center_validity': {
         'task': 'csc_center.tasks.check_validty',
-        # 'schedule': timedelta(seconds=30),  # Runs every 30 seconds
         'schedule': crontab(hour=9, minute=30), 
     },
 }
@@ -265,9 +254,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
 EMAIL_PORT = 587  # You can also try using port 465 with SSL/TLS
 EMAIL_USE_TLS = True  # Use TLS (True/False)
-DEFAULT_FROM_EMAIL = 'w3digitalpmna@gmail.com'
-EMAIL_HOST_USER = 'w3digitalpmna@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'kznq nfik tmpc fqlj'  # Replace with your email password
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', "default_from_email")
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', "email_host_user")
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', "email_host_password")
 
 
 
@@ -373,12 +362,12 @@ LOGGING = {
 
 
 SITE_PROTOCOL = 'https'
-SITE_DOMAIN = 'cscindia.info'
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', "site_domain")
 
 
 # Razor Pay
-RAZORPAY_KEY_ID = "rzp_test_m4LydPsT6mF9n1"
-RAZORPAY_KEY_SECRET = "p90CiA9zQAcNEI74kjLvpph5"
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'razor_pay_id')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'razor_pay_secret_key')
 
 
 MAX_UPLOAD_SIZE = 5242880  # 5 MB limit (in bytes)

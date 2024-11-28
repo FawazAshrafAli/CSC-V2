@@ -8,6 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'csc.settings')
 
 app = Celery('csc')
 
+app.conf.timezone = 'Asia/Kolkata'
+app.conf.enable_utc = True
+
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # namespace='CELERY' means all celery-related config keys should have a `CELERY_` prefix.
