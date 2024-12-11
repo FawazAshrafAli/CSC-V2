@@ -297,7 +297,6 @@
         e.stopPropagation();
 
         const qrUrl = $(this).data("qr-url");
-        console.log(qrUrl)
         const domain = `{{request.get_host}}`
         const url = `https://${domain}${qrUrl}`
 
@@ -322,6 +321,12 @@
                     <i class="fa fa-whatsapp" style="color: #fff; font-size: 17px;"></i>
                 </div>
                 <span><small>Whatsapp</small></span>
+            </a>
+            <a href="#" class="share-anchor" title="Copy Url" onclick="copyQr('${url}')">
+              <div class="share-btn-tiles" style="background-color: grey;">
+                <i class="fa fa-copy" style="color: #fff; font-size: 17px;"></i>
+              </div>
+              <span><small>Copy Url</small></span>
             </a>`
         )
         $('#share-tab-div').show()
@@ -479,6 +484,19 @@
       alert("URL copied to clipboard!");
     }
 
+    function copyQr(url) {
+      const tempInput = document.createElement("input");
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      
+      tempInput.select();
+      tempInput.setSelectionRange(0, 99999); // For mobile devices
+      document.execCommand("copy");
+      
+      document.body.removeChild(tempInput);
+      
+      alert("QR copied to clipboard!");
+    }
 
 </script>
 {% endblock scripts %}

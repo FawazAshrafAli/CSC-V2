@@ -229,7 +229,7 @@
           let centerStreet;
           let centerLocation;
           let centerContacts;
-          const textOrgin = 300;
+          const textOrgin = 270;
 
           centerName = localStorage.getItem('centerName');
           centerStreet = localStorage.getItem('centerStreet');
@@ -270,8 +270,8 @@
               qrImage.src = centerQrCode;
 
               qrImage.onload = function() {              
-                context.clearRect(canvas.width-70, 5, 65, 65);
-                context.drawImage(qrImage, canvas.width-70, 5, 65, 65);
+                context.clearRect(canvas.width-80, 15, 65, 65);
+                context.drawImage(qrImage, canvas.width-80, 15, 65, 65);
               };          
             }
         };
@@ -285,26 +285,15 @@
         centerLogo = localStorage.getItem('centerLogo');                
 
         function defaultFooter () {
-          let xDistance = 10;
-
           if (centerLogo) {
             logoImage.src = centerLogo;
           }          
-
-          // if (!centerLogo && centerQrCode) {
-          //   qrImage.onload = function() {
-          //     clearFooter();
-          //     context.drawImage(qrImage, xDistance, canvas.height - 93, 65, 65);
-          //     renderCscDetails();
-          //   };
-          // }
 
           logoImage.onload = function() {
             clearFooter();
 
             if (logoImage.src) {
-              context.drawImage(logoImage, xDistance, canvas.height - 85, 50, 50);
-              xDistance += 50;
+              context.drawImage(logoImage, 10, canvas.height - 85, 50, 50);
             }            
 
             renderCscDetails();

@@ -10,6 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Max
 from django.urls import reverse
+from datetime import timedelta
 import uuid
 
 class State(models.Model):
@@ -223,15 +224,17 @@ class CscCenter(models.Model):
     latitude = models.CharField(max_length=100, null=True)
     longitude = models.CharField(max_length=100, null=True)
 
+    is_active = models.BooleanField(default=False)
+    status = models.CharField(max_length=100, default="Not Viewed")
+
+    approved_date = models.DateTimeField(blank=True, null=True)
+
+    last_paid_date = models.DateField(blank=True, null=True)
+    next_payment_date = models.DateField(blank=True, null=True)
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    payment_implemented_date = models.DateField(blank=True, null=True)
-    inactive_date = models.DateField(blank=True, null=True)
-
-    is_active = models.BooleanField(default=False)
-
-    status = models.CharField(max_length=100, default="Not Viewed")
 
     def save(self, *args, **kwargs):
         self.generate_qr_code_image()
@@ -271,11 +274,14 @@ class CscCenter(models.Model):
             else:
                 self.slug = str(uuid.uuid4())
 
-        if not self.logo:
+        if not self.logo:            
             self.logo = "../static/w3/images/csc_default.jpeg"
 
-        if not self.payment_implemented_date:
-            self.payment_implemented_date = self.created.date()
+        if self.last_paid_date:
+            self.next_payment_date = self.last_paid_date + timedelta(days=365)
+        else:
+            if self.created:
+                self.next_payment_date = self.created.date()
 
         super().save(*args, **kwargs)
 
@@ -386,9 +392,16 @@ class CscCenter(models.Model):
     def live_days(self):
         if not self.is_active:
             today = timezone.now().date()
-            if self.inactive_date:
-                inactive_date = self.inactive_date
-                return (today - inactive_date).days
+            
+            if self.next_payment_date and today >= self.next_payment_date:
+                last_day = self.next_payment_date - timedelta(days=1)
+            elif not self.next_payment_date and today >= self.created.date():
+                last_day = self.created.date() - timedelta(days=1)
+            else:
+                return None
+            
+            return (today - last_day).days
+
         return None
     
     def generate_qr_code_image(self):
@@ -448,14 +461,8 @@ class CscCenter(models.Model):
 
     class Meta:
         db_table = 'csc_center'
-        ordering = ["name"]
+        ordering = ["-created"]
 
     def __str__(self):
         return self.name
     
-
-
-class Image(models.Model):
-    name = models.CharField(max_length=150, default="No Image")
-    image = models.ImageField(upload_to="rough/", blank=True, null=True)
-    banner = models.ImageField(upload_to="rough_banner/", blank=True, null=True)

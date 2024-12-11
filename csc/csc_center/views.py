@@ -1,16 +1,21 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import CreateView
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.contrib import messages
 from datetime import datetime
 from math import ceil, floor
 from django.http import Http404
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth import logout
+from django.utils import timezone
+from django.conf import settings
+from django.templatetags.static import static
+from django.core.files import File
 import logging
 import uuid
 import time
 import sys
+import os
 
 from .models import CscCenter, CscKeyword, CscNameType, State, District, Block, SocialMediaLink, Banner
 from services.models import Service
@@ -37,7 +42,7 @@ class AddCscCenterView(BaseView, CreateView):
             context['products'] = Product.objects.all()
             context['services'] = Service.objects.all()
             context['states'] = State.objects.all()
-            context['social_medias'] = ["Facebook", "Instagram", "Twitter", "YouTube", "LinkedIn", "Pinterest", "Tumblr"]
+            context['social_medias'] = ["Facebook", "Instagram", "Twitter", "YouTube", "LinkedIn", "Pinterest", "Tumblr"]            
 
             time_data = []
             for i in range(1, 25):
@@ -125,6 +130,10 @@ class AddCscCenterView(BaseView, CreateView):
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
 
+            if CscCenter.objects.filter(email = email).exists():
+                messages.error(request, "CSC center with the same email already exists. Please try again with another email.")
+                return redirect(self.redirect_url)
+
             try:
                 type = get_object_or_404(CscNameType, slug = type.strip())
             except Http404:
@@ -147,13 +156,13 @@ class AddCscCenterView(BaseView, CreateView):
                 block = get_object_or_404(Block, block = block.strip())
             except Http404:
                 messages.error(request, 'Invalid Block')
-                return redirect(self.redirect_url)
-            
+                return redirect(self.redirect_url)            
+
             self.object = CscCenter.objects.create(
                 name = name.strip() if name else None, type = type, csc_reg_no = csc_reg_no.strip() if csc_reg_no else None, 
                 state = state, district = district, block = block, location = location.strip() if location else None,
                 zipcode = zipcode.strip() if zipcode else None, landmark_or_building_name = landmark_or_building_name.strip() if landmark_or_building_name else None,
-                street = street.strip() if street else None, logo = logo if logo else "/static/w3/images/csc_default.jpeg", description = description.strip() if description else None, contact_number = contact_number.strip() if contact_number else None,
+                street = street.strip() if street else None, logo = logo, description = description.strip() if description else None, contact_number = contact_number.strip() if contact_number else None,
                 owner = owner.strip() if owner else None, email = email.strip() if email else None, website = website.strip() if website else None, 
                 mobile_number = mobile_number.strip() if mobile_number else None, whatsapp_number = whatsapp_number.strip() if whatsapp_number else None,
                 mon_opening_time = mon_opening_time, tue_opening_time = tue_opening_time, 
@@ -170,7 +179,7 @@ class AddCscCenterView(BaseView, CreateView):
             self.object.keywords.set(keywords)
             self.object.services.set(services)
             self.object.products.set(products)
-            self.object.inactive_date = self.object.created.date()
+            self.object.next_payment_date = self.object.created.date()
             self.object.save()
 
             current_keywords = self.object.keywords.all()
@@ -218,11 +227,11 @@ class AddCscCenterView(BaseView, CreateView):
                         self.object.social_media_links.set(social_media_list)
                         self.object.save()
 
-            messages.success(request, "Added CSC center")
+            messages.success(request, "Added CSC center. Once the csc center is approved we will notify you via email.")
 
             if not User.objects.filter(email = email).exists():
-                logout(request)        
-                return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
+                logout(request)                
+                return redirect(self.redirect_url)
             elif request.user.is_authenticated and request.user.email == email:
                 return redirect(reverse_lazy("users:home"))
             else:
@@ -540,24 +549,20 @@ def error(msg):
 
 def activate_and_delete_dummy_payments():
     try:
-        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')
-        
-        payment_implemented_date = datetime.strptime("30-12-2024", "%d-%m-%Y").date()
+        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')        
 
         sys.stdout.write(f"\nActivating and deleting dummy payments . . .\n")    
 
         csv_center_ids = [f"CSC{row['ID']}" for _, row in csv_data.iterrows()]
-        activated_count = CscCenter.objects.filter(pk__in=csv_center_ids).update(is_active=True, payment_implemented_date = payment_implemented_date)
 
-        for center in CscCenter.objects.filter(payment_implemented_date__isnull = True):
-            center.inactive_date == 
-            center.save() 
+        last_paid_date = timezone.datetime(2023, 12, 31, tzinfo=timezone.get_current_timezone()).date()
+        
+        activated_count = CscCenter.objects.filter(pk__in=csv_center_ids).update(is_active=True, status="Approved", approved_date = F('created'), last_paid_date = last_paid_date)
 
         success(f"Activated {activated_count} CSC inactive centers")
 
         payments = Payment.objects.filter(csc_center__pk__in = csv_center_ids)
         payment_count = payments.count()
-
         payments.delete()
         
         success(f"Deleted {payment_count} dummy payments")
@@ -565,4 +570,50 @@ def activate_and_delete_dummy_payments():
         success(f"All Done!")
     except Exception as e:
         error(f"Error in activating csc centers and destroying dummy payments: \n{e}")
-    
+
+def create_users():
+    try:
+        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')        
+        length = len(csv_data)  
+
+        sys.stdout.write(f"\nCreating users . . .\n")   
+
+        for index, row in row_generator(csv_data):        
+            email = str(row["csc_email"])
+            if not User.objects.filter(email=email).exists():
+                username = row["Username"] if pd.notna(row.get("Username")) else email
+                try:
+                    username = int(float(username))
+                    username = email
+                except Exception as e:
+                    username = str(username)
+                password = str(int(row["csc_phone"])) if pd.notna(row.get("csc_phone")) else "123456"                    
+
+                User.objects.create_user(username=username, email=email, password=password)
+            
+            print(f"\rProcessed {index + 1}/{length} rows - {int((index + 1) / length * 100)}% completed", end="")
+
+        print("\nUser creation process completed successfully.")
+
+    except Exception as e:
+        logger.exception(f"Error in creating user: {e}")
+
+            
+def verify_emails():
+    try:
+        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')        
+
+        sys.stdout.write(f"\nVerify emails . . .\n")    
+
+        csv_center_emails = [str(row['csc_email']) for _, row in csv_data.iterrows()]
+
+        User.objects.filter(email__in=csv_center_emails).update(email_verified = True)
+
+        success(f"Verified emails of csv file.")
+
+        success(f"All Done!")
+    except Exception as e:
+        error(f"Error in verifying: \n{e}")
+
+
+

@@ -29,15 +29,15 @@ def check_payment(center, data):
     try:
         if not center.is_active:
             payment_url = reverse_lazy("payment:payment", kwargs = {'slug' : center.slug})
-            print(payment_url)
-            if center.live_days < 15:
-                data['light_warning_message'] = f"You are on the 15 days trail period. Please make the payment in the next {15 - center.live_days} days to avoid suspension of your account. &nbsp;<span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
-            else:
-                data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account. <span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
+            if center.live_days:                
+                if center.live_days < 15:
+                    data['light_warning_message'] = f"You are on the 15 days trail period. Please make the payment in the next {15 - center.live_days} days to avoid suspension of your account. &nbsp;<span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
+                else:
+                    data['hard_warning_message'] = f"Your account is in danger. Please make the payment as soon as possible to avoid suspension of your account. <span style='display: inline-block;'>Click <a href='{payment_url}' style='color: blue; text-decoration: underline;'>Pay Now</a> for payment</span>"
             
         return data
     except Exception as e:
-        logger.error(f"Error in check_payment: {e}")
+        logger.exception(f"Error in check_payment: {e}")
         return data
 
 def check_payment_response(request):
@@ -440,7 +440,7 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
             sat_opening_time = sat_opening_time.strip() if sat_opening_time else None
             sun_opening_time = sun_opening_time.strip() if sun_opening_time else None
     
-            mon_closing_time =         mon_closing_time.strip() if mon_closing_time else None
+            mon_closing_time = mon_closing_time.strip() if mon_closing_time else None
             tue_closing_time = tue_closing_time.strip() if tue_closing_time else None
             wed_closing_time = wed_closing_time.strip() if wed_closing_time else None
             thu_closing_time = thu_closing_time.strip() if thu_closing_time else None
@@ -457,6 +457,10 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
 
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
+
+            if CscCenter.objects.filter(email = email).exists():
+                messages.error(request, "CSC center with the same email already exists. Please try again with another email.")
+                return redirect(self.redirect_url)
 
             try:
                 type = get_object_or_404(CscNameType, slug = type.strip())
@@ -503,6 +507,7 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
             self.object.keywords.set(keywords)
             self.object.services.set(services)
             self.object.products.set(products)
+            self.object.next_payment_date = self.object.created.date()
             self.object.save()
 
             current_keywords = self.object.keywords.all()
@@ -550,12 +555,12 @@ class AddCscCenterView(CscCenterBaseView, CreateView):
                         self.object.social_media_links.set(social_media_list)
                         self.object.save()
 
-            messages.success(request, "Added CSC center")
+            messages.success(request, "Added CSC center. Once the csc center is approved we will notify you via email.")
 
             if not User.objects.filter(email = email).exists():
                 logout(request)        
-                return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
-            elif request.user.email and request.user.email == email:
+                return redirect(self.redirect_url)
+            elif request.user.is_authenticated and request.user.email == email:
                 return redirect(reverse_lazy("users:home"))
             else:
                 logout(request)
@@ -1216,7 +1221,6 @@ class OrderHistoryListView(OrderHistoryBaseView, ListView):
                 center_slug = request.GET.get('center_slug')
 
                 payments = self.model.objects.filter(csc_center__slug = center_slug, status = "Completed").order_by("-created")
-                print(payments)
 
                 list_payments = []
 

@@ -336,7 +336,7 @@
 			if ($('#pop-up-box-heading').html() == 'Select CSC Center') {
 					const center = $('#pop-up-dropdown').val();
 					localStorage.setItem('centerSlug', center);
-					localStorage.setItem('cscUser', `{{request.user.username}}`);					
+					localStorage.setItem('cscUser', `{{request.user.email}}`);					
 			}
 		})
 
@@ -367,7 +367,7 @@
 			});
 		};
 
-		if (localStorage.getItem('cscUser') == `{{request.user.username}}` && localStorage.getItem('centerSlug')) {
+		if (localStorage.getItem('cscUser') == `{{request.user.email}}` && localStorage.getItem('centerSlug')) {
 			const centerSlug = localStorage.getItem('centerSlug');
 			getCurrentCsc(centerSlug);
 		} else {

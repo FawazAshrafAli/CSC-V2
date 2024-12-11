@@ -13,15 +13,20 @@ import logging
 import uuid
 
 from .models import User, UserOtp
+from home.views import BaseHomeView
 
 from .tasks import send_verification_email, send_otp_email
 
 logger = logging.getLogger(__name__)
-class AuthenticationView(TemplateView):
+class AuthenticationView(BaseHomeView, TemplateView):
     template_name = 'authentication/login.html'
     admin_success_url = reverse_lazy('csc_admin:home')
     user_success_url = reverse_lazy('users:home')
     redirect_url = reverse_lazy('authentication:login')
+
+    def get_context_date(sekf, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
     def get(self, request, *args, **kwargs):
 
@@ -93,7 +98,7 @@ class LogoutView(View):
             logger.exception("Some error occured")
             return redirect(self.redirect_url)
 
-class ResetPasswordWithOtpView(UpdateView):
+class ResetPasswordWithOtpView(BaseHomeView, UpdateView):
     model = User
     fields = ['password']
     template_name = 'authentication/forgot_password.html'
@@ -200,7 +205,7 @@ class ForgotPasswordView(View):
             return redirect(self.redirect_url)
 
 
-class UserRegistrationView(CreateView):
+class UserRegistrationView(BaseHomeView, CreateView):
     model = User
     fields = ["username", "email", "password"]
     template_name = 'authentication/register.html'
@@ -243,7 +248,6 @@ class UserRegistrationView(CreateView):
 
             base_url = f"https://{request.get_host()}"
 
-            # send_verification_email.delay(request, user)
             send_verification_email.delay(user.id, base_url)
             messages.success(request, "A verification email has been send to your email address.")        
             return redirect(self.success_url)
