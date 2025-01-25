@@ -60,7 +60,7 @@
                                 <td class="text-center">{{payment.currency}} {{payment.amount}}</td>
                                 <td class="text-center">{{payment.status}}</td>
                                 <td class="text-center">{% if payment.status == "Completed" %} {{payment.payment_method}} {% else %} Nil {% endif %}</td>
-                                <td class="text-center">{{payment.created|date:"F d, Y"}}</td>                                     
+                                <td class="text-center">{{payment.created}}</td>                                     
                             </tr>
                             {% endfor %}
                             {% else %}

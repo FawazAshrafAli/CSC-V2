@@ -1,17 +1,17 @@
 from django.db import models
 from django.utils.text import slugify
-from ckeditor.fields import RichTextField
 from csc_center.models import CscCenter
-from django.urls import reverse
 
 from services.models import Service
+from products.models import Product
 from csc_center.models import State
 
 class Poster(models.Model):
     title = models.CharField(max_length=100)
     poster = models.ImageField(upload_to="posters/")
-    state = models.ForeignKey(State, on_delete=models.CASCADE, blank=True, null=True)
-    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    states = models.ManyToManyField(State)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
 
     slug = models.SlugField(blank=True, null=True)
 
@@ -38,6 +38,14 @@ class Poster(models.Model):
 
     def __str__(self):
         return self.title
+    
+    @property
+    def get_states(self):
+        if self.states.count() > 0:
+            states = [state.state for state in self.states.all()]
+            return ", ".join(states)
+
+        return "All States"
 
 
 class PosterFooter(models.Model):

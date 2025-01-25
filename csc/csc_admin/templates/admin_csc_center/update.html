@@ -102,9 +102,9 @@
                                 </select>
                             </div>
                             <div class="col-md-4" id="csc-reg-div">
-                                <h5>CSC REG No. <i class="tip" data-tip-content="CSC Registration Number"></i><span class="invalid-span">&nbsp;</span></h5>
+                                <h5>CSC ID <i class="tip" data-tip-content="CSC ID"></i><span class="invalid-span">&nbsp;</span></h5>
                                 <input class="search-field" type="text" name="csc_reg_no" value="{% if center.csc_reg_no %}{{center.csc_reg_no}}{% endif %}"
-                                    placeholder="CSC Registration Number" required/>
+                                    placeholder="CSC ID" required/>
                             </div>
                         </div>
                         <h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>Location Name</h5>
@@ -210,7 +210,7 @@
                             <div class="col-md-6" id="banners-div">
                                 <h5>Upload Banner<span>&nbsp;(optional)</span> <span class="invalid-span">&nbsp; <i>Required!</i></span></h5></h5>
                                 <input type="file" name="banner" id="csc-banner-input" multiple required>
-                                <span id="current-csc-banner">{% if center.banners.all|length > 0 %} current banners: {% for banner in center.banners.all %} <a href="{{banner.banner_image.url}}" target="_blank" style="color:blue">{{banner.banner_image.name}}</a> {% endfor %} {% endif %}</span>
+                                <small><span id="current-csc-banner">{% if center.get_banners %} current banners: {{center.get_banners|safe}} <button type="button">Clear Banners</button> {% endif %}</span></small>
                                 <br><span><i>Note: Maximum size for each banner image is 20 KB.</i></span>
                             </div>
                         </div>
@@ -243,7 +243,7 @@
                         <!-- Website -->
                         <div class="col-md-4" id="website-div">
                             <h5>Website<span>&nbsp;(optional)</span> <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
-                            <input type="text" name="website" placeholder="www.domainname.com" value="{% if center.website != None %}{{center.website}}{% endif %}" >
+                            <input type="text" name="website" placeholder="www.domainname.com" value="{% if center.website != 'None' and center.website != None %}{{center.website}}{% endif %}" >
                         </div>
                     </div>
                     <!-- Row / End -->
@@ -885,21 +885,7 @@
 						$(this).removeClass('is-valid').addClass('is-invalid');
 						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
 					}
-				} 
-
-				else if (parentDiv === "#website-div") {
-					if (!value) {
-						$(this).removeClass('is-invalid').removeClass('is-valid');
-						$(`${parentDiv} .invalid-span`).hide();
-					}
-					else if (validateWebsite(value)) {
-						$(this).removeClass('is-invalid').addClass('is-valid');
-						$(`${parentDiv} .invalid-span`).empty("&nbsp; Required!").hide();
-					} else {
-						$(this).removeClass('is-valid').addClass('is-invalid');
-						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
-					}
-				}
+				} 				
 
 				else if (parentDiv === "#csc-reg-div") {
 					if (validateCscReg(value)) {
@@ -962,8 +948,7 @@
 		validateInput('#zipcode-div');
 		validateInput('#address-div');
 		validateInput('#owner-div');
-		validateInput('#email-div');
-		validateInput('#website-div');
+		validateInput('#email-div');		
 		validateInput('#contact-div');
 		validateInput('#mobile-div');
 		validateInput('#whatsapp-div');
@@ -1130,10 +1115,7 @@
             const ownerValue = $('#owner-div input').val().trim();
 
 			const email = $('#email-div input');
-            const emailValue = $('#email-div input').val().trim();
-
-			const website = $('#website-div input');
-            const websiteValue = $('#website-div input').val().trim();
+            const emailValue = $('#email-div input').val().trim();			
 
 			const contact = $('#contact-div input');
             const contactValue = $('#contact-div input').val().trim();
@@ -1346,21 +1328,7 @@
 				$(email).removeClass('is-invalid').addClass('is-valid');
 				$(`#email-div .invalid-span`).hide();
 				$(email).blur();
-			}
-
-			// Check Website
-			if (websiteValue) {
-				if (!validateWebsite(websiteValue)) {
-					$(website).removeClass('is-valid').addClass('is-invalid');
-					$(`#website-div .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
-					$(website).focus();
-					formValid = false;
-				} else {
-					$(website).removeClass('is-invalid').addClass('is-valid');
-					$(`#website-div .invalid-span`).hide();
-					$(website).blur();
-				}
-			}
+			}			
 
 			// Check Contact
 			if (!contactValue || !validatePhone(contactValue)) {
@@ -1520,6 +1488,34 @@
 <!-- Add New Social Media Link -->
 <script>
     $(document).ready(() => {
+        // Remove banners
+        $('#current-csc-banner button').click(function () {
+            const confirmation = window.confirm("Are you sure you want to remove banners?")
+
+            centerSlug = `{{center.slug}}`;
+
+            if (confirmation) {
+                $.ajax({
+                    type:'get',
+                    url:`/csc_center/remove_banners/${centerSlug}`,
+                    dataType: 'json',
+                    success: response => {
+                        if (response.status == "failed") {
+                            console.error(response.error);
+                        }
+
+                        if (response.status == "success") {
+                            $('#current-csc-banner').empty();
+                            setTimeout(() => {
+                                alert("Banner Cleared!");
+                            }, 500);
+                        }
+                    },
+                    error: error => console.log("Error: ", error),
+                });
+            };           
+        });
+
         $('#add-link-btn').click(() => {
             $('#pricing-list-container').append(
                 `<tr class="pricing-list-item pattern">

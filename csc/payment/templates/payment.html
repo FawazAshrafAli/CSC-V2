@@ -4,50 +4,125 @@
 {% block title_prefix %} Payment {% endblock title_prefix %}
 
 {% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
 <link rel="stylesheet" href="{% static 'w3/payment/css/payment.css' %}">
+
+<style>
+    td {
+        text-align: center;
+    }
+</style>
 {% endblock styles %}
 
 {% block content %}
-<div class="main-search-container plain-color">
-	<div class="main-search-inner">
+<div class="main-search-container plain-color" id="main-container">
+	{% comment %} <div class="main-search-inner"> {% endcomment %}
+    <div>
 
 		<div class="container">            
 			<div class="row">
 				{% include "components/message.html" %}
-				<div class="col-md-12">
+				<div class="col-md-6" id="payment-div">
                     <div class="payment-form">
                         <h4>Payment</h4>
                         <hr>
-                        <table>                       
-                            <tr>
-                                <th>Amount</th>
-                                <th>&nbsp;:&nbsp;</th>
-                                <td>{{amount}} INR</td>                                
-                            </tr>                            
-                        </table>
+                        <table width="100%" border="1">
+                            <tbody>
+                              <tr style="background:#DCDCDC; height:35px;" >
+                                <td><strong> Regular Price </strong></td>
+                                <td><strong> Offer Price </strong></td>
+                                <td><strong>Early Bird Offer </strong></td>
+                              </tr>
+                              <tr>
+                                <td> Rs: 200/Month </td>
+                                <td>Rs: 100/Month </td>
+                                <td> Rs: {{amount|floatformat:0}}/Year (only for first 500 VLEs)</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         
                         <br>                       
-                        <form action="{% url 'payment:success' %}" method="POST">
+                        <form action="{% url 'payment:success' %}" method="POST" id="razorpay-form">
                             <script
                                 src="https://checkout.razorpay.com/v1/checkout.js"
-                                data-key="{{ razorpay_key_id }}"  <!-- Razorpay API Key -->
-                                data-amount="{{ amount|floatformat:2 }}"  <!-- INR amount -->
-                                data-currency="{{ currency }}"  <!-- INR currency -->
-                                data-order_id="{{ razorpay_order_id }}"  <!-- Razorpay Order ID -->
-                                data-buttontext="Pay with Razorpay"
-                                data-name="Your Test Store"
-                                data-description="Payment for Test Order"
-                                data-theme.color="#F37254">
+                                data-key="{{ razorpay_key_id }}"
+                                data-amount="{{amount_in_paisa}}"
+                                data-currency="{{ currency }}"
+                                data-order_id="{{ razorpay_order_id }}"
+                                data-buttontext="Pay &#8377;{{amount|floatformat:'2'}}"
+                                data-name="CSC India"
+                                data-description="Payment for Live Order"
+                                data-theme.color="#F37254">  
+                                
                             </script>
                             <input type="hidden" name="razorpay_order_id" value="{{razorpay_order_id}}">
                             <input type="hidden" name="csc_center" value="{{csc_center.slug}}">
                             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         </form>
                     </div>            
+                </div>                
+                <div class="col-md-6" style="display: flex; justify-content: center;">
+                    <!-- <img src="{% static 'w3/images/payment_banner.jpeg' %}" alt="" > -->
+                    <div style="overflow: hidden;">
+                        <div class="swiper-container">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="{% static 'w3/images/1.png' %}" alt="Title 1">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="{% static 'w3/images/2.png' %}" alt="Title 2">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="{% static 'w3/images/3.png' %}" alt="Title 3">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="{% static 'w3/images/4.png' %}" alt="Title 4">
+                                </div>                                
+                            </div>
+                            <!-- Navigation buttons -->
+                            <!-- <div class="swiper-button-next"></div> -->
+                            <!-- <div class="swiper-button-prev"></div> -->
+                            <!-- Pagination dots -->
+                            <div class="swiper-pagination"></div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
-    </div>
+    </div>    
 </div>
+
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const swiper = new Swiper('.swiper-container', {
+            slidesPerView: 1,
+            spaceBetween: 10,
+            // navigation: {
+                // nextEl: '.swiper-button-next',
+                // prevEl: '.swiper-button-prev',
+            // },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            loop: true,
+            
+            autoplay: {
+                // delay: 2500,
+                disableOnInteraction: false,
+            },
+
+            effect: 'fade',
+                fadeEffect: {
+                    crossFade: true
+                }
+        });
+    });
+</script>
+{% endblock scripts %}

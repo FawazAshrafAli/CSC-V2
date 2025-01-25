@@ -7,31 +7,6 @@ from authentication.models import User
 
 logger = get_task_logger(__name__)
 
-
-@shared_task
-def send_verification_email(user_id, base_url):
-
-    try:
-        user = User.objects.get(pk = user_id)
-        # verification_link = request.build_absolute_uri(
-        #     reverse_lazy('authentication:verify_email', kwargs = {"token": user.verification_token})
-        # )
-
-        verification_link = f"{base_url}{reverse_lazy('authentication:verify_email', kwargs={'token': user.verification_token})}"
-
-        sender = settings.DEFAULT_FROM_EMAIL
-
-        send_mail(
-            'Verify your email',
-            f'Click the link to verify your email: {verification_link}',
-            sender,
-            [user.email],
-            fail_silently=False
-        )
-    except Exception as e:
-        logger.error(f"Error sending verification email to {user.email}: {e}")
-
-
 @shared_task
 def send_otp_email(email, otp):
     try:
@@ -43,3 +18,31 @@ def send_otp_email(email, otp):
         send_mail(subject, message, from_email, receipient_list)
     except Exception as e:
         logger.error(f'Error sending OTP email: {e}')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 5, 'countdown': 60})
+def send_verification_otp(self, otp, email):
+    try:
+        subject = "OTP for Verifying Your Email"
+        plain_message = f"Your OTP code is {otp}. It is valid for the next 5 minutes."
+        html_message = f"""
+        <html>
+            <body>
+                <p>Your OTP code is <strong>{otp}</strong>.</p>
+                <p>It is valid for the next <strong>5 minutes</strong>.</p>
+            </body>
+        </html>
+        """
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [email]
+
+        send_mail(
+            subject,
+            plain_message,
+            from_email,
+            recipient_list,
+            html_message=html_message,
+        )
+    except Exception as e:
+        logger.exception(f"Error in sending verification OTP to {email}: {e}")
+        raise self.retry(exc=e)

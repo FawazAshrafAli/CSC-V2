@@ -25,6 +25,43 @@
 	.is-valid {
 		border: 1px solid green !important;
 	}
+
+	#otp-submission-box {
+		display: none;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		max-width: 380px;
+		z-index: 999; 
+		background-color: #fff; 
+		padding: 15px 25px; 
+		box-shadow: 0 0 5px #777;
+	}
+
+	#confirm-btn {
+		background: linear-gradient(to bottom, #24A0ed, blue);
+		color: #fff;
+		border: none;
+		box-shadow: 0 0 5px #777;
+	}
+
+	#pop-up-btns-div {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	#pop-up-btns-div button:first-child {
+		color: #fff;
+		background: linear-gradient(to bottom, #24A0ed, blue);
+		border: none;
+		box-shadow: 0 0 5px #777;;
+	}
+
+	#pop-up-btns-div button:first-child:hover {
+		background: linear-gradient(to bottom, #24A0ed, blue, #24A0ed);
+	}
 </style>
 {% endblock styles %}
 
@@ -40,6 +77,23 @@
         display: none;
     }
 </style>
+
+<div id="otp-submission-box">
+    <div class="modal-content">            
+        <h4>Please enter the OTP sent to your email address to verify it</h4>                             
+    </div>
+    <br>
+    <form id="otp-verification-form">
+		<div>
+			<input type="text" name="otp" id="otp-input" placeholder="OTP">
+			<div id="countdown" style="font-size: 20px; text-align: right; width: 100%;">05:00</div>
+		</div>
+		<div id="pop-up-btns-div">
+			<button type="submit" id="confirm-btn">Submit OTP</button>
+			<button type="button" id="change-email">Change Email</button>
+		</div>
+    </form>
+</div>
 
 <!-- Titlebar
 ================================================== -->
@@ -109,9 +163,9 @@
 								<span id="type-span"></span>
 							</div>
 							<div class="col-md-4" id="csc-reg-div">
-								<h5>CSC REG No. <i class="tip" data-tip-content="CSC Registration Number"></i><span class="invalid-span">&nbsp;</span></h5>
+								<h5>CSC ID <i class="tip" data-tip-content="CSC ID"></i><span class="invalid-span">&nbsp;</span></h5>
 								<input class="search-field" type="text" name="csc_reg_no" id="reg-no-input"
-									placeholder="CSC Registration Number" required/>
+									placeholder="CSC ID" required/>
 							</div>
 						</div>
 						<h5 class="margin-top-30 margin-bottom-10">ABCD <span>Common Service Centre (CSC)</span>Location Name</h5>
@@ -238,11 +292,11 @@
 						<!-- Email Address -->
 						<div class="col-md-4" id="email-div">
 							<h5>E-Mail ID <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
-							<input type="email" name="email" placeholder="E-Mail ID" required>
+							<input type="email" name="email" id="email-input" placeholder="E-Mail ID" required>
 						</div>
 						<!-- Website -->
 						<div class="col-md-4" id="website-div">
-							<h5>Website<span>&nbsp;(optional)</span> <span class="invalid-span">&nbsp; <i>Required!</i></span></h5>
+							<h5>Website<span>&nbsp;(optional)</span> </h5>
 							<input type="text" name="website" placeholder="www.domainname.com">
 						</div>
 					</div>
@@ -559,7 +613,7 @@
 				<!-- Section / End -->
 				 <div id="add-csc-btns-div">
 					<a href="#" id="preview-btn" class="button preview">Preview <i class="fa fa-arrow-circle-right"></i></a>
-					<button class="button preview" type="button">Submit</button>
+					<button class="button preview" id="submit-btn" type="button">Submit</button>
 				 </div>
 			</form>
 			<br>
@@ -730,15 +784,72 @@
 	
 			$(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
 			$('#add-csc-btns-div button').hide();
-			
-			$('#add-csc-form').submit()
-		});
-    });
-</script>
 
-<!-- Adding New Social Media Link -->
-<script>
-    $(document).ready(() => {
+			
+			
+			const email = $('#email-input').val();
+			const csrfToken = `{{csrf_token}}`;
+			$.ajax({
+				type: "POST",
+				url: "/authentication/send_email_otp/",
+				dataType: "json",
+				data: {"email": email.trim()},
+				headers: {
+					'X-CSRFToken': csrfToken
+				},
+				success: response => {
+					if (response.status === "success") {
+						window.alert("An OTP to verify your email address has been successfully sent to your email");
+						$("#otp-submission-box").show();
+						otpTimer();
+					} else if (response.error == "duplicate") {
+						window.alert("CSC Center with this email already exists. Please try again with another email.")
+						$('#submit-btn').html("Submit");
+					} else if (response.error) {
+						console.error(response.error);
+					}
+				},
+				error: error => console.error("Error: ", error),
+			})
+			
+			// $('#add-csc-form').submit();
+		});
+
+		$('#otp-verification-form').on('submit', function (e) {
+			e.preventDefault();
+
+			const email = $('#email-input').val();
+			const otp = $('#otp-input').val();
+			const csrfToken = `{{csrf_token}}`;
+
+			$.ajax({
+				type: 'POST',
+				url: '/authentication/verify_email_otp/',
+				dataType: 'json',
+				data: {
+					"email": email.trim(),
+					"otp": otp.trim()
+				},
+				headers: {
+					'X-CSRFToken': csrfToken
+				},
+				success: response => {
+					if (response.status === "success") {
+						window.alert("Email verification completed.");
+						$('#add-csc-form').submit();
+					} else if (response.error) {
+						console.error("Error: ", response.error);
+
+						if (response.error === "OTP expired") {
+							window.alert("OTP Expired.");
+						}
+					}
+				},
+				error: error => console.log("Error: ", error),
+			})
+		})
+
+		// Adding New Social Media Link
         $('#add-link-btn').click(() => {
             $('#pricing-list-container').append(
                 `<tr class="pricing-list-item pattern">
@@ -769,11 +880,8 @@
                 disable_search: true
             });
         });        
-    });
-</script>
 
-<script>
-    $(document).ready(() => {
+
         const namePattern = /^[\p{L}\s'-]+$/u;
         const slugPattern = /^[a-zA-Z0-9_-]+$/;
         const phonePattern = /^(?:\+91|91|0)?(?:[789]\d{9}|\(?\d{2,5}\)?\d{6,8})$/;
@@ -852,21 +960,7 @@
 						$(this).removeClass('is-valid').addClass('is-invalid');
 						$(`${parentDiv} .invalid-span`).html("&nbsp; Required!").show();
 					}
-				} 
-
-				else if (parentDiv === "#website-div") {
-					if (!value) {
-						$(this).removeClass('is-invalid').removeClass('is-valid');
-						$(`${parentDiv} .invalid-span`).hide();
-					}
-					else if (validateWebsite(value)) {
-						$(this).removeClass('is-invalid').addClass('is-valid');
-						$(`${parentDiv} .invalid-span`).empty("&nbsp; Required!").hide();
-					} else {
-						$(this).removeClass('is-valid').addClass('is-invalid');
-						$(`${parentDiv} .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
-					}
-				}
+				} 				
 
 				else if (parentDiv === "#csc-reg-div") {
 					if (validateCscReg(value)) {
@@ -928,8 +1022,7 @@
 		validateInput('#zipcode-div');
 		validateInput('#address-div');
 		validateInput('#owner-div');
-		validateInput('#email-div');
-		validateInput('#website-div');
+		validateInput('#email-div');		
 		validateInput('#contact-div');
 		validateInput('#mobile-div');
 		validateInput('#whatsapp-div');
@@ -1092,10 +1185,7 @@
             const ownerValue = $('#owner-div input').val().trim();
 
 			const email = $('#email-div input');
-            const emailValue = $('#email-div input').val().trim();
-
-			const website = $('#website-div input');
-            const websiteValue = $('#website-div input').val().trim();
+            const emailValue = $('#email-div input').val().trim();			
 
 			const contact = $('#contact-div input');
             const contactValue = $('#contact-div input').val().trim();
@@ -1309,21 +1399,7 @@
 				$(email).removeClass('is-invalid').addClass('is-valid');
 				$(`#email-div .invalid-span`).hide();
 				$(email).blur();
-			}
-
-			// Check Website
-			if (websiteValue) {
-				if (!validateWebsite(websiteValue)) {
-					$(website).removeClass('is-valid').addClass('is-invalid');
-					$(`#website-div .invalid-span`).html("&nbsp; Invalid&nbsp;<i class='fa fa-question-circle'></i>").prop("title", "Please enter a valid website URL that starts with 'http://' or 'https://'.\nकृपया एक मान्य वेबसाइट यूआरएल दर्ज करें जो 'http://' या 'https://' से शुरू होता है।").show();
-					$(website).focus();
-					formValid = false;
-				} else {
-					$(website).removeClass('is-invalid').addClass('is-valid');
-					$(`#website-div .invalid-span`).hide();
-					$(website).blur();
-				}
-			}
+			}						
 
 			// Check Contact
 			if (!contactValue || !validatePhone(contactValue)) {
@@ -1392,6 +1468,7 @@
 
 
 		$('#preview-btn').click(function () {
+
 			if (validateForm()) {
 				if ($(this).html() != 'Edit Form') {
 					$('#add-csc-form input').prop('readonly', true);
@@ -1421,9 +1498,63 @@
 
 					$(this).html('Preview <i class="fa fa-arrow-circle-right"></i>');
 					$('#add-csc-btns-div button').hide();
-				};
+				};				
 			}
         });
+
+		let countdownInterval = null;
+
+		function otpTimer() {
+			if (countdownInterval) {
+				clearInterval(countdownInterval);
+			}
+
+			$('#confirm-btn').show();
+			$('#countdown').show();
+			$('#send-otp-btn').hide();
+
+			let minutes = 4;
+			let seconds = 59;
+
+			countdownInterval = setInterval(function () {
+				let formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+				let formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+				$('#countdown').text(formattedMinutes + ':' + formattedSeconds);
+
+				if (minutes === 0 && seconds === 0) {
+					clearInterval(countdownInterval);
+					countdownInterval = null;
+					$('#countdown').hide();
+					$('#confirm-btn').hide();
+					$('#pop-up-btns-div').prepend(
+						`<button type="button" style="border: 1px solid #777; padding: 3px 5px; background: linear-gradient(to bottom, seagreen, green, green); color: #fff;" id="send-otp-btn">Resend OTP</button>`
+					);
+				} else {
+					if (seconds === 0) {
+						minutes--;
+						seconds = 59;
+					} else {
+						seconds--;
+					}
+				}
+			}, 1000);
+		}					
+
+		$(document).on('click', '#send-otp-btn', function () {
+			const emailInput = $('email-input').val();
+			if (emailInput && emailInput.trim()) {
+				otpTimer();
+				$('#add-csc-btns-div button').click();
+			} else {
+				window.alert("Email is not provided.");
+			}
+		})	
+
+		$(document).on('click', '#change-email', function () {
+			$('#otp-submission-box').hide();
+			$('#submit-btn').html("Submit").show();
+		})					
     })
 </script>
 {% endblock scripts %}

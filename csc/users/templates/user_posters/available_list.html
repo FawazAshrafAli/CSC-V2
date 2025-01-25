@@ -68,6 +68,25 @@
       background-color: #fff;
       color: #777;      
     }
+
+    @keyframes blinking {
+      0%{opacity: 1;}
+      25%{opacity: 1;}
+      35%{opacity: 0.5;}
+      50%{opacity: 0;}
+      65%{opacity: 0.5;}
+      75%{opacity: 1;}
+      100%{opacity: 1;}
+      
+    }
+
+    #blinking-notification {
+      animation-name: blinking;
+      animation-duration: 1.5s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate-reverse;
+    }
 </style>
 {% endblock styles %}
 
@@ -149,10 +168,15 @@
         <!-- Listings -->
         <div class="col-lg-12 col-md-12">
           <div class="dashboard-list-box margin-top-0" id="validity-message" style="background-color: #fff;">
-            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
-            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px; z-index:999;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px; z-index:999;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
           </div>
         </div>
+
+        <div style="text-align:center; color: red; font-weight: bold;" id="blinking-notification">
+          This page is being updated.. Kindly keep checking..
+        </div>
+
         <div class="col-lg-12 col-md-12">
           <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
             <div class="row">
@@ -208,124 +232,132 @@
   }
 
     $(document).ready(function () {
+      
       window.getPoster = function(imageUrl) {
-        $('#poster-pop-up-box').fadeIn();
-        var canvas = $('#poster-canvas')[0];
-        var context = canvas.getContext('2d', { willReadFrequently: true });
+
+        if (localStorage.getItem("paidCsc") === true || localStorage.getItem("paidCsc") === "true" ) {
+          $('#poster-pop-up-box').fadeIn();
+          var canvas = $('#poster-canvas')[0];
+          var context = canvas.getContext('2d', { willReadFrequently: true });
 
 
-        const footerWidth = canvas.width;        
-        const footerHeight = canvas.width * 0.25;
+          const footerWidth = canvas.width;        
+          const footerHeight = canvas.width * 0.25;
 
-        function clearFooter() {
-          context.fillStyle = "white";
+          function clearFooter() {
+            context.fillStyle = "white";
 
-          context.clearRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
-          context.fillRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
-        }
-
-        function renderCscDetails() {
-          let centerName;
-          let centerStreet;
-          let centerLocation;
-          let centerContacts;
-          const textOrgin = 270;
-
-          centerName = localStorage.getItem('centerName');
-          centerStreet = localStorage.getItem('centerStreet');
-          centerLocation = localStorage.getItem('centerLocation');
-          centerContacts = localStorage.getItem('centerContacts');
-
-          if (centerName) {
-            context.font = "20px Times New Roman";
-            context.fillStyle = "black";
-            context.textAlign = "center";
-            context.fillText(centerName, textOrgin, canvas.height - (footerHeight/1.4));
-
-            let distance = 20;
-            context.font = "15px Times New Roman";
-
-            let combonents = [centerStreet, centerLocation, centerContacts]
-
-            combonents.forEach(combonent => {
-              if (combonent) {
-                context.fillText(combonent, textOrgin, canvas.height - (footerHeight/1.4) + distance);
-                distance += 20;
-              }
-            });              
+            context.clearRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
+            context.fillRect(0, canvas.height-footerHeight, canvas.width, footerHeight);
           }
-        }
 
-        var mainImage = new Image();
-        mainImage.src = imageUrl;
+          function renderCscDetails() {
+            let centerName;
+            let centerStreet;
+            let centerLocation;
+            let centerContacts;
+            const textOrgin = 270;
 
-        const qrImage = new Image();
-        let centerQrCode;
-        centerQrCode = localStorage.getItem('centerQrCode');
-        
-        mainImage.onload = function() {
-            context.drawImage(mainImage, 0, 0, canvas.width, canvas.width);
+            centerName = localStorage.getItem('centerName');
+            centerStreet = localStorage.getItem('centerStreet');
+            centerLocation = localStorage.getItem('centerLocation');
+            centerContacts = localStorage.getItem('centerContacts');
 
-            if (centerQrCode) {
-              qrImage.src = centerQrCode;
+            if (centerName) {
+              context.font = "20px Times New Roman";
+              context.fillStyle = "black";
+              context.textAlign = "center";
+              context.fillText(centerName, textOrgin, canvas.height - (footerHeight/1.4));
 
-              qrImage.onload = function() {              
-                context.clearRect(canvas.width-80, 15, 65, 65);
-                context.drawImage(qrImage, canvas.width-80, 15, 65, 65);
-              };          
+              let distance = 20;
+              context.font = "15px Times New Roman";
+
+              let combonents = [centerStreet, centerLocation, centerContacts]
+
+              combonents.forEach(combonent => {
+                if (combonent) {
+                  context.fillText(combonent, textOrgin, canvas.height - (footerHeight/1.4) + distance);
+                  distance += 20;
+                }
+              });              
             }
-        };
+          }
 
-        const logoImage = new Image();        
-        const footerImage = new Image();
-        
-        let centerLogo;
-        let centerFooter;        
+          var mainImage = new Image();
+          mainImage.src = imageUrl;
 
-        centerLogo = localStorage.getItem('centerLogo');                
-
-        function defaultFooter () {
-          if (centerLogo) {
-            logoImage.src = centerLogo;
-          }          
-
-          logoImage.onload = function() {
-            clearFooter();
-
-            if (logoImage.src) {
-              context.drawImage(logoImage, 10, canvas.height - 85, 50, 50);
-            }            
-
-            renderCscDetails();
-          };
-        }
-
-        defaultFooter();
-        
-        $(document).on('change', '#custom-poster', function () {
-          if ($(this).is(':checked')) {
-            centerFooter = localStorage.getItem('centerFooter');
+          const qrImage = new Image();
+          let centerQrCode;
+          centerQrCode = localStorage.getItem('centerQrCode');
           
-            if (centerFooter) {
-              context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
-              footerImage.src = centerFooter;
-              
-              footerImage.onload = function() {
-                context.drawImage(footerImage, 0, canvas.height - footerHeight, footerWidth, footerHeight);
-              };
+          mainImage.onload = function() {
+              context.drawImage(mainImage, 0, 0, canvas.width, canvas.width);
+
+              if (centerQrCode) {
+                qrImage.src = centerQrCode;
+
+                qrImage.onload = function() {              
+                  context.clearRect(canvas.width-80, 15, 65, 65);
+                  context.drawImage(qrImage, canvas.width-80, 15, 65, 65);
+                };          
+              }
+          };
+
+          const logoImage = new Image();        
+          const footerImage = new Image();
+          
+          let centerLogo;
+          let centerFooter;        
+
+          centerLogo = localStorage.getItem('centerLogo');                
+
+          function defaultFooter () {
+            if (centerLogo) {
+              logoImage.src = centerLogo;
+            }          
+
+            logoImage.onload = function() {
+              clearFooter();
+
+              if (logoImage.src) {
+                context.drawImage(logoImage, 10, canvas.height - 85, 50, 50);
+              }            
+
+              renderCscDetails();
+            };
+          }
+
+          defaultFooter();
+          
+          $(document).on('change', '#custom-poster', function () {
+            if ($(this).is(':checked')) {
+              centerFooter = localStorage.getItem('centerFooter');
+            
+              if (centerFooter) {
+                context.clearRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+                footerImage.src = centerFooter;
+                
+                footerImage.onload = function() {
+                  context.drawImage(footerImage, 0, canvas.height - footerHeight, footerWidth, footerHeight);
+                };
+              } else {
+                window.alert("Custom footer not set. Please add a custom footer to proceed.\nकस्टम फुटर सेट नहीं है। कृपया आगे बढ़ने के लिए कस्टम फुटर जोड़ें।")
+                $(this).prop('checked', false);
+              }
             } else {
-              window.alert("Custom footer not set. Please add a custom footer to proceed.\nकस्टम फुटर सेट नहीं है। कृपया आगे बढ़ने के लिए कस्टम फुटर जोड़ें।")
-              $(this).prop('checked', false);
-            }
-          } else {
-            defaultFooter();
-          }         
-        })
+              defaultFooter();
+            }         
+          })
 
 
-        logoImage.onerror = qrImage.onerror = function() {
-            console.error("Failed to load image from localStorage.");
-        };
+          logoImage.onerror = qrImage.onerror = function() {
+              console.error("Failed to load image from localStorage.");
+          };
+        } else {
+          window.alert("Please make the payment to preview and download the posters.");
+        }
+
+        
       }
 
       $(document).on('click', '#download-poster-btn', function () {
@@ -363,8 +395,8 @@
           defaultPosterView(response);
 
           $('#validity-message').html(`
-            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
-            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
+            ${ (response && response.light_warning_message) ? `<div class="col-md-12" style="background-color: orange; margin-bottom: 5px; z-index:999;"><h5 style="color: #fff"> ${response.light_warning_message} </h5></div>`: ''}
+            ${ (response && response.hard_warning_message) ? `<div class="col-md-12" style="background-color: orangered; margin-bottom: 5px; z-index:999;"><h5 style="color: #fff"> ${response.hard_warning_message} </h5></div>`: ''}
           `)
 
           if (response.centerName) {
@@ -387,6 +419,11 @@
           }
           if (response.centerFooter) {
             localStorage.setItem('centerFooter', response.centerFooter);
+          }
+          if (response.paid) {
+            localStorage.setItem('paidCsc', true);
+          } else {
+            localStorage.setItem('paidCsc', false);
           }
 
           if (response.posters && response.posters.length > 0) {
@@ -427,7 +464,7 @@
           dataType: 'json',
           data: {'center_slug': center},
           success: response => {
-            successAction(response, message)
+            successAction(response, message);
           },
           error: error => {
             console.error('Error: ', error);

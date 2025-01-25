@@ -1,21 +1,19 @@
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import CreateView
+from django.views.generic import CreateView, View
 from django.urls import reverse_lazy
 from django.contrib import messages
 from datetime import datetime
 from math import ceil, floor
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.db.models import Q, F
 from django.contrib.auth import logout
 from django.utils import timezone
-from django.conf import settings
-from django.templatetags.static import static
-from django.core.files import File
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.text import slugify
 import logging
 import uuid
 import time
 import sys
-import os
 
 from .models import CscCenter, CscKeyword, CscNameType, State, District, Block, SocialMediaLink, Banner
 from services.models import Service
@@ -243,6 +241,39 @@ class AddCscCenterView(BaseView, CreateView):
             logger.exception(f"{msg}: {e}")
             messages.error(request, msg)
             return redirect(self.redirect_url)
+        
+
+class RemoveCscCenterBannerView(LoginRequiredMixin, View):
+    login_url = reverse_lazy("authentication:login")
+
+    def get_object(self):
+        try:
+            return get_object_or_404(CscCenter, slug = self.kwargs.get('slug'))
+        except Http404:
+            logger.error("CSC center not found when removing csc center banner. status = 404")
+        except Exception as e:
+            logger.exception(f"Error in fetching the object in remove csc center banner view: {e}")
+        
+        return None
+
+    def get(self, request, *args, **kwargs):
+        try:
+            if request.headers.get("x-requested-with") != "XMLHttpRequest":
+                return JsonResponse({"status": "failed", "error": "Bad Request"}, status=400)
+            
+            self.object = self.get_object()
+            if not self.object:            
+                return JsonResponse({"status": "failed", "error": "CSC not found"}, status=404)
+
+            self.object.banners.clear()
+
+            return JsonResponse({"status": "success"}, status=200)
+            
+        except Exception as e:
+            logger.exception(f"Error in removing csc center banner: {e}")
+            return JsonResponse({"status": "failed", "error": "An unexpected error occured."}, status=500)
+
+                    
 
 
 # populate csc center data using excel spread sheet
@@ -326,17 +357,30 @@ def remove_trailing_decimals():
     return "\nRemoved Trailing Decimals!"
 
 
+def success(msg):
+    GREEN = "\033[92m"
+    RESET = "\033[0m"
+
+    sys.stdout.write(f"{GREEN}\n{msg}\n{RESET}")
+
+def error(msg):
+    RED = "\033[91m"
+    RESET = "\033[0m"
+
+    sys.stdout.write(f"{RED}\n{msg}\n{RESET}")
+
+
+
 def row_generator(csv_data):
     for index, row in csv_data.iterrows():
         # if index >= 4999:
         yield index, row
 
 def import_excel_data():
-    # csv_data = pd.read_csv(r'D:\Projects\CSC\csc\csc_center\csc-centers.csv')
     csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')
     length = len(csv_data)  
 
-    print("\nImporting data . . .\n")
+    success("Importing data . . .")
     
     for index, row in row_generator(csv_data):
         
@@ -352,6 +396,23 @@ def import_excel_data():
         block, created =  Block.objects.get_or_create(block = current_block.strip(), state = state, district = district)
  
         if not CscCenter.objects.filter(id = f"CSC{row['ID']}").exists():
+            contact_number = str(row["csc_phone"]).split(',') if row["csc_phone"] and pd.notna(row["csc_phone"]) else None
+            if contact_number is not None:
+                contact_number = contact_number[0]
+                contact_number = int(float(contact_number))
+
+            mobile_number = str(row["csc_phonetwo"]).split(',') if row["csc_phonetwo"] and pd.notna(row["csc_phonetwo"]) else None
+            if mobile_number is not None:
+                mobile_number = mobile_number[0]
+                mobile_number = mobile_number.replace("+91", "").replace("'", "")                
+                try:
+                    mobile_number = int(float(mobile_number))
+                except ValueError:
+                    mobile_number = None
+
+            if not contact_number and mobile_number:
+                contact_number = mobile_number
+
             csc_center, created = CscCenter.objects.get_or_create(
                 id = f"CSC{row['ID']}",
                 name = row["csc_name"] if row["csc_name"] and row["csc_name"] != "nan" and row["csc_name"] != '' else None,
@@ -364,14 +425,16 @@ def import_excel_data():
                 zipcode = row["csc_pincode"] if row["csc_pincode"] and row["csc_pincode"] != "nan" and row["csc_pincode"] != '' else None,
                 street = row["csc_place"] if row["csc_place"] and row["csc_place"] != "nan" and row["csc_place"] != '' else None,
                 owner = row["CSC Owner Name"] if row["CSC Owner Name"] and row["CSC Owner Name"] != "nan" and row["CSC Owner Name"] != '' else None,
-                email = str(row["csc_email"].lower() if row["csc_email"] and type(row["csc_email"]) == str and row["csc_email"] != "nan" and row["csc_email"] != '' else None),
-                contact_number = row["csc_phone"] if row["csc_phone"] and row["csc_phone"] != "nan" and row["csc_phone"] != '' else None,
-                mobile_number = row["csc_phonetwo"] if row["csc_phonetwo"] and row["csc_phonetwo"] != "nan" and row["csc_phonetwo"] != '' else None,
+                email = str(row.get("csc_email") if pd.notna(row.get("csc_email")) else row.get("CSC Email") if pd.notna(row.get("CSC Email")) else None),
+                contact_number = contact_number,
+                mobile_number = mobile_number,
                 show_opening_hours = False, 
                 show_social_media_links = False,
                 latitude = row["csc_latitude"] if row["csc_latitude"] and len(str(row["csc_latitude"])) < 100 and row["csc_latitude"] != "nan" and row["csc_latitude"] != '' else None,
                 longitude = row["csc_longitude"] if row["csc_longitude"] and len(str(row["csc_longitude"])) < 100 and row["csc_longitude"] != "nan" and row["csc_longitude"] != '' else None,            
-                is_active = True if row["Status"] == "publish" else False
+                is_active = True,
+                status = "Approved",
+                approved_date = timezone.now()
             )
 
             whatsapp = str(row["csc_whatsapp"])
@@ -388,13 +451,17 @@ def import_excel_data():
 
             if row["Date"]:            
                 try:
-                    csc_center.created = datetime.strptime(row["Date"], "%d/%m/%Y %H:%M")
+                    naive_datetime = datetime.strptime(row["Date"], "%d/%m/%Y %H:%M")
+                    aware_datetime = timezone.make_aware(naive_datetime, timezone=timezone.get_current_timezone())
+                    csc_center.created = aware_datetime
                     csc_center.save()
                 except ValueError:
                     pass
 
                 try:
-                    csc_center.created = datetime.strptime(row["Date"], "%d-%m-%Y %H:%M")
+                    naive_datetime = datetime.strptime(row["Date"], "%d-%m-%Y %H:%M")
+                    aware_datetime = timezone.make_aware(naive_datetime, timezone=timezone.get_current_timezone())
+                    csc_center.created = aware_datetime
                     csc_center.save()
                 except ValueError:
                     pass
@@ -418,9 +485,8 @@ def import_excel_data():
                     user.save()
         
         print(f"\rExecuted {index + 1}/{length} rows - Completed {int((index + 1) / length * 100)}%", end="")
-
-    print()
-    return "Importing Completed!"
+    
+    success("Importing Completed!")
 
 def restore():
     import_excel_data()
@@ -573,25 +639,44 @@ def activate_and_delete_dummy_payments():
 
 def create_users():
     try:
-        csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv')        
-        length = len(csv_data)  
+        csv_data = pd.read_csv(r'/home/shidevr1/cscindia/static/w3/admin_csc_center/documents/csc-centers.csv')                                
 
-        sys.stdout.write(f"\nCreating users . . .\n")   
+        to_create = []
 
-        for index, row in row_generator(csv_data):        
-            email = str(row["csc_email"])
-            if not User.objects.filter(email=email).exists():
-                username = row["Username"] if pd.notna(row.get("Username")) else email
-                try:
-                    username = int(float(username))
-                    username = email
-                except Exception as e:
-                    username = str(username)
-                password = str(int(row["csc_phone"])) if pd.notna(row.get("csc_phone")) else "123456"                    
+        for index, row in row_generator(csv_data):
+            email = row.get("csc_email") if pd.notna(row.get("csc_email")) else row.get("CSC Email") if pd.notna(row.get("CSC Email")) else None
 
-                User.objects.create_user(username=username, email=email, password=password)
+            if email:
+                username = str(row["Username"])
+
+                if User.objects.filter(username = username).exists() or username.isdecimal():
+                    username = email                
+
+                contact_number = str(row["csc_phone"]).split(',') if row["csc_phone"] and pd.notna(row["csc_phone"]) else None
+                if contact_number is not None:
+                    contact_number = contact_number[0]
+                    contact_number = int(float(contact_number))
+
+                password = str(contact_number) if contact_number else "12345678"
+
+                if not User.objects.filter(Q(email = email) | Q(username = email) | Q(username = username)).exists():
+                    to_create.append({
+                        "username": username,
+                        "email": email,
+                        "password": password
+                        })
             
-            print(f"\rProcessed {index + 1}/{length} rows - {int((index + 1) / length * 100)}% completed", end="")
+        sys.stdout.write(f"\nQued the creating user details")
+                
+        for _ in to_create:
+            username = _["username"]
+            email = _["email"]
+            password = _["password"]
+
+            if not User.objects.filter(Q(email = email) | Q(username = email) | Q(username = username)).exists():
+
+                User.objects.create_user(username = username, email = email, password = password)
+                sys.stdout.write(f"\nCreated user account for {email}.")  
 
         print("\nUser creation process completed successfully.")
 
@@ -616,4 +701,143 @@ def verify_emails():
         error(f"Error in verifying: \n{e}")
 
 
+def activate_csc_centers():
+    try:
+        csv_data = pd.read_csv(r'/home/shidevr1/cscindia/static/w3/admin_csc_center/documents/csc-centers.csv')
 
+        sys.stdout.write(f"\nActivating . . .\n")    
+
+        csv_center_ids = [f"CSC{row['ID']}" for _, row in csv_data.iterrows()]
+
+        CscCenter.objects.filter(pk__in = csv_center_ids).update(is_active = True)
+
+        success(f"CSC center activation: Complete!")
+
+        success(f"All Done!")
+    except Exception as e:
+        error(f"Error in activating csc centers: \n{e}")
+
+def update_csc_centers():
+    centers = CscCenter.objects.filter(email = "None")
+
+    csv_data = pd.read_csv(r'/home/shidevr1/cscindia/static/w3/admin_csc_center/documents/csc-centers.csv')
+
+    for index, row in row_generator(csv_data):
+        center = centers.filter(pk = f"CSC{row['ID']}").first()
+        email = row.get("csc_email") if pd.notna(row.get("csc_email")) else row.get("CSC Email") if pd.notna(row.get("CSC Email")) else None
+
+        if center and email:
+            center.email = email
+            center.save()
+
+            sys.stdout.write(f"\nEmail updated for {email}")
+
+    success(f"All Done!")
+
+
+from django.db import transaction
+
+def convert_to_lowercase_email():
+    users = User.objects.filter(email__regex=r'[A-Z]')
+    csc_centers = CscCenter.objects.filter(email__regex=r'[A-Z]')
+    
+    if not users.exists():
+        logger.info("No users with uppercase letters in email found.")
+    if not csc_centers.exists():
+        logger.info("No CSC centers with uppercase letters in email found.")
+
+    if not users.exists() and not csc_centers.exists():
+        return
+
+    try:
+        with transaction.atomic():
+            if users.exists():
+                for user in users:
+                    user.email = user.email.lower()
+                User.objects.bulk_update(users, ["email"])
+                logger.info(f"Successfully updated {len(users)} user emails to lowercase.")
+            
+            if csc_centers.exists():
+                for csc_center in csc_centers:
+                    csc_center.email = csc_center.email.lower()
+                CscCenter.objects.bulk_update(csc_centers, ["email"])
+                logger.info(f"Successfully updated {len(csc_centers)} CSC center emails to lowercase.")
+    
+    except Exception as e:
+        logger.error(f"Error occurred while updating emails: {str(e)}")
+        raise
+
+
+def update_center_slug():
+    sys.stdout.write("\nUpdating slugs of CSC centers . . .\n")
+
+    csc_centers = CscCenter.objects.filter(name__isnull = False)
+    existing_slugs = set(CscCenter.objects.values_list("slug", flat=True))
+
+    new_slugs = []
+
+    updating_centers = []
+
+    for center in csc_centers:
+        new_slug_parts = [center.name]
+
+        if center.type:
+            new_slug_parts.append(center.type.type)
+
+        if center.block:
+            new_slug_parts.append(center.block.block)
+
+        if center.district:
+            new_slug_parts.append(center.district.district)
+
+        if center.state:
+            new_slug_parts.append(center.state.state)
+
+        new_slug = "-".join(new_slug_parts)
+
+        base_slug = slugify(new_slug)
+        slug = base_slug
+
+        count = 1
+
+        while slug in existing_slugs or slug in new_slugs:
+            slug = f"{base_slug}-{count}"
+            count += 1
+
+        center.slug = slug
+        
+        new_slugs.append(slug)
+
+        updating_centers.append(center)
+
+    CscCenter.objects.bulk_update(updating_centers, ["slug"])
+
+    success("CSC Center slug updation: Completed!\n")
+    
+
+def set_slug():
+    # csv_data = pd.read_csv(r'/home/shidevr1/cscindia/static/w3/admin_csc_center/documents/csc-centers.csv')
+    csv_data = pd.read_csv(r'D:\Projects\CSC\csc\static\w3\admin_csc_center\documents\csc-centers.csv') 
+
+    sys.stdout.write("\nFunction Called . . .\n")
+
+    centers_to_update = []
+    with transaction.atomic():
+        for _, row in csv_data.iterrows():
+            id = f"CSC{row['ID']}"    
+            slug = row["Slug"] if pd.notna(row["Slug"]) and row["Slug"].strip() != "" else None
+
+            try:
+                center = CscCenter.objects.get(id=id)
+                if center.slug != slug:
+                    center.slug = slug
+                    centers_to_update.append(center)
+
+                    sys.stdout.write(f"Center '{center.name}' qued for updation")
+            except CscCenter.DoesNotExist:                
+                error(f"Center with ID {id} does not exist.")
+
+    if centers_to_update:
+        CscCenter.objects.bulk_update(centers_to_update, ["slug"])
+
+    success(f"\nCompleted!\n")

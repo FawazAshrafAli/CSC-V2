@@ -1,4 +1,4 @@
-{% extends "admin_base/base.html" %}
+ {% extends "admin_base/base.html" %}
 {% load crispy_forms_tags %}
 {% load static %}
 
@@ -60,11 +60,32 @@
                                 <h5>Upload Poster</h5>
                                 <input type="file" name="poster" required>
                             </div>
-                        </div>
+                        </div>                        
                         <div class="row with-forms">
                             <div class="col-md-6">
+                                <h5>Service <i class="tip" data-tip-content="Service"></i></h5>
+                                <select class="chosen-select" name="service" data-placeholder="Select Service">
+                                    <option label="Select Service"></option>
+                                    {% for service in services %}
+                                    <option value="{{service.slug}}">{{service.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        
+                            <div class="col-md-6">
+                                <h5>Product <i class="tip" data-tip-content="Product"></i></h5>
+                                <select class="chosen-select" name="product" data-placeholder="Select Product">
+                                    <option label="Select Product"></option>
+                                    {% for product in products %}
+                                    <option value="{{product.slug}}">{{product.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row with-forms">
+                            <div class="col-md-12">
                                 <h5>State <i class="tip" data-tip-content="State"></i></h5>
-                                <select class="chosen-select" name="state" data-placeholder="Select State" required>
+                                <select class="chosen-select" name="state" id="state-dropdown" data-placeholder="Select State" multiple>
                                     <option label="Select State"></option>
                                     <option value="all">All States</option>
                                     {% for state in states %}
@@ -72,16 +93,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <h5>Service <i class="tip" data-tip-content="Service"></i></h5>
-                                <select class="chosen-select" name="service" data-placeholder="Select Service" required>
-                                    <option label="Select Service"></option>
-                                    {% for service in services %}
-                                    <option value="{{service.slug}}">{{service.name}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>                        
+                        </div>
                         
                     </div>
                     <!-- Section / End -->                    
@@ -135,5 +147,17 @@
 
 </div>
 <!-- Style Switcher / End -->
+
+<script>
+    $(".chosen-select").on("chosen:showing_dropdown", function () {
+        const $dropdown = $(this).next(".chosen-container").find(".chosen-results");
+        $dropdown.off("mousewheel DOMMouseScroll").on("mousewheel DOMMouseScroll", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            const delta = e.originalEvent.wheelDelta || -e.originalEvent.detail;
+            this.scrollTop += (delta < 0 ? 1 : -1) * 30;
+        });
+    });
+</script>
 
 {% endblock scripts %}

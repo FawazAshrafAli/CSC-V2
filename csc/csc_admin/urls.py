@@ -33,7 +33,7 @@ from .views import (
     DeleteCscCenterView,
     RemoveSocialMediaLinkView, CscOwnersListView,
     
-    ListCscCenterRequestView, CscCenterRequestDetailView,
+    ListCscCenterRequestView, CscCenterRequestDetailView, DeleteCscCenterRequestView,
 
     RejectCscCenterRequestView, ListRejectedCscCenterRequestView, 
     RejectedCscCenterRequestDetailView, CancelCscCenterRejectionView,
@@ -59,6 +59,8 @@ from .views import (
     PaymentHistoryListView, PaymentHistoryDetailView,
 
     AddPriceView, GetPopUpDistrictView,
+
+    AddHomePageBannersView, RemoveHomePageBannerView
     )
 
 app_name = "csc_admin"
@@ -124,6 +126,7 @@ urlpatterns = [
 
     path('csc_center_requests/', ListCscCenterRequestView.as_view(), name = "csc_center_requests"),
     path('csc_center_request/<str:slug>', CscCenterRequestDetailView.as_view(), name = "csc_center_request"),
+    path('delete_csc_center_request/<str:slug>', DeleteCscCenterRequestView.as_view(), name = "delete_csc_center_request"),
 
     path('reject_csc_center_request/<str:slug>', RejectCscCenterRequestView.as_view(), name = "reject_csc_center_request"),
     path('rejected_csc_centers/', ListRejectedCscCenterRequestView.as_view(), name = "rejected_csc_centers"),
@@ -141,7 +144,7 @@ urlpatterns = [
     path('cancel_csc_center_approval/<str:slug>', CancelCscCenterApprovalView.as_view(), name = "cancel_csc_center_approval"),
 
     path('csc_centers/', ListCscCenterView.as_view(), name = "csc_centers"),
-    path('csc_centers/<int:state>/<int:district>/<int:block>/', ListCscCenterView.as_view(), name = "csc_centers_with_params"),
+    path('csc_centers/<int:state>/<int:district>/<int:block>/<str:payment>/', ListCscCenterView.as_view(), name = "csc_centers_with_params"),
 
     path('add_csc/', AddCscCenterView.as_view(), name = "add_csc"),
     path('csc_center/<str:slug>', DetailCscCenterView.as_view(), name = "csc_center"),
@@ -192,4 +195,7 @@ urlpatterns = [
     path('payment_history/<str:slug>', PaymentHistoryDetailView.as_view(), name="payment_history"),
 
     path("add_price/", AddPriceView.as_view(), name="add_price"),
+
+    path('add_home_page_banner/', AddHomePageBannersView.as_view(), name="add_home_page_banner"),
+    path('remove_home_page_banner/', RemoveHomePageBannerView.as_view(), name="remove_home_page_banner"),
     ]

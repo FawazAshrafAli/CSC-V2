@@ -82,13 +82,18 @@
                         <tr>
                             <th>State</th>
                             <th>&nbsp;:&nbsp;</th>
-                            <td>{% if poster.state %}{{poster.state.state}}{% else %}All States{% endif %}</td>
+                            <td>{{poster.get_states}}</td>
                         </tr>
                         <tr>
                             <th>Service</th>
                             <th>&nbsp;:&nbsp;</th>
                             <td>{{poster.service}}</td>
-                        </tr>                                                
+                        </tr>
+                        <tr>
+                            <th>Product</th>
+                            <th>&nbsp;:&nbsp;</th>
+                            <td>{{poster.product}}</td>
+                        </tr>
                     </table>
                 </div>
             </div>

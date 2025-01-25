@@ -22,6 +22,33 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+<style>
+    #add-banner-btn {
+        color: #fff; 
+        background: linear-gradient(to bottom, green, darkgreen, green); 
+        border: none; 
+        box-shadow: 0 0 5px #777;
+    }
+    #add-banner-btn:hover {
+        background: linear-gradient(to bottom, lime, darkgreen, green);
+    }
+
+    #current-home-banner button {
+        color: black;
+        background-color: #fff;
+        font-size: 13px;
+        padding: 0px 10px;
+        border: none;
+        box-shadow: 0px 0px 3px #777;
+        border-radius: 5%;
+    }
+
+    #current-home-banner button:hover {
+        color: #fff;
+        background-color: darkred;
+    }
+</style>
+
 {% block styles %}{% endblock styles %}
 </head>
 
@@ -185,6 +212,8 @@
 						<li><a href="{% url 'csc_admin:centers_enquiries' %}">List CSC Centers Enquiries</a></li>						
 					</ul>	
 				</li>
+
+                <li><a href="#" id="add-banner-image">Add Banner Image</a></li>
 			</ul>
             
             <ul data-submenu-title="Components">
@@ -254,6 +283,9 @@
 <script type="text/javascript" src="{% static 'scripts/jquery-ui.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/tooltips.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/custom.js' %}"></script>
+
+<!-- New Chosen Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
 
 
 <!-- w3 -->
@@ -931,6 +963,40 @@
                 </div>`
             );
         });
+
+        $('#add-banner-image').click((e) => {
+            e.preventDefault();
+
+            $('#pop-up-box-heading').html(`Add Home Page Banners`);
+            $('#pop-up-form').html(          
+                `<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">                
+                <div class="form-group">
+                    <label for="banner-input">Banners</label>
+                    <input type="file" class="form-control" id="banner-input" name="banner" multiple required style="margin-bottom: 0;">
+                <div>
+                <div>
+                    <small><span id="current-home-banner">current home banners: {% if home_banners %} {{home_banners.get_banners|safe}} <button type="button">Clear Banners</button> {% else %} default {% endif %}</span></small>
+                </div>
+                <br>
+                <div id="pop-up-add-btn-div">
+                    <button id="add-banner-btn" type="submit">Add Banner</button>
+                    <button class="banner-close" id="pop-up-cancel-btn" type="button">Cancel</button>
+                </div>`
+            ).prop({"method": "post", "action": "/admin/add_home_page_banner/", "enctype": "multipart/form-data"});
+            $('#pop-up-box').show();
+        });
+
+        $(document).on('click', '#current-home-banner button', function () {
+            const confirm_banner_removal = window.confirm("Removing home page banner. . .\nAre you sure?")
+
+            if (confirm_banner_removal) {
+                window.location=`{% url 'csc_admin:remove_home_page_banner' %}`
+            }
+        });
+
+        $(document).on('click', '.banner-close', function () {
+            $('#pop-up-box').hide();
+        })
 
         // Delete item Form submission
         $(document).on('click', '#pop-up-delete-btn', () => {

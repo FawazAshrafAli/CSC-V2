@@ -78,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'csc.urls'
@@ -242,10 +243,14 @@ CELERY_TASK_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CELERY_BEAT_SCHEDULE = {
-    'check_csc_center_validity': {
-        'task': 'csc_center.tasks.check_validty',
-        'schedule': crontab(hour=9, minute=30), 
+    'check_validity': {
+        'task': 'csc_center.tasks.check_validity',
+        'schedule': crontab(hour=11, minute=11), 
     },
+    'check_expiring_centers': {
+        'task': 'csc_center.tasks.check_expiring_centers',
+        'schedule': crontab(hour=11, minute=10), 
+    },    
 }
 
 
@@ -361,13 +366,12 @@ LOGGING = {
 }
 
 
-SITE_PROTOCOL = 'https'
-SITE_DOMAIN = os.getenv('SITE_DOMAIN', "site_domain")
-
-
 # Razor Pay
-RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'razor_pay_id')
-RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'razor_pay_secret_key')
+# RAZORPAY_KEY_ID = "rzp_live_GYkZM75t2V19qt"
+# RAZORPAY_KEY_SECRET = "PVFCoGUOf0zLp60wX0crK0CZ"
+
+RAZORPAY_KEY_ID = "rzp_test_m4LydPsT6mF9n1"
+RAZORPAY_KEY_SECRET = "p90CiA9zQAcNEI74kjLvpph5"
 
 
 MAX_UPLOAD_SIZE = 5242880  # 5 MB limit (in bytes)
@@ -376,3 +380,17 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1209600 
 SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE =True
+
+SITE_PROTOCOL = 'https'
+SITE_DOMAIN = 'cscindia.info'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 86400,
+    }
+}

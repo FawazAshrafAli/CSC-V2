@@ -6,7 +6,7 @@ from .views import (
     
     ProductEnquiryListView, DeleteProductEnquiryView, 
     
-    CscCenterListView, AddCscCenterView, DetailCscCenterView, 
+    CscCenterListView, DetailCscCenterView, 
     UpdateCscCenterView, GetCurrentCscCenterView,
     GetCenterDataView,
 
@@ -37,7 +37,6 @@ urlpatterns = [
     path('get_footer/', get_footer, name="get_footer"),
 
     path('csc_centers/', CscCenterListView.as_view(), name="csc_centers"),
-    path('add_csc/', AddCscCenterView.as_view(), name="add_csc"),
     path('csc_center/<str:slug>', DetailCscCenterView.as_view(), name="csc_center"),
     path('update_csc/<str:slug>', UpdateCscCenterView.as_view(), name="update_csc"),
     path('get_current_csc/', GetCurrentCscCenterView.as_view(), name="get_current_csc"),

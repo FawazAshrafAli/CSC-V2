@@ -1,16 +1,17 @@
-from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse_lazy, reverse
-from django.views.decorators.cache import never_cache
-from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView, CreateView, DetailView, UpdateView, ListView
-from django.http import JsonResponse, Http404
-from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect, get_object_or_404
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth import authenticate, logout
+from django.http import JsonResponse, Http404
+from django.db.models import Count, Q
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.core.cache import cache
 from django.utils import timezone
 from datetime import datetime
-from django.contrib.auth import authenticate, logout
-from django.db.models import Count, Q
 import logging
 import re
 
@@ -19,6 +20,7 @@ from .forms import (
     UpdateBlogForm
     )
 
+from home.models import HomePageBanner, Banner as HomeBanner
 from contact_us.models import Enquiry
 from faq.models import Faq
 from authentication.models import User
@@ -53,6 +55,8 @@ class BaseAdminView(LoginRequiredMixin, View):
         context = super().get_context_data(**kwargs)
         try:
             context['services'] = Service.objects.all()
+            home_banners = HomePageBanner.objects.all().first()
+            context["home_banners"] = home_banners if home_banners else None
         except Exception as e:
             logger.exception("Error in fetching context data of base admin view: %s", e)
 
@@ -909,17 +913,93 @@ class BaseAdminCscCenterView(BaseAdminView):
 
 
 class ListCscCenterRequestView(BaseAdminCscCenterView, ListView):
-    queryset = CscCenter.objects.filter(is_active = False, status = "Not Viewed").order_by("-created")
+    queryset = CscCenter.objects.filter(status = "Not Viewed").order_by("-created")
     template_name = 'admin_csc_center/request_list.html'
     context_object_name = "csc_centers"
-    paginate_by = 10
+    paginate_by = cache.get("requested_csc_center_pagination", 10)
     ordering = ['-created']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:            
+            context["available_items_per_page"] = (10, 50, 100)
+
+            context["current_items_per_page"] = cache.get("requested_csc_center_pagination", 10)
+
+            item_per_page = self.request.GET.get("item_per_page", cache.get("requested_csc_center_pagination", 10))
+            context['item_per_page'] = item_per_page
+            
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+        except Exception as e:
+            logger.exception(f"Error in getting context data of ListCscCenterRequestView of csc_admin app: {e}")
+
+        return context
+    
+    def get_queryset(self):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                queryset = (self.queryset[int(starting_item)-1: int(ending_item)])
+                return queryset
+        except Exception as e:
+            logger.exception(f"Error in getting queryset of ListCscCenterRequestView of csc_admin app: {e}")
+
+        return self.queryset
+    
+    def get_paginate_by(self, queryset):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+                
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("requested_csc_center_pagination", items_per_page, 24 * 3600)
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of ListCscCenterRequestView of superadmin: {e}")
+        
+        return cache.get("requested_csc_center_pagination", 10)
 
 
 class CscCenterRequestDetailView(BaseAdminCscCenterView, DetailView):
     context_object_name = 'csc_center'
     template_name = 'admin_csc_center/request_detail.html'
     slug_url_kwarg = 'slug'
+
+
+class DeleteCscCenterRequestView(BaseAdminCscCenterView, View):
+    success_url = redirect_url = reverse_lazy("csc_admin:csc_center_requests")
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object = get_object_or_404(CscCenter, slug = kwargs['slug'])
+        
+            self.object.delete()      
+            messages.success(request, "Deleted CSC Center")
+            return redirect(self.success_url)
+    
+        except Http404:
+            messages.error(request, 'Invalid CSC Center')
+            return redirect(self.redirect_url)
+    
+        except Exception as e:            
+            logger.exception("Error in deleting csc center request: %s", e)
+            messages.error(request, "Error in deleting csc center request")
+            return redirect(self.redirect_url)
 
 
 class RejectCscCenterRequestView(BaseAdminCscCenterView, UpdateView):
@@ -953,12 +1033,66 @@ class RejectCscCenterRequestView(BaseAdminCscCenterView, UpdateView):
 
 class ListRejectedCscCenterRequestView(BaseAdminCscCenterView, ListView):
     model = CscCenterAction
-    queryset = model.objects.exclude(rejection_reason = "").order_by("-created")
+    queryset = model.objects.filter(csc_center__status = "Rejected").order_by("-created")
     template_name = 'admin_csc_center/rejected_list.html'
     context_object_name = "actions"
     ordering = ['-created']
-    paginate_by = 10   
+    paginate_by = cache.get("rejected_csc_center_pagination", 10)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:            
+            context["available_items_per_page"] = (10, 50, 100)
+
+            context["current_items_per_page"] = cache.get("rejected_csc_center_pagination", 10)
+
+            item_per_page = self.request.GET.get("item_per_page", cache.get("rejected_csc_center_pagination", 10))
+            context['item_per_page'] = item_per_page
+            
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+        except Exception as e:
+            logger.exception(f"Error in getting context data of ListRejectedCscCenterRequestView of csc_admin app: {e}")
+
+        return context
+    
+    def get_queryset(self):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                queryset = (self.queryset[int(starting_item)-1: int(ending_item)])
+                return queryset
+        except Exception as e:
+            logger.exception(f"Error in getting queryset of ListRejectedCscCenterRequestView of csc_admin app: {e}")
+
+        return self.queryset
+    
+    def get_paginate_by(self, queryset):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+                
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("rejected_csc_center_pagination", items_per_page, 24 * 3600)
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of ListRejectedCscCenterRequestView of superadmin: {e}")
+        
+        return cache.get("rejected_csc_center_pagination", 10)
 
 class RejectedCscCenterRequestDetailView(BaseAdminCscCenterView, DetailView):
     model = CscCenterAction
@@ -1033,11 +1167,66 @@ class ReturnCscCenterRequestView(BaseAdminCscCenterView, UpdateView):
 
 class ListReturnedCscCenterRequestView(BaseAdminCscCenterView, ListView):
     model = CscCenterAction
-    queryset = model.objects.exclude(feedback = "").order_by('-created')
+    queryset = model.objects.filter(csc_center__status = "Returned").order_by('-created')
     template_name = 'admin_csc_center/returned_list.html'
     context_object_name = "csc_centers"
     ordering = ['-created']
-    paginate_by = 10
+    paginate_by = cache.get("returned_csc_center_pagination", 10)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:            
+            context["available_items_per_page"] = (10, 50, 100)
+
+            context["current_items_per_page"] = cache.get("returned_csc_center_pagination", 10)
+
+            item_per_page = self.request.GET.get("item_per_page", cache.get("returned_csc_center_pagination", 10))
+            context['item_per_page'] = item_per_page
+            
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+        except Exception as e:
+            logger.exception(f"Error in getting context data of ListReturnedCscCenterRequestView of csc_admin app: {e}")
+
+        return context
+    
+    def get_queryset(self):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                queryset = (self.queryset[int(starting_item)-1: int(ending_item)])
+                return queryset
+        except Exception as e:
+            logger.exception(f"Error in getting queryset of ListReturnedCscCenterRequestView of csc_admin app: {e}")
+
+        return self.queryset
+    
+    def get_paginate_by(self, queryset):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+                
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("returned_csc_center_pagination", items_per_page, 24 * 3600)
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of ListReturnedCscCenterRequestView of superadmin: {e}")
+        
+        return cache.get("returned_csc_center_pagination", 10)
 
 
 class ReturnedCscCenterRequestDetailView(BaseAdminCscCenterView, DetailView):
@@ -1087,18 +1276,20 @@ class ApproveCscCenterRequestView(BaseAdminCscCenterView, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
             self.object = self.get_object()
-
-            payment_link = f"https://{request.get_host()}/payment/{self.object.slug}"
             
-            if self.object.email and payment_link:
+            registration_link = f"https://{request.get_host()}/authentication/user_registration/{self.object.email}"
+            
+            if self.object.email and registration_link:
                 center_data = {
                     "email": self.object.email,
                     "name": self.object.name,
                     "owner": self.object.owner if self.object.owner else self.object.email
                 }
-                send_confirm_creation.delay(center = center_data, payment_link = payment_link)
+                
+                send_confirm_creation.delay(center = center_data, registration_link = registration_link)
 
                 self.object.status = "Approved"
+                self.object.approved_date = timezone.now()
                 self.object.save()
 
             messages.success(request, "Request Approved")
@@ -1114,6 +1305,64 @@ class ListApprovedCscCenterRequestView(BaseAdminCscCenterView, ListView):
     queryset = CscCenter.objects.filter(status = "Approved").order_by('-created')
     template_name = 'admin_csc_center/approved_list.html'
     context_object_name = "csc_centers"
+    paginate_by = cache.get("approved_csc_center_pagination", 10)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:            
+            context["available_items_per_page"] = (10, 50, 100)
+
+            context["current_items_per_page"] = cache.get("approved_csc_center_pagination", 10)
+
+            item_per_page = self.request.GET.get("item_per_page", cache.get("approved_csc_center_pagination", 10))
+            context['item_per_page'] = item_per_page
+            
+
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+        except Exception as e:
+            logger.exception(f"Error in getting context data of ListApprovedCscCenterRequestView of csc_admin app: {e}")
+
+        return context
+
+    def get_queryset(self):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                queryset = (self.queryset[int(starting_item)-1: int(ending_item)])
+                return queryset
+        except Exception as e:
+            logger.exception(f"Error in getting queryset of ListApprovedCscCenterRequestView of csc_admin app: {e}")
+
+        return self.queryset
+        
+    
+    def get_paginate_by(self, queryset):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+                
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("approved_csc_center_pagination", items_per_page, 24 * 3600)
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of ListApprovedCscCenterRequestView of superadmin: {e}")
+        
+        return cache.get("approved_csc_center_pagination", 10)
 
 
 class ApprovedCscCenterRequestDetailView(BaseAdminCscCenterView, DetailView):    
@@ -1137,10 +1386,17 @@ class CancelCscCenterApprovalView(BaseAdminCscCenterView, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
             self.object = self.get_object()
+            user_email = self.object.email
             self.object.status = "Not Viewed"
-            self.object.save()        
+            self.object.is_active = False
+            self.object.save()
+
+            user_obj = User.objects.filter(email = user_email)
+            user_obj.delete()
+
             messages.success(request, "Cancelled csc center request approval")
             return redirect(self.get_success_url())
+
         except Exception as e:
             msg = "Cancelling csc center request approval Failed"
             logger.exception(f"{msg}: %s", e)
@@ -1149,36 +1405,21 @@ class CancelCscCenterApprovalView(BaseAdminCscCenterView, UpdateView):
 
 
 class ListCscCenterView(BaseAdminCscCenterView, ListView):
+    model = CscCenter
     template_name = "admin_csc_center/list.html"
     ordering = ['name']
     context_object_name = 'centers'
-    queryset = CscCenter.objects.all().order_by('name')
-    paginate_by = 10   
-
-    def get_queryset(self):
-        try:
-            state = self.kwargs.get('state')
-            district = self.kwargs.get('district')
-            block = self.kwargs.get('block')
-            
-            queryset = self.queryset
-
-            if state:
-                queryset = queryset.filter(state__pk=state)
-            if district:
-                queryset = queryset.filter(district__pk=district)
-            if block:
-                queryset = queryset.filter(block__pk=block)
-                
-            return queryset
-        except Exception as e:
-            logger.exception("Error in fetching csc center queryset in list csc center view.: %s", e)
-            return self.queryset
+    queryset = model.objects.filter(status="Approved").order_by('-approved_date')
+    paginate_by = cache.get("csc_center_pagination", 10)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            
+            context["available_items_per_page"] = (10, 50, 100)
+            current_items_per_page = self.request.GET.get("items_per_page")
+
+            context["current_items_per_page"] = int(current_items_per_page) if current_items_per_page else cache.get("csc_center_pagination", 10)
+
             state = self.kwargs.get('state')
             district = self.kwargs.get('district')
             block = self.kwargs.get('block')
@@ -1191,10 +1432,91 @@ class ListCscCenterView(BaseAdminCscCenterView, ListView):
             context['blocks'] = Block.objects.filter(state__id = state, district_id = district).order_by("block") if state and district else None
             context['block_id'] = block if block else None
 
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+
+            payment = self.request.GET.get("payment") or self.kwargs.get("payment")
+
+            context["paid_csc_centers"] = True if payment == "paid" else None
+            context["unpaid_csc_centers"] = True if payment == "unpaid" else None
+
+            query = self.request.GET.get("query")
+            if query:
+                context["query"] = query
+
         except Exception as e:
             logger.exception("Error in fetching context data in list csc center view.: %s", e)
 
         return context
+    
+    def get_paginate_by(self, queryset):
+        try:
+            query = self.request.GET.get("query")
+
+            if query:
+                queryset = self.get_queryset()
+                return queryset.count()
+
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("csc_center_pagination", items_per_page, 24 * 3600)
+                    
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of ListCscCenterView of csc_admin app: {e}")
+        
+        return cache.get("csc_center_pagination", 10)
+
+    def get_queryset(self):
+        try:
+            payment = self.request.GET.get("payment") or self.kwargs.get("payment")
+
+            state = self.kwargs.get('state')
+            district = self.kwargs.get('district')
+            block = self.kwargs.get('block')
+            
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            queryset = self.queryset
+
+            if payment and payment != "all":
+                queryset = queryset.filter(is_active = True if payment.strip() == "paid" else False).order_by("-last_paid_date")
+
+            if starting_item and ending_item:
+                queryset = (queryset[int(starting_item)-1: int(ending_item)])
+
+            if state:
+                queryset = queryset.filter(state__pk=state)
+            if district:
+                queryset = queryset.filter(district__pk=district)
+            if block:
+                queryset = queryset.filter(block__pk=block)
+
+            query = self.request.GET.get("query")
+
+            if query:
+                queryset = self.model.objects.filter(Q(name__icontains = query) | Q(email__icontains = query) | Q(owner__icontains = query) | Q(contact_number__icontains = query) | Q(block__block__icontains = query) | Q(district__district__icontains = query) | Q(state__state__icontains = query))
+                
+            return queryset
+
+        except Exception as e:
+            logger.exception("Error in fetching csc center queryset in list csc center view.: %s", e)
+            return self.queryset    
 
 
 class AddCscCenterView(BaseAdminCscCenterView, CreateView):
@@ -1299,6 +1621,10 @@ class AddCscCenterView(BaseAdminCscCenterView, CreateView):
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
 
+            if CscCenter.objects.filter(email = email).exists():
+                messages.error(request, "CSC center with the same email already exists. Please try again with another email.")
+                return redirect(self.redirect_url)
+
             try:
                 type = get_object_or_404(CscNameType, slug = type.strip())
             except Http404:
@@ -1344,6 +1670,7 @@ class AddCscCenterView(BaseAdminCscCenterView, CreateView):
             self.object.keywords.set(keywords)
             self.object.services.set(services)
             self.object.products.set(products)
+            self.object.next_payment_date = self.object.created.date()
             self.object.save()
 
             current_keywords = self.object.keywords.all()
@@ -1391,12 +1718,12 @@ class AddCscCenterView(BaseAdminCscCenterView, CreateView):
                         self.object.social_media_links.set(social_media_list)
                         self.object.save()
 
-            messages.success(request, "Added CSC center")
+            messages.success(request, "Added CSC center. Once the csc center is approved we will notify you via email.")
 
             if not User.objects.filter(email = email).exists():
                 logout(request)        
-                return redirect(reverse('authentication:user_registration', kwargs={'email': self.object.email}))
-            elif request.user.email and request.user.email == email:
+                return redirect(self.redirect_url)
+            elif request.user.is_authenticated and request.user.email == email:
                 return redirect(reverse_lazy("users:home"))
             else:
                 logout(request)
@@ -1687,8 +2014,12 @@ class DeleteCscCenterView(BaseAdminCscCenterView, View):
     def get(self, request, *args, **kwargs):
         try:
             self.object = get_object_or_404(CscCenter, slug = kwargs['slug'])
+            email = self.object.email
         
             self.object.delete()
+            if not CscCenter.objects.filter(email = email).exists():
+                user = User.objects.filter(email = email)
+                user.delete()
             messages.success(request, "Deleted CSC Center")
             return redirect(self.success_url)
     
@@ -1737,7 +2068,7 @@ class CscOwnersListView(BaseAdminCscCenterView, ListView):
     queryset = CscCenter.objects.all().order_by("owner")
     template_name = "admin_csc_center/owners_list.html"
     context_object_name = 'csc_centers'
-    paginate_by = 10    
+    paginate_by = cache.get("owners_pagination", 10)
 
     def get_queryset(self):
         try:
@@ -1747,22 +2078,31 @@ class CscOwnersListView(BaseAdminCscCenterView, ListView):
             state = self.kwargs.get('state')
             district = self.kwargs.get('district')
             block = self.kwargs.get('block')
+
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
             
             queryset = self.queryset
+            
 
             if state:
                 queryset = queryset.filter(state__pk=state)
             if district:
                 queryset = queryset.filter(district__pk=district)
             if block:
-                queryset = queryset.filter(block__pk=block)
+                queryset = queryset.filter(block__pk=block)            
 
             for center in queryset:
                 if center.email not in unique_emails:
                     unique_emails.add(center.email)
                     unique_center_pks.append(center.pk)
 
-            return queryset.filter(pk__in=unique_center_pks)
+            queryset = queryset.filter(pk__in=unique_center_pks)
+
+            if starting_item and ending_item:
+                queryset = (self.queryset[int(starting_item)-1: int(ending_item)])
+
+            return queryset
         
         except Exception as e:
             logger.exception("Error in getting csc center queryset: %s", e)
@@ -1771,7 +2111,7 @@ class CscOwnersListView(BaseAdminCscCenterView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        try:
+        try:            
             state = self.kwargs.get('state')
             district = self.kwargs.get('district')
             block = self.kwargs.get('block')
@@ -1784,10 +2124,44 @@ class CscOwnersListView(BaseAdminCscCenterView, ListView):
             context['blocks'] = Block.objects.filter(state__id = state, district_id = district).order_by("block") if state and district else None
             context['block_id'] = block if block else None
 
+            context["available_items_per_page"] = (10, 50, 100)
+            context["current_items_per_page"] = cache.get("owners_pagination", 10)
+
+            item_per_page = self.request.GET.get("item_per_page", cache.get("owners_pagination", 10))
+            context['item_per_page'] = item_per_page
+
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                context["current_starting_item"] = int(starting_item)
+                context["current_ending_item"] = int(ending_item)
+
         except Exception as e:
             logger.exception("Error in getting context data of csc owners list view: %s", e)
 
         return context
+
+    def get_paginate_by(self, queryset):
+        try:
+            starting_item = self.request.GET.get("starting_item")
+            ending_item = self.request.GET.get("ending_item")
+
+            if starting_item and ending_item:
+                differnce = int(ending_item) - int(starting_item) + 1
+                if differnce > 0:
+                    return differnce
+                
+            items_per_page = self.request.GET.get("items_per_page")
+            if items_per_page and items_per_page.isdigit():
+                items_per_page = int(items_per_page)
+                if items_per_page > 0:
+                    cache.set("owners_pagination", items_per_page, 24 * 3600)
+                    return items_per_page
+        except Exception as e:
+            logger.exception(f"Error in method get_paginate_by of CscOwnersListView of superadmin: {e}")
+        
+        return cache.get("owners_pagination", 10)
 
 
 # Nuclear
@@ -1795,7 +2169,7 @@ class GetDistrictView(View):
     def get(self, request, *args, **kwargs):
         try:
             state_name = request.GET.get('state_name')
-            districts = list(District.objects.filter(state__state=state_name).values())
+            districts = list(District.objects.filter(state__state=state_name).exclude(district="nan").values())
             return JsonResponse({"districts": districts}, safe=False)
         except Exception as e:
             logger.exception("Error in getting districts: %s", e)
@@ -1818,7 +2192,7 @@ class GetBlockView(View):
         try:
             district_name = request.GET.get('district_name')
             state_name = request.GET.get('state_name')
-            blocks = list(Block.objects.filter(district__district = district_name, state__state = state_name).values())
+            blocks = list(Block.objects.filter(district__district = district_name, state__state = state_name).exclude(block="nan").values())
             return JsonResponse({"blocks": blocks}, safe=False)
         except Exception as e:
             logger.exception("Error in getting blocks: %s", e)
@@ -2310,7 +2684,7 @@ class PosterDetailView(BasePosterView, DetailView):
     slug_url_kwarg = 'slug'
 
 class CreatePosterView(BasePosterView, CreateView):
-    fields = ["title", "poster", "state", "service"]
+    fields = ["title", "poster", "states", "service", "product"]
     template_name = 'admin_poster/create.html'
     success_url = reverse_lazy('csc_admin:posters')
     redirect_url = reverse_lazy('csc_admin:create_poster')
@@ -2318,7 +2692,8 @@ class CreatePosterView(BasePosterView, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            context['states'] = State.objects.all()
+            context['states'] = State.objects.all().order_by("state")
+            context['products'] = Product.objects.all().order_by("name")
         except Exception as e:
             logger.exception("Error in getting admin create poster context: %s", e)
 
@@ -2328,29 +2703,38 @@ class CreatePosterView(BasePosterView, CreateView):
         try:
             title = request.POST.get('title').strip()
             poster = request.FILES.get('poster')
-            state_id = request.POST.get('state').strip()
+            state_ids = request.POST.getlist('state')
             service_slug = request.POST.get('service').strip()
+            product_slug = request.POST.get('product').strip()
 
-            if not state_id:
+            if not state_ids or len(state_ids) < 1:
                 messages.error(request, "State is required.")
                 return redirect(self.redirect_url)
-
-            if state_id != "all":
-                try:
-                    state = get_object_or_404(State, pk = state_id)
-                except Http404:
-                    messages.error(request, 'Invalid State')
-                    return redirect(self.redirect_url)
             
+            states = []
+            if "all" not in state_ids:
+                states = list(State.objects.filter(id__in = state_ids))                                
+            
+            service = None
+
             try:
                 service = get_object_or_404(Service, slug = service_slug)
             except Http404:
-                messages.error(request, 'Invalid Service')
-                return redirect(self.redirect_url)
+                pass
+            
+            product = None
+
+            try:
+                product = get_object_or_404(Product, slug = product_slug)
+            except Http404:
+                pass
 
             if title:
-                self.poster = self.model.objects.create(title = title, poster = poster, state = state if state_id != "all" else None, service = service)            
-                messages.success(request, 'Added Poster')
+                poster = self.model.objects.create(title = title, poster = poster, service = service, product = product)
+                if len(states) > 0:
+                    poster.states.set(states)
+
+                messages.success(request, 'Added Poster')                
                 return redirect(self.success_url)
             else:
                 messages.warning(request, 'Please provide the poster title.')
@@ -2383,16 +2767,33 @@ class DeletePosterView(BasePosterView, View):
         
 
 class UpdatePosterView(BasePosterView, UpdateView):
-    fields = ["title", "poster", "state", "service"]
+    fields = ["title", "poster", "states", "service", "product"]
     template_name = 'admin_poster/update.html'
     success_url = reverse_lazy('csc_admin:posters')
     redirect_url = success_url
     slug_url_kwarg = 'slug'
 
+    def get_success_url(self):
+        try:
+            return reverse_lazy('csc_admin:poster', kwargs = {"slug": self.kwargs.get("slug")})
+        except Exception as e:
+            logger.exception(f"Error in fetching success url of update poster view of superadmin: {e}")
+
+        return self.success_url
+    
+    def get_redirect_url(self):
+        try:
+            return reverse_lazy('csc_admin:update_poster', kwargs = {"slug": self.kwargs.get("slug")})
+        except Exception as e:
+            logger.exception(f"Error in fetching redirect url of update poster view of superadmin: {e}")
+
+        return self.redirect_url
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            context['states'] = State.objects.all()
+            context['states'] = State.objects.all().order_by("state")
+            context['products'] = Product.objects.all().order_by("name")
         except Exception as e:
             logger.exception("Error in fetching post update context: %s", e)
         
@@ -2403,41 +2804,48 @@ class UpdatePosterView(BasePosterView, UpdateView):
             self.object = self.get_object()
             title = request.POST.get('title').strip()
             poster = request.FILES.get('poster')
-            state_id = request.POST.get('state').strip()
+            state_ids = request.POST.getlist('state')
             service_slug = request.POST.get('service').strip()
+            product_slug = request.POST.get('product').strip()
             
             if not title:
                 messages.warning(request, 'Title is required.')            
-                return redirect(self.redirect_url)
+                return redirect(self.get_redirect_url())
 
-            if not state_id:
+            if not (state_ids or len(state_ids) < 1):
                 messages.error(request, "State is required.")
-                return redirect(self.redirect_url)
+                return redirect(self.get_redirect_url())
 
-            if state_id != "all" :
+            states = []
+            if "all" not in state_ids:
+                states = list(State.objects.filter(id__in = state_ids))
+            
+            service = None
+            if service_slug:
                 try:
-                    state = get_object_or_404(State, pk = state_id)
+                    service = get_object_or_404(Service, slug = service_slug)
                 except Http404:
-                    messages.error(request, 'Invalid State')
-                    return redirect(self.redirect_url)
+                    messages.error(request, 'Invalid Service')
+                    return redirect(self.get_redirect_url())            
             
-            try:
-                service = get_object_or_404(Service, slug = service_slug)
-            except Http404:
-                messages.error(request, 'Invalid Service')
-                return redirect(self.redirect_url)            
-            
-            if not service:
-                messages.warning(request, 'Service is required.')            
-                return redirect(self.redirect_url)
+            product = None
+            if product_slug:
+                try:
+                    product = get_object_or_404(Product, slug = product_slug)
+                except Http404:
+                    messages.error(request, 'Invalid Product')
+                    return redirect(self.get_redirect_url()) 
             
             if not poster:
                 poster = self.object.poster
 
             self.object.title = title
             self.object.poster = poster
-            self.object.state = state if state_id != "all" else None
             self.object.service = service
+            self.object.product = product
+            self.object.states.clear()
+            if len(states) > 0:
+                self.object.states.set(states)
             self.object.save()
 
             messages.success(request, 'Updated Poster')
@@ -2446,7 +2854,7 @@ class UpdatePosterView(BasePosterView, UpdateView):
         except Exception as e:
             logger.exception("Error in updating post: %s", e)
             messages.error(request, 'Error in updating post')
-            return redirect(self.redirect_url)
+            return redirect(self.get_redirect_url())
             
 
 ################# Profile ##############
@@ -2796,13 +3204,11 @@ class PaymentHistoryBaseView(BaseAdminView):
         return context
 
 class PaymentHistoryListView(PaymentHistoryBaseView, ListView):
-    queryset = Payment.objects.all().order_by('-created')
+    queryset = Payment.objects.filter(status="Completed").order_by('-created')
     template_name = "admin_csc_center/list_payment_history.html"
     ordering = ['-created']
     context_object_name = 'payments'
     paginate_by = 10
-
-
 
 
 class PaymentHistoryDetailView(PaymentHistoryBaseView, DetailView):
@@ -2880,3 +3286,51 @@ class AddPriceView(BaseAdminView, CreateView):
             logger.exception("Error in adding price: %s", e)
             return JsonResponse({"status": "Error in adding price"})
         return super().post(request, *args, **kwargs)
+
+
+# Home Page
+
+class AddHomePageBannersView(BaseAdminView, CreateView):
+    model = HomePageBanner
+    fields = ["image"]
+    success_url = redirect_url = reverse_lazy("csc_admin:home")
+
+    def post(self, request, *args, **kwargs):
+        try:
+            banners = request.FILES.getlist("banner")
+            banner_list = []
+
+            for image in banners:
+                banner, created = HomeBanner.objects.get_or_create(image = image)
+
+                banner_list.append(banner)
+
+            banners = self.model.objects.all()
+            while banners.count() > 1:
+                banners.last().delete()
+
+            banner_obj, created = self.model.objects.get_or_create(name = "Home Page Banners")          
+            banner_obj.images.set(banner_list)
+
+            messages.success(request, "Success! Added home page banner.")
+            return redirect(self.success_url)
+        except Exception as e:
+            logger.exception(f"Error in adding home page banner: {e}")
+            messages.error(request, "An unexpected error occured")
+            return redirect(self.redirect_url)
+    
+
+class RemoveHomePageBannerView(BaseAdminView, View):
+    model = HomePageBanner
+    success_url = redirect_url = reverse_lazy("csc_admin:home")
+
+    def get(self, request, *args, **kwargs):
+        try:            
+            self.model.objects.all().delete()
+            messages.success(request, "Success! Removed home page banners")
+            return redirect(self.success_url)
+
+        except Exception as e:
+            logger.exception(f"Error in removing home page banner: {e}")
+            messages.error(request, "Failed! An expected error occured")
+            return redirect(self.redirect_url)

@@ -28,7 +28,7 @@
         }
         .content {
             padding: 20px;
-            text-align: center;
+            /* text-align: center; */
         }
         .content h1 {
             color: #333333;
@@ -59,8 +59,20 @@
         <div class="content">
             <h1>Payment Completed Successfully!</h1>
             <p>Dear {{ owner }},</p>
-            <p>We are happy to inform you that your payment of <strong>₹{{ amount }}</strong> has been processed successfully. Your csc center account '{{csc_center_name}}'' is now active and ready to use.</p>
-            <p>You can now log in and start using all the features available to you.</p>
+            <p>We are happy to inform you that your payment of <strong>₹{{ amount }}</strong> has been processed successfully. Your csc center account '{{csc_center_name}}' is now active and ready to use.</p>
+
+            <!-- <p>You can now log in and start using all the features available to you.</p> -->
+
+            <p>Thank you for being part of this community. Now you can login to locator through <a href="https://cscindia.info/authentication/">https://cscindia.info/authentication/</a> (Login - List of Common Service Centres (CSC) in India).</p>
+            
+            <p>
+                Are you a member of our community since before November 1, 2024, and haven’t updated your account yet? Simply log in using your email ID and your phone number as your password to access your account.<br>
+                क्या आप 1 नवंबर 2024 से पहले हमारे समुदाय के सदस्य थे और अभी तक अपना खाता अपडेट नहीं किया है? बस अपने ईमेल आईडी और पासवर्ड के रूप में अपने फोन नंबर का उपयोग करके लॉगिन करें और अपने खाते तक पहुंच प्राप्त करें।
+            </p>
+            
+            <p>Inside the login you can update your center details, download promotional posters and manage your enquiries. Also you can share your page link and QR code to your customers. Poster section is being updated. More features will be added soon.</p>
+
+            
             <p>An invoice for your transaction has been attached with this email.</p>
         </div>
 

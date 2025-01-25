@@ -62,27 +62,39 @@
                                 <span id="current-poster">{% if poster.poster %} current poster: <a href="{{poster.poster.url}}" target="_blank" style="color:blue">{{poster.poster.name}}</a> {% endif %}</span>
                             </div>
                         </div>
+                        
                         <div class="row with-forms">
                             <div class="col-md-6">
-                                <h5>State <i class="tip" data-tip-content="State"></i></h5>
-                                <select class="chosen-select" name="state" data-placeholder="Select State" required>
-                                    <option label="Select State"></option>
-                                    <option value="all" {% if not poster.state %} selected {% endif %}>All States</option>
-                                    {% for state in states %}
-                                    <option value="{{state.pk}}" {% if poster.state.pk == state.pk %} selected {% endif %}>{{state.state}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6">
                                 <h5>Service <i class="tip" data-tip-content="Service"></i></h5>
-                                <select class="chosen-select" name="service" data-placeholder="Select Service" required>
-                                    <option label="Select Service"></option>
+                                <select class="chosen-select" name="service" data-placeholder="Select Service">
+                                    <option value="">Select Service</option>
                                     {% for service in services %}
                                     <option value="{{service.slug}}" {% if poster.service.slug == service.slug %} selected {% endif %}>{{service.name}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="col-md-6">
+                                <h5>Product <i class="tip" data-tip-content="Product"></i></h5>
+                                <select class="chosen-select" name="product" data-placeholder="Select Product">
+                                    <option value="">Select Product</option>
+                                    {% for product in products %}
+                                    <option value="{{product.slug}}" {% if poster.product.slug == product.slug %} selected {% endif %}>{{product.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>                        
+                        <div class="row with-forms">
+                            <div class="col-md-12">
+                                <h5>State <i class="tip" data-tip-content="State"></i></h5>
+                                <select class="chosen-select" name="state" data-placeholder="Select State" multiple required>
+                                    <option label="Select State"></option>
+                                    <option value="all" {% if poster.states.all|length < 1 %} selected {% endif %}>All States</option>
+                                    {% for state in states %}
+                                    <option value="{{state.pk}}" {% if state in poster.states.all %} selected {% endif %}>{{state.state}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                         
                     </div>
                     <!-- Section / End -->                    

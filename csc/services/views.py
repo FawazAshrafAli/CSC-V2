@@ -5,6 +5,7 @@ from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 import logging
+import sys
 
 from .models import Service
 from csc_admin.models import ServiceEnquiry
@@ -89,5 +90,37 @@ class CreateServiceEnquiryView(DetailServiceView, CreateView):
             logger.exception(f"Error in creating service enquiry: {e}")
             messages.error(request, "Failed to submit service enquiry")
             return redirect(self.get_redirect_url())
+
+
+def remove_duplicate_services():
+    try:
+        GREEN = "\033[92m"
+        RED = "\033[91m"
+        RESET = "\033[0m"
+
+        sys.stdout.write("\nRemoving duplicate services. . .\n")
+
+        services = Service.objects.all()
+        service_slugs = [service.slug for service in services]
+
+        for service_slug in service_slugs:
+            services_with_current_slug = Service.objects.filter(slug = service_slug)
+            current_service_count = services_with_current_slug.count()
+            if current_service_count > 1:
+
+                service_ids = [service.id for service in services_with_current_slug][1:]
+
+                deleting_services = Service.objects.filter(id__in = service_ids)
+                deleting_services.delete()
+
+                sys.stdout.write(f"{GREEN}\nRemoved duplicate service with slug: {service_slug}\n{RESET}")
+
+        sys.stdout.write(f"{GREEN}\nCompleted! Removed duplicate services.\n{RESET}")
+    
+    except Exception as e:
+        logger.exception(f"Error in removing duplicate services: {e}")
+        sys.stdout.write(f"{RED}\nAn unexpected error occured.\n{RESET}")
+
+    
 
 

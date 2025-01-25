@@ -8,13 +8,13 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 @shared_task
-def send_confirm_creation(center, payment_link):
+def send_confirm_creation(center, registration_link):
     try:
         subject = 'Welcome to Our Website'
         from_email = settings.DEFAULT_FROM_EMAIL
         to_email = [center["email"]]
         
-        html_content = render_to_string('admin_email_templates/csc_approve.html', {'name': center["name"], 'owner': center["owner"], 'payment_link': payment_link})
+        html_content = render_to_string('admin_email_templates/csc_approve.html', {'name': center["name"], 'owner': center["owner"], 'registration_link': registration_link})
         text_content = strip_tags(html_content)
         
         email = EmailMultiAlternatives(subject, text_content, from_email, to_email)

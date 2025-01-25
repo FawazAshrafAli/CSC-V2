@@ -197,7 +197,6 @@
 						</ul>
 					</div>
 					
-					<a href="{% url 'users:add_csc' %}" class="button border with-icon">ADD CSC CENTER <i class="sl sl-icon-plus"></i></a>
 				</div>
 				<!-- Header Widget / End -->
 			</div>
@@ -227,12 +226,13 @@
 			<ul data-submenu-title="Main">
 				<li {% if home_page %} class="active" {% endif %}><a href="{% url 'users:home' %}"><i class="sl sl-icon-home"></i> Home</a></li>
 
-				<li {% if center_page %} class="active" {% endif %} ><a><i class="fa fa-building"></i> CSC Centers</a>
+				<li {% if service_page %} class="active" {% endif %}><a href="{% url 'users:csc_centers' %}"><i class="fas fa-building"></i> CSC Centers</a></li>				
+
+				{% comment %} <li {% if center_page %} class="active" {% endif %} ><a><i class="fa fa-building"></i> CSC Centers</a>
 					<ul>
-						<li><a href="{% url 'users:csc_centers' %}">List CSC Centers</a></li>
-						<li><a href="{% url 'users:add_csc' %}" >Add CSC Center</a></li>
+						<li><a href="{% url 'users:csc_centers' %}">List CSC Centers</a></li>						
 					</ul>	
-				</li>
+				</li> {% endcomment %}
 
 				<li {% if poster_page %} class="active" {% endif %} ><a><i class="fa fa-image"></i> Posters</a>
 					<ul>
@@ -298,6 +298,9 @@
 <script type="text/javascript" src="{% static 'scripts/tooltips.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/custom.js' %}"></script>
 
+<!-- New Chosen Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
+
 
 <!-- w3 -->
 <script>
@@ -352,17 +355,19 @@
 				dataType: 'json',
 				data: {'center_slug': centerSlug},
 				success: response => {
-					if (response) {
+					if (response.current_center_name) {
 						let image_path = `{% if request.user.image %}{{ request.user.image.url }}{% else %}/static/images/dashboard-avatar.jpg{% endif %}`;						
 
 						$('#current-csc-center').html(`<span><img src="${image_path}" alt="Account Logo" style="width:35px !important; height:35px !important;"></span> ${response.current_center_name.slice(0,5)}..`);
 					} else {
 						defaultCurrentCsc();
+						localStorage.setItem('centerSlug', `{{csc_center.slug}}`);
+						getCurrentCsc(`{{csc_center.slug}}`);
 					}
 				},
 				error: error => {
 					console.error('Error: ', error);
-					defaultCurrentCsc();
+					defaultCurrentCsc();					
 				},				
 			});
 		};
@@ -372,7 +377,7 @@
 			getCurrentCsc(centerSlug);
 		} else {
 			defaultCurrentCsc();
-			getCurrentCsc(`{{csc_center.slug}}`)			
+			getCurrentCsc(`{{csc_center.slug}}`);			
 		}
 	});
 </script>

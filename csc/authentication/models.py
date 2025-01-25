@@ -10,9 +10,6 @@ class User(AbstractUser):
     facebook = models.URLField(max_length=150, null=True, blank=True)
     google = models.URLField(max_length=150, null=True, blank=True)
 
-    email_verified = models.BooleanField(default=False)
-    verification_token = models.CharField(max_length=64, blank=True, null=True)
-
     @property
     def full_name(self):
         if self.first_name:
@@ -29,3 +26,18 @@ class UserOtp(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+
+class EmailVerificationOtp(models.Model):
+    email = models.EmailField(max_length=254, unique=True)
+    otp = models.PositiveIntegerField()
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.email
+    
+    class Meta:
+        db_table = "email_verification_otps"
+        ordering = ["updated"]

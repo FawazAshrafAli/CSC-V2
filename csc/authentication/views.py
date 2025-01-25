@@ -4,18 +4,20 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.utils.crypto import get_random_string
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
 from django.conf import settings
+from random import randint
 import logging
-import uuid
 
 from .models import User, UserOtp
 from home.views import BaseHomeView
+from .models import EmailVerificationOtp
+from csc_center.models import CscCenter
 
-from .tasks import send_verification_email, send_otp_email
+from .tasks import send_otp_email, send_verification_otp
 
 logger = logging.getLogger(__name__)
 class AuthenticationView(BaseHomeView, TemplateView):
@@ -29,21 +31,16 @@ class AuthenticationView(BaseHomeView, TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-
         try:
-            if request.user.is_authenticated:                
+            if request.user.is_authenticated:         
                 if request.user.is_superuser:
                     return redirect(self.admin_success_url)
                 else:
-                    if request.user.email_verified:
-                        return redirect(self.user_success_url)
-                    else:
-                        logout(request)
-                        messages.error(request, 'Email not verified. Please check your email for verification link.')
-                        return redirect(self.redirect_url)
+                    return redirect(self.user_success_url)
+            
             return super().get(request, *args, **kwargs)
-        except Exception:
-            logger.exception("Some error occured")
+        except Exception as e:
+            logger.exception(f"Some error occured: {e}")
             return redirect(self.redirect_url)
 
     def post(self, request, *args, **kwargs):
@@ -62,25 +59,22 @@ class AuthenticationView(BaseHomeView, TemplateView):
                         user = user_obj                    
                 if user is not None:
                     login(request, user) 
-                    if user.is_superuser or user.email_verified:
+                    if user.is_superuser:
                         if remember_me:
                             request.session.set_expiry(settings.SESSION_COOKIE_AGE)
                         else:
                             request.session.set_expiry(0) 
 
                     if user.is_superuser:                        
-                        return redirect(self.admin_success_url)
-                    elif user.email_verified:
-                        return redirect(self.user_success_url)
-                    else:
-                        messages.error(request, 'Email not verified. Please check your email for verification link.')
+                        return redirect(self.admin_success_url)                    
+                    else:                        
                         return redirect(reverse_lazy('authentication:login'))
                 else:
                     messages.error(request, 'Invalid Credentials.')
                     
             return super().get(request, *args, **kwargs)
-        except Exception:
-            logger.exception("Some error occured")
+        except Exception as e:
+            logger.exception(f"Some error occured: {e}")
             return redirect(self.redirect_url)
 
 
@@ -209,8 +203,8 @@ class UserRegistrationView(BaseHomeView, CreateView):
     model = User
     fields = ["username", "email", "password"]
     template_name = 'authentication/register.html'
-    success_url = reverse_lazy('authentication:login')
-    redirect_url = success_url
+    success_url = reverse_lazy('users:home')
+    redirect_url = reverse_lazy('authentication:login')
 
     def get_context_data(self, **kwargs):
         try:
@@ -222,13 +216,23 @@ class UserRegistrationView(BaseHomeView, CreateView):
             return {}
 
     def get(self, request, *args, **kwargs):
-        try:
+        try:            
             email = self.kwargs.get('email')
-            if email and self.model.objects.filter(email = email):
-                return redirect(self.success_url)
+            if not CscCenter.objects.filter(email = email, status = "Approved").exists():
+                messages.error(request, "Invalid Link")
+                return redirect(self.redirect_url)
+
+            if email and self.model.objects.filter(email = email).exists():
+                if request.user.is_authenticated:
+                    logout(request)
+
+                user = User.objects.get(email = email)
+                login(request, user)
+
+                return redirect(self.success_url)            
             return super().get(request, *args, **kwargs)
-        except Exception:
-            logger.exception("Error in getting user request")
+        except Exception as e:
+            logger.exception(f"Error in getting user request in UserRegistrationView: {e}")
             return redirect(self.redirect_url)
 
     def post(self, request, *args, **kwargs):
@@ -241,41 +245,73 @@ class UserRegistrationView(BaseHomeView, CreateView):
                 messages.error(request, "Passwords are not matching.")
                 return super().get(request, *args, **kwargs)
 
-            user = self.model.objects.create_user(username = email, email=email, password=password)
-            user.is_active = False
-            user.verification_token = str(uuid.uuid4())
-            user.save()
+            new_user = self.model.objects.create_user(username = email, email=email, password=password)            
+            new_user.save()
 
-            base_url = f"https://{request.get_host()}"
+            if request.user.is_authenticated:
+                logout(request)            
 
-            send_verification_email.delay(user.id, base_url)
-            messages.success(request, "A verification email has been send to your email address.")        
+            user = authenticate(request, username = new_user.username, password = password)
+            login(request, user)                  
+            messages.success(request, "Account creation successfull.")       
             return redirect(self.success_url)
         except Exception as e:
             logger.exception(f"Error in user registration: {e}")
             return redirect(self.redirect_url)
-        
-
     
 
+def call_email_verification_mail(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=400)
+    
+    try:
+        email = request.POST.get("email")
+        if not email:
+            return JsonResponse({"error": "Email is required"}, status=400)
+        
+        if "@" not in email or "." not in email:
+            return JsonResponse({"error": "Invalid email format"}, status=400)
+        
+        if CscCenter.objects.filter(email = email.strip()).exists():
+            return JsonResponse({"error": "duplicate"})
+        
+        otp_number = randint(100000, 999999)
 
-class VerifyEamilAddressView(View):
-    success_url = reverse_lazy('authentication:login')
+        otp_obj, created = EmailVerificationOtp.objects.update_or_create(
+            email=email,
+            defaults={"otp": otp_number}
+        )
 
-    def get(self, request, *args, **kwargs):
-        try:
-            token = self.kwargs.get('token')
-            user = User.objects.get(verification_token=token)
-            if user.email_verified:
-                messages.info(request, "Your email has already been verified.")
+        send_verification_otp.delay(otp_obj.otp, email)
+
+        return JsonResponse({"status": "success"}, status=200)
+    
+    except Exception as e:
+        logger.exception(f"Error sending OTP for email verification: {e}")
+        return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+    
+def verify_email_with_otp(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=400)
+    
+    try:
+        inputted_otp = request.POST.get("otp")
+        email = request.POST.get("email")
+        
+        if not inputted_otp or not email:
+            return JsonResponse({"error": "OTP and email are required"}, status=400)
+        
+        otp_obj = EmailVerificationOtp.objects.filter(otp=inputted_otp, email=email).first()
+        if otp_obj:
+            if timezone.now() < otp_obj.updated + timedelta(minutes=5):                
+                return JsonResponse({"status": "success"}, status=200)
             else:
-                user.email_verified = True
-                user.is_active = True  # Activate the account
-                user.verification_token = None  # Clear the token
-                user.save()
-                messages.success(request, "Your email has been verified successfully.")
-                logout(request)
-        except User.DoesNotExist:
-            messages.error(request, "Invalid verification link.")
+                return JsonResponse({"error": "OTP expired"}, status=400)
+        else:
+            return JsonResponse({"error": "Invalid OTP"}, status=400)
+    
+    except Exception as e:
+        logger.exception(f"Error verifying OTP for email: {e}")
+        return JsonResponse({"error": f"An error occurred: {e}"}, status=500)
+                
 
-        return redirect(self.success_url)

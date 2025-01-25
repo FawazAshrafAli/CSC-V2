@@ -174,7 +174,7 @@ class CscCenter(models.Model):
     qr_code_image = models.ImageField(upload_to='csc_qr_codes/', blank=True, null=True)
 
     name = models.CharField(max_length=150)
-    slug = models.SlugField(unique=True, blank=True, null=True, max_length=250)
+    slug = models.SlugField(unique=True, blank=True, null=True, max_length=500)
     type = models.ForeignKey(CscNameType, on_delete=models.CASCADE, null=True)
     
     keywords = models.ManyToManyField(CscKeyword)
@@ -193,8 +193,8 @@ class CscCenter(models.Model):
     owner = models.CharField(max_length=150)
     email = models.EmailField(max_length=100)
     website = models.URLField(max_length=100, null=True, blank=True)
-    contact_number = models.CharField(max_length=20)
-    mobile_number = models.CharField(max_length=20)
+    contact_number = models.CharField(max_length=20, null=True, blank=True)
+    mobile_number = models.CharField(max_length=20, null=True, blank=True)
     whatsapp_number = models.CharField(max_length=100, null=True, blank=True)
     services = models.ManyToManyField(Service)
     products = models.ManyToManyField(Product)
@@ -259,7 +259,23 @@ class CscCenter(models.Model):
 
         if not self.slug:
             if self.name:
-                base_slug = slugify(self.name)
+                slug_parts = [self.name]
+
+                if self.type:
+                    slug_parts.append(self.type.type)
+
+                if self.block.block:
+                    slug_parts.append(self.block.block)
+
+                if self.block.district:
+                    slug_parts.append(self.district.district)
+
+                if self.state.state:
+                    slug_parts.append(self.state.state)
+
+                full_slug = "-".join(slug_parts)
+
+                base_slug = slugify(full_slug)
 
                 if not base_slug or base_slug == "":
                     self.slug = str(uuid.uuid4())
@@ -270,6 +286,7 @@ class CscCenter(models.Model):
                     while CscCenter.objects.filter(slug = slug).exists():
                         slug = f"{base_slug}-{count}"
                         count += 1
+
                     self.slug = slug
             else:
                 self.slug = str(uuid.uuid4())
@@ -280,8 +297,8 @@ class CscCenter(models.Model):
         if self.last_paid_date:
             self.next_payment_date = self.last_paid_date + timedelta(days=365)
         else:
-            if self.created:
-                self.next_payment_date = self.created.date()
+            if self.approved_date:
+                self.next_payment_date = self.approved_date.date()
 
         super().save(*args, **kwargs)
 
@@ -404,6 +421,13 @@ class CscCenter(models.Model):
 
         return None
     
+    @property
+    def get_banners(self):
+        if self.banners.count() > 0:
+            list_banners = [f"<a href='{banner.banner_image.url}' target='_blank' style='color:blue'>{(banner.banner_image.name.replace('csc_center_banners/', ''))}</a>" for banner in self.banners.all()]
+            return ', '.join(list_banners)
+        return None
+    
     def generate_qr_code_image(self):
         url = self.get_absolute_url  
         protocol = settings.SITE_PROTOCOL 
@@ -466,3 +490,34 @@ class CscCenter(models.Model):
     def __str__(self):
         return self.name
     
+
+class ExpiredCscCenter(models.Model):
+    csc_center = models.ForeignKey(CscCenter, on_delete=models.CASCADE)
+    expired_date = models.DateField()
+    sent_expiry_email = models.BooleanField(default=False)
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.csc_center.name}-{self.expired_date}"
+    
+    class Meta:
+        db_table = "expired_csc_centers"
+        ordering = ["-created"]
+
+
+class ExpiringCscCenter(models.Model):
+    csc_center = models.ForeignKey(CscCenter, on_delete=models.CASCADE)
+    expiration_date = models.DateField()
+    sent_expiring_email = models.BooleanField(default=False)
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.csc_center.name}-{self.expiration_date}"
+    
+    class Meta:
+        db_table = "expiring_csc_centers"
+        ordering = ["-created"]

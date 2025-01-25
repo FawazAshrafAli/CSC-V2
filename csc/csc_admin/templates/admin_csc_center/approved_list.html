@@ -55,6 +55,21 @@
         text-align:center;
         vertical-align: top;
     }
+
+    #list-btn, #clear-btn {
+        border: none;
+        box-shadow: 0 0 5px #777;        
+        padding: 5px 8px;
+        margin: 0;
+        background-color: #fff;
+    }
+    #list-btn:hover {
+        background-color: aliceblue
+    }
+
+    #clear-btn {
+        margin-left: 5px;
+    }
 </style>
 {% endblock styles %}
 
@@ -94,9 +109,47 @@
         <div class="col-lg-12 col-md-8 padding-right-30">
             <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
                 <div class="row">
-                    <div class="col-lg-3">
-                        <h4>CSC Centers Requests</h4>
-                    </div>                
+                    <div class="col-lg-4">
+                        <h4>Approved CSC Centers Requests</h4>
+                    </div>
+                    <form class="col-lg-6" method="get" action="{% url 'csc_admin:approved_csc_centers' %}" id="item-form" style="display: flex; flex-direction: row-reverse; justify-content: flex-start; padding-right: 0;">
+
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="margin-top: 3px; display: flex; align-items: center;">
+                                <button type="submit" id="list-btn">List</button>
+                                {% if current_starting_item and current_ending_item %}
+                                <a href="{% url 'csc_admin:approved_csc_centers' %}" type="submit" id="clear-btn">Clear</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="ending-item-number" style="margin: 0;">Ending Item No.:&nbsp;</label>                        
+                                <input type="number" name="ending_item" id="ending-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_ending_item %}{{current_ending_item}}{% else %}{{page_obj.end_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="starting-item-number" style="margin: 0;">Starting Item No.:&nbsp;</label>                        
+                                <input type="number" name="starting_item" id="starting-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_starting_item %}{{current_starting_item}}{% else %}{{page_obj.start_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <div class="col-lg-2">
+                        <div class="sort-by">
+                            <form method="get" action="{% url 'csc_admin:approved_csc_centers' %}" id="pagination-form" class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="item-per-page-input" style="margin: 0;">Showing:&nbsp;</label>                        
+                                <select name="items_per_page" id="item-per-page-input" style="width: 50px; margin: 0; padding: 0; height: 25px; background-color: #fff; border: none; box-shadow: 0 0 1px;" onchange="$('#pagination-form').submit();">
+                                    {% for option in available_items_per_page %}
+                                    <option value="{{option}}" {% if option == current_items_per_page %} selected {% endif %}>{{option}}</option>
+                                    {% endfor %}
+                                </select>                            
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <br>
                 <div class="table-responsive">
@@ -116,7 +169,7 @@
                             {% if csc_centers and csc_centers|length != 0 %}
                             {% for center in csc_centers %}
                             <tr class="row-items" onclick="window.location='{% url 'csc_admin:approved_csc_center' center.slug %}'" id="tbody-tr-{{center.pk}}">
-                                <td><small>&nbsp;{{ forloop.counter }}</small></td>
+                                <td><small>&nbsp;{% if current_starting_item %} {{ forloop.counter0|add:current_starting_item }} {% else %} {{ forloop.counter0|add:page_obj.start_index }} {% endif %}</small></td>
                                 <td><small>&nbsp;{{ center.name }}</small></td>
                                 <td><small>{{center.owner}}</small></td>
                                 <td><small>{{center.partial_address}}</small></td>
@@ -146,27 +199,36 @@
             </div>
         </div>
         <!-- Pagination -->
-      <div class="clearfix"></div>
-      <div class="row" id="pagination-row">
-        <div class="col-md-12">
-          <!-- Pagination -->
-          <div class="pagination-container margin-top-20 margin-bottom-40">
-            <nav class="pagination" id="pagination-nav">
-              <ul>
-                <li>
-                  <a href="#" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
-                </li>                
-                <li><a href="#" id="first-page">1</a></li>
-                <li><a href="#" id="second-page">2</a></li>
-                <li><a href="#" id="third-page" >3</a></li>
-                <li>
-                  <a href="#" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
-                </li>
-              </ul>
-            </nav>
-          </div>
+        <div class="clearfix"></div>
+        <div class="row" id="pagination-row">
+            <div class="col-md-12">
+                <!-- Pagination -->
+                <div class="pagination-container margin-top-20 margin-bottom-40">
+                    <nav class="pagination" id="pagination-nav">
+                        <ul>
+                            {% if page_obj.has_previous %}
+                            <li>
+                                <a href="?page={{ page_obj.previous_page_number }}&item_per_page={{ current_items_per_page }}" class="prev-page" id="prev-page">
+                                    <i class="sl sl-icon-arrow-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="#" id="first-page">{{ page_obj.number }}</a>
+                            </li>
+                            {% if page_obj.has_next %}
+                            <li>
+                                <a href="?page={{ page_obj.next_page_number }}&item_per_page={{ current_items_per_page }}" class="next-page" id="next-page">
+                                    <i class="sl sl-icon-arrow-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
-      </div>
+        
         <!-- Csc Posts / End -->        
     </div>
 
@@ -195,120 +257,33 @@
         $('#delete-confirmation-box').hide();
         $('.close-btn').click();
     })
-</script>
 
-<script>
     $(document).ready(() => {
+        $('#list-btn').click(function (e) {
+            e.preventDefault();
 
-    // Pagination
-      function paginator () {
-        let itemsPerPage = 10;
-        let currentPage = 1;
-        let totalItems = $('.row-items').length;
-        let totalPages = Math.ceil(totalItems / itemsPerPage);
-  
-        $('.prev-page').hide();      
-  
-        function paginationBtnVisibility() {
-          $('#first-page, #second-page, #third-page').removeClass('current-page prev-page next-page uncoming-page earlier-page').hide();
-          $('.next-page').hide();
-          $('.prev-page').hide();
-          
-          if (currentPage == totalPages) {          
-            $('.next-page').hide();
-            
-            if (totalPages == 1) {
-              $('#first-page').html(currentPage).addClass('current-page').show();                       
-              
-            } else if (totalPages == 2) {
-              $('#first-page').html(currentPage - 1).addClass('prev-page').show();            
-              $('#second-page').html(currentPage).addClass('current-page').show();
-              $('.prev-page').show();
-              
-            } else if (totalPages == 3) {
-              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
-              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
-              $('#third-page').html(currentPage).addClass('current-page').show();
-              $('#prev-page').show();
-  
+            const startingValue = parseInt($('#starting-item-number').val());
+            const endingValue = parseInt($('#ending-item-number').val());
+
+            if (startingValue && endingValue) {
+                if (startingValue >= endingValue) {
+                    window.alert("Starting item number must be smaller than the ending item number")        
+                } else if (startingValue <= 0 || endingValue <= 0) {
+                    window.alert("Both the starting and ending item numbers must be positive integers greater than zero")        
+                } else {
+                    $('#item-form').submit();
+                }
             } else {
-              $('#first-page').html(currentPage - 2).addClass('earlier-page').show();
-              $('#second-page').html(currentPage - 1).addClass('prev-page').show();
-              $('#third-page').html(currentPage).addClass('current-page').show();
-              $('.prev-page').show();            
+                window.alert("Kindly specify both the starting and ending item indices")
+            }
+        });
+
+        $('#starting-item-number, #ending-item-number').on('input', function () {            
+            if ($(this).val() && $(this).val() <= 0) {
+                $(this).val(1);
             };
-  
-          } else if (currentPage > 1) {          
-            $('.prev-page').show();
-            $('.next-page').show();
-            $('#first-page').html(currentPage - 1).addClass('prev-page').show();
-            $('#second-page').html(currentPage).addClass('current-page').show();
-            $('#third-page').html(currentPage + 1).addClass('next-page').show();
-  
-          } else if (currentPage == 1 && totalPages > 0) {          
-            $('.next-page').show();
-            $('#first-page').html(currentPage).addClass('current-page').show();
-            $('#second-page').html(currentPage + 1).addClass('next-page').show();
-  
-            if (totalPages >= 3) {          
-              $('#third-page').html(currentPage + 2).addClass('upcoming-page').show();
-            }
-          }          
-        };
-  
-        paginationBtnVisibility();
-  
-        function renderPage(page) {
-            $('.-items').hide();
-            $('.-items').slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
-            $('#pagination a').removeClass('active');
-            $('#pagination a').eq(page).addClass('active');
-            $('.prev-page').toggleClass('disabled', page === 1);
-            $('.next-page').toggleClass('disabled', page === totalPages);
-        }
-  
-        $(document).on('click', '.next-page', function() {
-            if (currentPage < totalPages) {
-                currentPage++;
-                $('#current-page').html(currentPage);
-                paginationBtnVisibility();
-                renderPage(currentPage);
-            }
         });
-  
-        $(document).on('click', '.upcoming-page', function() {
-            if (currentPage < totalPages - 1) {
-                currentPage += 2;
-                $('#current-page').html(currentPage);
-                paginationBtnVisibility();
-                renderPage(currentPage);
-            }
-        });
-  
-        $(document).on('click', '.prev-page', function() {
-          if (currentPage > 1) {
-              currentPage--;
-              $('#current-page').html(currentPage);
-              paginationBtnVisibility();
-              renderPage(currentPage);
-          }
-        });
-  
-        $(document).on('click', '.earlier-page', function() {
-          if (currentPage > 2) {
-              currentPage -= 2;
-              $('#current-page').html(currentPage);
-              paginationBtnVisibility();
-              renderPage(currentPage);
-          }
-        });
-  
-        // Initialize the first page
-        renderPage(currentPage);
-      };
-  
-      paginator();
-    })
+    });
 </script>
 
 {% endblock scripts %}

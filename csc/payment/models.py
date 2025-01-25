@@ -26,7 +26,7 @@ class Payment(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Transaction {self.payment_id} - {self.status}"
+        return f"Transaction {self.payment_id} of {self.csc_center.name} - {self.status}"
 
     class Meta:
         ordering = ['-created']

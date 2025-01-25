@@ -58,6 +58,21 @@
     .text-center {
         text-align: center;
     }
+
+    #list-btn, #clear-btn {
+        border: none;
+        box-shadow: 0 0 5px #777;        
+        padding: 5px 8px;
+        margin: 0;
+        background-color: #fff;
+    }
+    #list-btn:hover {
+        background-color: aliceblue
+    }
+
+    #clear-btn {
+        margin-left: 5px;
+    }
 </style>
 {% endblock styles %}
 
@@ -98,7 +113,45 @@
             <div class="dashboard-list-box margin-top-0" style="background-color: #fff;">
                 <div class="row">
                     <div class="col-lg-3">
-                        <h4>CSC Centers Requests</h4>
+                        <h4>Rejected CSC Centers</h4>
+                    </div>
+                    <form class="col-lg-7" method="get" action="{% url 'csc_admin:rejected_csc_centers' %}" id="item-form" style="display: flex; flex-direction: row-reverse; justify-content: flex-start; padding-right: 0;">
+
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="margin-top: 3px; display: flex; align-items: center;">
+                                <button type="submit" id="list-btn">List</button>
+                                {% if current_starting_item and current_ending_item %}
+                                <a href="{% url 'csc_admin:rejected_csc_centers' %}" type="submit" id="clear-btn">Clear</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="ending-item-number" style="margin: 0;">Ending Item No.:&nbsp;</label>                        
+                                <input type="number" name="ending_item" id="ending-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_ending_item %}{{current_ending_item}}{% else %}{{page_obj.end_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="starting-item-number" style="margin: 0;">Starting Item No.:&nbsp;</label>                        
+                                <input type="number" name="starting_item" id="starting-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_starting_item %}{{current_starting_item}}{% else %}{{page_obj.start_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <div class="col-lg-2">
+                        <div class="sort-by">
+                            <form method="get" action="{% url 'csc_admin:rejected_csc_centers' %}" id="pagination-form" class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="item-per-page-input" style="margin: 0;">Showing:&nbsp;</label>                        
+                                <select name="items_per_page" id="item-per-page-input" style="width: 50px; margin: 0; padding: 0; height: 25px; background-color: #fff; border: none; box-shadow: 0 0 1px;" onchange="$('#pagination-form').submit();">
+                                    {% for option in available_items_per_page %}
+                                    <option value="{{option}}" {% if option == current_items_per_page %} selected {% endif %}>{{option}}</option>
+                                    {% endfor %}
+                                </select>                            
+                            </form>
+                        </div>
                     </div>                
                 </div>
                 <br>
@@ -121,7 +174,7 @@
                             {% if actions and actions|length != 0 %}
                             {% for action in actions %}
                             <tr class="row-items" onclick="window.location='{% url 'csc_admin:rejected_csc_center' action.slug %}'" id="tbody-tr-{{action.pk}}">
-                                <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
+                                <td><small>&nbsp;{% if current_starting_item %} {{ forloop.counter0|add:current_starting_item }} {% else %} {{ forloop.counter0|add:page_obj.start_index }} {% endif %}</small></td>
                                 <td><small>&nbsp;{{ action.csc_center.name }}</small></td>
                                 <td><small>{{action.csc_center.owner}}</small></td>
                                 <td><small>{{action.csc_center.get_vertical_partial_address|safe}}</small></td>
@@ -204,6 +257,33 @@
         $('#delete-confirmation-box').hide();
         $('.close-btn').click();
     })
+
+    $(document).ready(() => {
+        $('#list-btn').click(function (e) {
+            e.preventDefault();
+
+            const startingValue = parseInt($('#starting-item-number').val());
+            const endingValue = parseInt($('#ending-item-number').val());
+
+            if (startingValue && endingValue) {
+                if (startingValue >= endingValue) {
+                    window.alert("Starting item number must be smaller than the ending item number")        
+                } else if (startingValue <= 0 || endingValue <= 0) {
+                    window.alert("Both the starting and ending item numbers must be positive integers greater than zero")        
+                } else {
+                    $('#item-form').submit();
+                }
+            } else {
+                window.alert("Kindly specify both the starting and ending item indices")
+            }
+        });
+
+        $('#starting-item-number, #ending-item-number').on('input', function () {            
+            if ($(this).val() && $(this).val() <= 0) {
+                $(this).val(1);
+            };
+        });
+    });
 </script>
 
 {% endblock scripts %}

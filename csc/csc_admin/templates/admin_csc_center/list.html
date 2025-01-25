@@ -133,6 +133,74 @@
         color: #fff;
     }
 
+    #list-btn, #clear-btn {
+        color: #777;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        border: none;
+        box-shadow: 0 0 3px #777;        
+        padding: 5px 8px;
+        margin: 0;
+        background-color: #fff;
+    }
+    #list-btn:hover {
+        background-color: aliceblue;
+        transform: scale(1.05);
+    }
+
+    #clear-btn {
+        margin-left: 5px;
+    }
+
+    #clear-btn:hover {
+        transform: scale(1.05);
+    }
+
+    #paid-btn, #unpaid-btn, #all-btn {
+        box-shadow: 0 0 3px;
+    }
+    #paid-btn {
+        margin-left: 10px;
+        {% if paid_csc_centers %}
+        color: #fff;
+        background: linear-gradient(to bottom, lime, green, lime);
+        {% else %}
+        color: green;
+        background-color: #fff;
+        {% endif %}
+    }
+    #unpaid-btn {
+        margin-left: 5px;
+        {% if unpaid_csc_centers %}
+        color: #fff;
+        background: linear-gradient(to bottom, darkred, red, darkred);
+        {% else %}
+        color: red;
+        background-color: #fff;
+        {% endif %}
+    }
+    #all-btn {
+        margin-left: 5px;
+        {% if not unpaid_csc_centers and not paid_csc_centers %}
+        color: #fff;
+        background: linear-gradient(to bottom, skyblue, blue, indigo);
+        {% else %}
+        color: blue;
+        background-color: #fff;
+        {% endif %}
+    }
+    #paid-btn:hover {
+        color: #fff;
+        background: linear-gradient(to bottom, lime, green, lime);
+    }
+    #unpaid-btn:hover {
+        color: #fff;
+        background: linear-gradient(to bottom, darkred, red, darkred);
+    }
+    #all-btn:hover {
+        color: #fff;
+        background: linear-gradient(to bottom, skyblue, blue, indigo);
+    }
 </style>
 {% endblock styles %}
 
@@ -187,8 +255,19 @@
                 <div class="row">
                     <div class="col-lg-3">
                         <h4>CSC Centers</h4>
-                    </div>
+                    </div>                    
                     <div class="col-lg-9">
+                        <div class="sort-by">
+                            <form method="get" action="{% url 'csc_admin:csc_centers' %}" id="pagination-form" class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="item-per-page-input" style="margin: 0;">Items per page:&nbsp;</label>                        
+                                <select name="items_per_page" id="item-per-page-input" style="width: 50px; margin: 0; padding: 0; height: 25px; background-color: #fff; box-shadow: 0 0 1px #777;" onchange="$('#pagination-form').submit();">
+                                    {% for option in available_items_per_page %}
+                                    <option value="{{option}}" {% if option == current_items_per_page %} selected {% endif %}>{{option}}</option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+
                         <!-- Sort by -->
                         <div class="sort-by">
                             <div class="sort-by-select">
@@ -228,9 +307,56 @@
                                 </select>
                             </div>
                         </div>
-                        <!-- Sort by / End -->
+                        <!-- Sort by / End -->                    
                     </div>
+
+                    
                 </div>
+                <div class="row">
+                    <div class="col-md-3" style="display: flex; justify-content: flex-end;">
+                        <div class="sort-by">
+                            <form method="get" action="{% url 'csc_admin:csc_centers' %}" id="blog-search-form" class="search-blog-input">
+                                <div class="input"><input class="search-field" type="text" placeholder="Type and hit enter" name="query" id="search-input-value" value="{{query}}"/></div>		
+                            </form>
+                        </div>
+                    </div>
+                    <form class="col-md-6" method="get" action="{% url 'csc_admin:csc_centers' %}" id="item-form" style="display: flex; flex-direction: row-reverse; justify-content: flex-start; padding-right: 0;">
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="margin-top: 3px; display: flex; align-items: center;">
+                                <button class="button" type="submit" id="list-btn">List</button>
+                                {% if current_starting_item and current_ending_item %}
+                                <a class="button" href="{% url 'csc_admin:csc_centers' %}" type="submit" id="clear-btn">Clear</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="ending-item-number" style="margin: 0;">Ending Item No.:&nbsp;</label>                        
+                                <input type="number" name="ending_item" id="ending-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_ending_item %}{{current_ending_item}}{% else %}{{page_obj.end_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="sort-by">
+                            <div class="form-group sort-by-select" style="display: flex; align-items: center; margin-right: 15px;">
+                                <label for="starting-item-number" style="margin: 0;">Starting Item No.:&nbsp;</label>                        
+                                <input type="number" name="starting_item" id="starting-item-number" style="height: 25px; width: 50px; margin-bottom: 0; padding: 1px;" value="{% if current_starting_item %}{{current_starting_item}}{% else %}{{page_obj.start_index}}{% endif %}">
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <div class="col-md-3">
+                        <div class="sort-by">
+                            <form method="get" action="{% url 'csc_admin:csc_centers' %}" class="form-group sort-by-select" id="paid-filter-form" style="margin-top: 3px; display: flex; align-items: center;">
+                                <input type="hidden" name="payment" id="payment-input" value="{% if paid_csc_centers %}paid{% elif unpaid_csc_centers %}unpaid{% else %}all{% endif %}">
+                                <button class="button" type="button" id="paid-btn">Paid</button>
+                                <button class="button" type="button" id="unpaid-btn">Unpaid</button>
+                                <button class="button" type="button" id="all-btn">All</button>
+                            </form>
+                        </div>
+                    </div>                    
+                </div>
+
+                
                 <br>
                 <div class="table-responsive">
                     <table id="center-table">
@@ -249,7 +375,7 @@
                         <tbody id="center-tbody">
                             {% for center in centers %}
                             <tr class="-items" onclick="window.location='{% url 'csc_admin:csc_center' center.slug %}'" id="tbody-tr-{{center.pk}}">
-                                <td><small>&nbsp;{{ forloop.counter0|add:page_obj.start_index }}</small></td>
+                                <td><small>&nbsp;{% if current_starting_item %} {{ forloop.counter0|add:current_starting_item }} {% else %} {{ forloop.counter0|add:page_obj.start_index }} {% endif %}</small></td>
                                 <td><small>&nbsp;{{ center.name }}</small></td>
                                 <td><button class="share-url-btn" data-absolute-url="{{center.get_absolute_url}}"><i class="fa fa-share-alt"></i>&nbsp;Share</button></td>
                                 <td><small>{{center.owner}}</small></td>
@@ -280,26 +406,32 @@
       <div class="clearfix"></div>
       <div class="row" id="pagination-row">
         <div class="col-md-12">
-          <!-- Pagination -->
-          <div class="pagination-container margin-top-20 margin-bottom-40">
-            <nav class="pagination" id="pagination-nav">
-              <ul>
-                {% if page_obj.has_previous %}
-                <li>
-                  <a  href="?page={{ page_obj.previous_page_number }}" class="prev-page" id="prev-page"><i class="sl sl-icon-arrow-left"></i></a>
-                </li>
-                {% endif %}            
-                <li><a href="#" id="first-page">{{ page_obj.number }}</a></li>                
-                {% if page_obj.has_next %}
-                <li>
-                  <a href="?page={{ page_obj.next_page_number }}" class="next-page" id="next-page"><i class="sl sl-icon-arrow-right"></i></a>
-                </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
+            <!-- Pagination -->
+            <div class="pagination-container margin-top-20 margin-bottom-40">
+                <nav class="pagination" id="pagination-nav">
+                    <ul>
+                        {% if page_obj.has_previous %}
+                        <li>
+                            <a href="?{% if paid_csc_centers %}payment=paid&{% elif unpaid_csc_centers %}payment=unpaid&{% endif %}page={{ page_obj.previous_page_number }}&item_per_page={{ current_items_per_page }}" class="prev-page" id="prev-page">
+                                <i class="sl sl-icon-arrow-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="#" id="first-page">{{ page_obj.number }}</a>
+                        </li>
+                        {% if page_obj.has_next %}
+                        <li>
+                            <a href="?{% if paid_csc_centers %}payment=paid&{% elif unpaid_csc_centers %}payment=unpaid&{% endif %}page={{ page_obj.next_page_number }}&item_per_page={{ current_items_per_page }}" class="next-page" id="next-page">
+                                <i class="sl sl-icon-arrow-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
         </div>
-      </div>
+    </div>
         <!-- Csc Posts / End -->        
     </div>
 
@@ -388,9 +520,16 @@
             const state = $('#state-filter-dropdown').val();
             const district = $('#district-filter-dropdown').val();
             const block = $('#block-filter-dropdown').val();
+            let payment;
             let data;
 
-            window.location = `/admin/csc_centers/${state ? state : 0}/${district ? district : 0}/${block ? block : 0}/`;
+            if (`{{paid_csc_centers}}` != "None") {
+                payment = "paid";
+            } else if (`{{unpaid_csc_centers}}` != "None") {
+                payment = "unpaid";
+            }            
+
+            window.location = `/admin/csc_centers/${state ? state : 0}/${district ? district : 0}/${block ? block : 0}/${payment ? payment : 'all'}/`;
 
             if (currentDropdownId == "state-filter-dropdown") {
                 data = {'state': state}
@@ -398,7 +537,7 @@
                 data = {'state': state, 'district': district}
             } else if (currentDropdownId == "block-filter-dropdown") {
                 data = {'state': state, 'district': district, 'block': block}
-            }
+            }            
 
             $.ajax({
                 type: 'GET',
@@ -484,6 +623,46 @@
     // Trigger chosen:updated if options are updated dynamically
     // Optional: remove if not updating options dynamically
     $("#state-filter-dropdown").trigger('chosen:updated');
+
+    $('#list-btn').click(function (e) {
+        e.preventDefault();
+
+        const startingValue = parseInt($('#starting-item-number').val());
+        const endingValue = parseInt($('#ending-item-number').val());
+
+        if (startingValue && endingValue) {
+            if (startingValue >= endingValue) {
+                window.alert("Starting item number must be smaller than the ending item number")        
+            } else if (startingValue <= 0 || endingValue <= 0) {
+                window.alert("Both the starting and ending item numbers must be positive integers greater than zero")        
+            } else {
+                $('#item-form').submit();
+            }
+        } else {
+            window.alert("Kindly specify both the starting and ending item indices")
+        }
+    });
+
+    $('#starting-item-number, #ending-item-number').on('input', function () {            
+        if ($(this).val() && $(this).val() <= 0) {
+            $(this).val(1);
+        };
+    });
+
+    $('#paid-btn').click(function () {
+        $('#payment-input').val("paid");        
+        $('#paid-filter-form').submit();
+    });
+
+    $('#unpaid-btn').click(function () {        
+        $('#payment-input').val("unpaid");
+        $('#paid-filter-form').submit();
+    });
+
+    $('#all-btn').click(function () {        
+        $('#payment-input').val("all");
+        $('#paid-filter-form').submit();
+    });
   });
 </script>
 

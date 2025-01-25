@@ -98,18 +98,19 @@
                 </div>
                 <div class="col-lg-8" id="csc-description-div">                        
                     <table id="csc-detail-table">
+                        {% if center.csc_reg_no %}
+                        <tr>
+                            <th>CSC ID</th>
+                            <td>:</td>
+                            <td>{{center.csc_reg_no}}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Title</th>
                             <td>:</td>
                             <td>{{center.full_name}}</td>
                         </tr>
-                        {% if center.csc_reg_no %}
-                        <tr>
-                            <th>CSC Reg No.</th>
-                            <td>:</td>
-                            <td>{{center.csc_reg_no}}</td>
-                        </tr>
-                        {% endif %}
+                        
                         {% if center.website %}
                         <tr>
                             <th>Website</th>

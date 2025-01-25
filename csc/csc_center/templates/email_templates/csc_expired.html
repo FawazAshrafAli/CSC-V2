@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your CSC Center Account Expiration Notice</title>
-    <style>
+    <style>        
+    
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -25,7 +26,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .email-header {
-            background-color: #FF5722;
+            background-color: red;
             color: #ffffff;
             text-align: center;
             padding: 25px;
@@ -41,7 +42,7 @@
             margin: 15px 0;
         }
         .highlight {
-            color: #FF5722;
+            color: red;
             font-weight: bold;
         }
         .button {
@@ -66,6 +67,29 @@
                 border-radius: 0;
             }
         }
+
+        p, h3, h4 {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .text-decoration-underline {
+            text-decoration: underline;
+        }
+        .text-danger {
+            color: red;;
+        }
+        .text-success {
+            color: green;;
+        }
+        .text-center {
+            text-align: center;
+        }        
+        .tick-listing {
+            list-style: circle;
+        }
+        .arrow-listing {
+            list-style: square;
+        }
     </style>
 </head>
 <body>
@@ -73,36 +97,78 @@
         <div class="email-content">
             <!-- Email Header -->
             <div class="email-header">
-                Important: Account Expiration Notice
+                Important: Account Expired
             </div>
 
             <!-- Email Body -->
             <div class="email-body">
                 <p>Dear <strong>{{ owner_name }}</strong>,</p>
-
-                <p>We hope this message finds you well. We want to inform you that your CSC Center "{{center_name}}" account has expired as of <strong class="highlight">{{ expiration_date }}</strong>. To ensure that you can continue enjoying our services without interruption, we kindly ask you to renew your account at your earliest convenience.</p>
+                <br>
+                <p>
+                    We hope this message finds you well. We want to inform you that your CSC Center "{{center_name}}" account has expired as of <strong class="highlight">{{ expiration_date }}</strong>. To ensure that you can continue enjoying our services without interruption, we kindly ask you to renew your account at your earliest convenience.<br>
+                    हम आशा करते हैं कि यह संदेश आपको अच्छी स्थिति में प्राप्त होगा। हम आपको सूचित करना चाहते हैं कि आपके CSC सेंटर "{{center_name}}" का खाता <strong class="highlight">{{expiration_date}}</strong> को समाप्त हो गया है। यह सुनिश्चित करने के लिए कि आप हमारी सेवाओं का बिना किसी रुकावट के लाभ उठा सकें, हम आपसे अनुरोध करते हैं कि कृपया अपने खाते को जल्द से जल्द नवीनीकृत करें।
+                </p>
                 
-                <h2>Why Renew?</h2>
-                <ul>
-                    <li><strong>Continued Access:</strong> Avoid disruptions in services and maintain your presence.</li>
-                    <li><strong>Ongoing Support:</strong> Stay connected with our support team for any assistance you may need.</li>
-                    <li><strong>Exclusive Offers:</strong> As a renewed member, you will have access to special offers and updates.</li>
+                
+                <br>
+                <h3>Why Pay and Activate Mini website (Digital Business Card)</h3>
+                <p>मिनी वेबसाइट (डिजिटल बिजनेस कार्ड) के लिए भुगतान और सक्रियण क्यों करें</p>
+                <br>
+
+                <h4 class="text-decoration-underline">FEATURES AVAILABLE</h4>
+                <p class="text-decoration-underline">उपलब्ध सुविधाएँ</p>
+
+                <ul class="tick-listing">
+                    <li>Get Webpage in Smart Locator with unique QR code </li>
+                    <li>स्मार्ट लोकेटर में अद्वितीय क्यूआर कोड के साथ वेबपेज प्राप्त करें</li>
+                    <br>
+                    <li>Click to Call/Text/WhatsApp/Mail – Tap to connect buttons in the page </li>
+                    <li>कॉल/टेक्स्ट/व्हाट्सएप/मेल पर क्लिक करें – पेज में बटन कनेक्ट करने के लिए टैप करें</li>
+                    <br>
+                    <li>Update contact details and services at any time</li>
+                    <li>किसी भी समय संपर्क विवरण और सेवाएँ अपडेट करें</li>
+                    <br>
+                    <li>Receive & manage your leads (enquiries)</li>
+                    <li>अपनी लीड (पूछताछ) प्राप्त करें और प्रबंधित करें</li>
+                    <br>
+                    <li>Boosting the Smart Locator Using contents in website and social media</li>
+                    <li>वेबसाइट और सोशल मीडिया में सामग्री का उपयोग करके स्मार्ट लोकेटर को बढ़ावा देना</li>
+                    <br>
+                    <li>Instant Download Promotional Posters with your Center Name, Logo & Address</li>
+                    <li>अपने केंद्र के नाम, लोगो और पते के साथ तुरंत प्रचार पोस्टर डाउनलोड करें</li>
                 </ul>
 
-                <p style="text-align: center;">
-                    <a href="{{renew_link}}" class="button">Renew Your Account</a>
-                </p>
+                <h4 class="text-success text-decoration-underline">Exclusives (Coming Soon) </h4>
+                <p class="text-success text-decoration-underline">विशेष (जल्द ही आ रहा है)</p>
+
+                <ul class="arrow-listing">
+                    <li>Scholarships & welfare schemes</li>
+                    <li>छात्रवृत्ति और कल्याण योजनाएँ</li>
+                    <li>Additional Profitable Products with marketing support</li>
+                    <li>मार्केटिंग सहायता के साथ अतिरिक्त लाभदायक उत्पाद</li>
+                    <li>Business Campaigns offering the customers attractive prizes</li>
+                    <li>ग्राहकों को आकर्षक पुरस्कार प्रदान करने वाले व्यावसायिक अभियान</li>
+                </ul>
+
+                <p class="text-center">Pricing</p>
+                <p class="text-center">Regular price Rs 2400</p>
+                <p class="text-center">Offer Price Rs 900</p>
+                <p class="text-center">Early Bird Offer Rs 500 (only for first 500 VLEs)</p><br>
+                <p class="text-center">
+                    <a href="{{renew_link}}" class="button">Pay Now</a>
+                </p><br>
+
 
                 <p>If you have any questions, feel free to reach us at <strong>{{ support_email }}</strong>.</p>
 
                 <p>Thank you for being a valued member of our community. We look forward to continuing to support your CSC Center!</p>
-
+                <br>
                 <p>Best regards,<br>CSC Locator Team</p>
             </div>
 
             <!-- Email Footer -->
             <div class="email-footer">
-                &copy; 2024 CSC Center. All rights reserved.
+                &copy; 2024 CSC Locator. All rights reserved.
             </div>
         </div>
     </div>

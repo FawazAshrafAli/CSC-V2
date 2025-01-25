@@ -39,46 +39,7 @@
         border-top: 1px solid silver;
         padding: 0 3px;
     }
-</style>
 
-<!-- Titlebar -->
-<div id="titlebar">
-    <div class="row">
-        <div class="col-md-12">
-            <h2>{{csc.title}}</h2>
-            <!-- Breadcrumbs -->
-            <nav id="breadcrumbs">
-                <ul>
-                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
-                    <li><a href="{% url 'csc_admin:returned_csc_centers' %}">Returned CSC Center Requests</a></li>
-                    <li>{{csc_center.csc_center.full_name}}</li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-    <div id="delete-toggle-div" style="display: flex; align-items: center;">
-        <a href="{% url 'csc_admin:update_csc' csc_center.csc_center.slug %}" id="update-toggle-btn">UPDATE<a></button>
-        <button type="button" id="delete-toggle-btn">DELETE<button>
-        <button type="button" title="Options" id="csc-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
-    </div>
-    {% include "admin_components/message.html" %}
-</div>
-
-<!-- Delete Confirmation Box Start-->
-<div id="delete-confirmation-box" style="display: none;">
-    <div class="modal-content">            
-        <h4><span>Deleting</span> CSC Center '{{csc_center.csc_center.full_name}}' . . .</h4>
-        <h5>Are you sure?</h5>                        
-    </div>
-    <br>
-    <form method="GET" action="{% url 'csc_admin:delete_csc' csc_center.csc_center.slug %}">
-        <button type="submit" id="confirm-deletion-btn">Delete</button>
-        <button type="button" class="cancel-btn">Cancel</button>
-    </form>
-</div>
-<!-- Delete Confirmation Box End-->
-
-<style>
     #action-confirmation-box {
         display: none;
         position: fixed;
@@ -124,8 +85,47 @@
     .cancel-btn:hover {
         background: linear-gradient(to bottom, blue, blue, indigo);
     }
-    
+    #action-btns-row {
+        text-align:center;
+    }
 </style>
+
+<!-- Titlebar -->
+<div id="titlebar">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{csc.title}}</h2>
+            <!-- Breadcrumbs -->
+            <nav id="breadcrumbs">
+                <ul>
+                    <li><a href="{% url 'csc_admin:home' %}">Home</a></li>
+                    <li><a href="{% url 'csc_admin:returned_csc_centers' %}">Returned CSC Center Requests</a></li>
+                    <li>{{csc_center.csc_center.full_name}}</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div id="delete-toggle-div" style="display: flex; align-items: center;">
+        <a href="{% url 'csc_admin:update_csc' csc_center.csc_center.slug %}" id="update-toggle-btn">UPDATE<a></button>
+        <button type="button" id="delete-toggle-btn">DELETE<button>
+        <button type="button" title="Options" id="csc-more-option-btn"><i class="fas fa-ellipsis-v"></i></button>
+    </div>
+    {% include "admin_components/message.html" %}
+</div>
+
+<!-- Delete Confirmation Box Start-->
+<div id="delete-confirmation-box" style="display: none;">
+    <div class="modal-content">            
+        <h4><span>Deleting</span> CSC Center '{{csc_center.csc_center.full_name}}' . . .</h4>
+        <h5>Are you sure?</h5>                        
+    </div>
+    <br>
+    <form method="GET" action="{% url 'csc_admin:delete_csc' csc_center.csc_center.slug %}">
+        <button type="submit" id="confirm-deletion-btn">Delete</button>
+        <button type="button" class="cancel-btn">Cancel</button>
+    </form>
+</div>
+<!-- Delete Confirmation Box End-->
 
 <!-- Action Box Start-->
 <div id="action-confirmation-box">
@@ -163,10 +163,22 @@
                 <div class="col-lg-8" id="csc-description-div">                        
                     <table id="csc-detail-table">
                         <tr>
+                            <th>CSC ID</th>
+                            <td>:</td>
+                            <td>{{csc_center.csc_center.pk}}</td>
+                        </tr>
+                        <tr>
                             <th>Title</th>
                             <td>:</td>
                             <td>{{csc_center.csc_center.full_name}}</td>
                         </tr>
+                        {% if csc_center.csc_center.csc_reg_no %}
+                        <tr>
+                            <th>CSC Reg No.</th>
+                            <td>:</td>
+                            <td>{{csc_center.csc_center.csc_reg_no}}</td>
+                        </tr>
+                        {% endif %}
                         {% if csc_center.csc_center.website %}
                         <tr>
                             <th>Website</th>
@@ -241,6 +253,7 @@
     </div>
 </div>
 
+{% if csc_center.csc_center.description %}
 <div class="row">
     <div class="col-lg-12">
         <table id="csc-summary-table" >
@@ -257,7 +270,9 @@
         </table>
     </div>
 </div>
+{% endif %}
 
+{% if csc_center.feedback %}
 <div class="row">
     <div class="col-lg-12">
         <table id="csc-summary-table" >
@@ -274,12 +289,8 @@
         </table>
     </div>
 </div>
-
-<style>
-    #action-btns-row {
-        text-align:center;
-    }   
-    </style>
+{% endif %}
+<br>
     <div class="row" id="action-btns-row">
         <div class="col-md-12">
             <button type="button" class="button" id="cancel-return-btn">Cancel Return</button>
