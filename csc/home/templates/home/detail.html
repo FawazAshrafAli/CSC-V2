@@ -463,17 +463,18 @@
             class="item mfp-gallery" title="{{center.name}} banner image {{forloop.counter}}"></a>
         {% endfor %}
         {% else %}
-        <a href="{% static 'images/single-listing-01.jpg' %}" data-background-image="{% static 'images/single-listing-01.jpg' %}"
+        <a href="{% static 'w3/images/banner1.jpeg' %}" data-background-image="{% static 'w3/images/banner1.jpeg' %}"
             class="item mfp-gallery" title="Title 1"></a>
-        <a href="{% static 'images/single-listing-02.jpg' %}" data-background-image="{% static 'images/single-listing-02.jpg' %}"
+        <a href="{% static 'w3/images/banner2.jpeg' %}" data-background-image="{% static 'w3/images/banner2.jpeg' %}"
             class="item mfp-gallery" title="Title 3"></a>
-        <a href="{% static 'images/single-listing-03.jpg' %}" data-background-image="{% static 'images/single-listing-03.jpg' %}"
+        <a href="{% static 'w3/images/banner3.jpeg' %}" data-background-image="{% static 'w3/images/banner3.jpeg' %}"
             class="item mfp-gallery" title="Title 2"></a>
-        <a href="{% static 'images/single-listing-04.jpg' %}" data-background-image="{% static 'images/single-listing-04.jpg' %}"
+        <a href="{% static 'w3/images/banner4.jpeg' %}" data-background-image="{% static 'w3/images/banner4.jpeg' %}"
+            class="item mfp-gallery" title="Title 4"></a>
+            <a href="{% static 'w3/images/banner5.jpeg' %}" data-background-image="{% static 'w3/images/banner5.jpeg' %}"
             class="item mfp-gallery" title="Title 4"></a>
         {% endif %}
-    </div>
-
+    </div>    
 
 
 
@@ -567,6 +568,12 @@
         <div class="col-md-12" style="display: flex; justify-content: center;">
             <img src="{{center.qr_code_image.url}}" alt="" style="width: 95px;">        
         </div>
+        <div class="boxed-widget margin-top-35 d-flex justify-content-center">                
+            <div class="d-flex justify-content-between align-items-center" style="width: 240px;">
+                <button id="share-url-btn" style="background-color: #24a0ed; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share Url</button>
+                <button id="share-qr-btn" onclick="shareCurrentPage()" style="background-color: teal; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share QR</button>
+            </div>
+        </div>
         <div class="col-md-12">
             <h3 class="headline centered margin-bottom-45">
                 <strong class="headline-with-separator">Our Services</strong>
@@ -586,7 +593,7 @@
                             <img src="{% if service.image %}{{service.image.url}}{% else %}{% static 'w3/images/no_image.png' %}{% endif %}" alt="{{service.name}}">
                             <div class="listing-item-content">
                                 <h3>{{service.name}}</h3>
-                                {% if service.description %}<span>{{service.description|safe|slice:':20'}}</span>{% endif %}
+                                {% comment %} {% if service.description %}<span>{{service.description|safe|slice:':20'}}</span>{% endif %} {% endcomment %}
                             </div>
                         </div>
 
@@ -814,13 +821,7 @@
             </div>
             {% endif %}      
             
-            <div class="boxed-widget margin-top-35 d-flex justify-content-center">                
-                <div class="d-flex justify-content-between align-items-center" style="width: 240px;">
-                    <button id="share-url-btn" style="background-color: #24a0ed; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share Url</button>
-                    <button id="share-qr-btn" onclick="shareCurrentPage()" style="background-color: teal; color: #fff; border: none; box-shadow: 0 0 5px #777;"><i class="fa fa-share-alt"></i>&nbsp;Share QR</button>
-                </div>
-
-            </div>
+            
 
 
 
@@ -960,6 +961,19 @@
 {% block scripts %}
 <script>
     $('document').ready(() => {
+
+        let slideTimer;
+
+        function slideBanner() {
+            if ($('.slick-next').length > 0) {
+                $('.slick-next').click();
+            }
+
+            slideTimer = setTimeout(slideBanner, 3000);
+        }
+
+        slideBanner();
+
         $("#product-applicant-name, #product-applicant-email, #product-applicant-phone").on('input', function () {		
             const productApplicantName = $("#product-applicant-name").val();
             const productApplicantEmail = $("#product-applicant-email").val();
@@ -1004,6 +1018,24 @@
         
         // Optional: Alert or notify the user
         alert("URL copied to clipboard!");
+    }
+
+    function copyQr() {
+        // Create a temporary input element to hold the URL
+        const tempInput = document.createElement("input");
+        tempInput.value = `https://{{request.get_host}}{{center.qr_code_image.url}}`
+        document.body.appendChild(tempInput);
+        
+        // Select and copy the URL
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand("copy");
+        
+        // Remove the temporary input element
+        document.body.removeChild(tempInput);
+        
+        // Optional: Alert or notify the user
+        alert("QR copied to clipboard!");
     }
 
     // Share tab visibility
@@ -1064,6 +1096,12 @@
                     <i class="fa fa-whatsapp" style="color: #fff; font-size: 17px;"></i>
                 </div>
                 <span><small>Whatsapp</small></span>
+            </a>
+            <a href="#" class="share-anchor" title="Copy Url" onclick="$('#share-tab-div').hide(); copyQr()">
+                <div class="share-btn-tiles" style="background-color: grey;">
+                    <i class="fa fa-copy" style="color: #fff; font-size: 17px;"></i>
+                </div>
+                <span><small>Copy QR</small></span>
             </a>`
         )
         $('#share-tab-div').show()

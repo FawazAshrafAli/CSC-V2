@@ -183,23 +183,24 @@
 				<div class="col-md-12">
                 
 					<div class="main-search-headlines">
-						<h2>
-							Apply for
-							<!-- Typed words can be configured in script settings at the bottom of this HTML file -->
-							<span class="typed-words"></span>
+					<h2>
+						Find Nearest CSC - Common Service Centres in India
 						</h2>
-						<h4>CSC - Common Services Centre programme is an initiative of the Ministry of Electronics and IT (MeitY), Government of India.</h4>
 					</div>
 					
 
 					<form method="get" action="{% url 'home:csc_centers' %}">
 						
-						<div class="add-listing-headline">
-							<h3> Pincode Search</h3>
+						<div class="add-listing-headline" style="width:185px; display: inline-flex;">
+							<h3>Pincode Search</h3>
 							<!-- Switcher -->
 							<label class="switch"><input type="checkbox" id="pincode-checkbox-btn"><span
 									class="slider round"></span></label>
 						</div>
+						
+							<div id="csc-near-me-div" style="display: inline-flex; margin-left: 5px;">
+						<a href="#" style="text-decoration:none;font-size: 15px;font-weight: bold;border: 2px solid #c400ff;padding: 0px 10px 0px 10px;margin: 0;border-radius: 15px;color: #c400ff;" id="near-me"><i class="fa fa-map-marker" aria-hidden="true"></i> CSC Near Me</a>
+					</div>
 
 						<div class="main-search-input">
 
@@ -229,9 +230,7 @@
 							
 						</div>
 					</form>
-					<div id="csc-near-me-div">
-						<a href="#" id="near-me">Centers Near Me</a>
-					</div>
+				 
 				</div>
 			</div>
 			<!-- Features Categories -->
@@ -261,9 +260,15 @@
 		<div class="main-search-photo-slider">
 			<div class="msps-slider-container">
 				<div class="msps-slider">
+					{% if home_banners %}
+					{% for banner in home_banners %}
+					<div class="item"><img src="{{banner.image.url}}" class="item" title="Title {{forloop.counter}}"/></div>
+					{% endfor %}
+					{% else %}
 					<div class="item"><img src="{% static 'images/slider01.jpeg' %}" class="item" title="Title 1"/></div>
 					<div class="item"><img src="{% static 'images/slider02.jpeg' %}" class="item" title="Title 1"/></div>
 					<div class="item"><img src="{% static 'images/slider03.jpeg' %}" class="item" title="Title 1"/></div>
+					{% endif %}
 				</div>
 			</div>
 		</div>

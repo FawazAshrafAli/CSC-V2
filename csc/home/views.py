@@ -1,5 +1,5 @@
 import requests
-from django.shortcuts import redirect, get_object_or_404, render
+from django.shortcuts import redirect, get_object_or_404
 from django.http import Http404
 from django.views.generic import TemplateView, View, DetailView, ListView, CreateView
 from django.views.decorators.cache import never_cache
@@ -9,10 +9,9 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from urllib.parse import quote
 from django.db.models import Count
-from django.views.decorators.csrf import csrf_exempt
 import logging
 
-
+from .models import HomePageBanner
 from blog.models import Blog
 from csc_center.models import CscCenter, State, District, Block, CscKeyword
 from services.models import Service, ServiceEnquiry
@@ -39,9 +38,9 @@ class BaseHomeView(View):
             context["service_group_3"] = services[12:18] if len(services) > 12 else None
             context['services'] = services
             
-            states = State.objects.all()
+            states = State.objects.all().exclude(state = "nan")
             context['states'] = states
-            context['footer_states'] = states.exclude(state = "nan")
+            context['footer_states'] = states
             context['faqs'] = Faq.objects.all()
             context['home_page'] = True
 
@@ -72,6 +71,8 @@ class HomePageView(BaseHomeView, TemplateView):
             context['products'] = Product.objects.all()
             context['blogs'] = Blog.objects.all()
             context["keywords"] = CscKeyword.objects.all()
+            banner_obj = HomePageBanner.objects.all().first()
+            context["home_banners"] = banner_obj.images.all() if banner_obj else None
         except Exception as e:
             logger.exception("Error in fetching home page context data: %s", e)
         return context
@@ -112,10 +113,10 @@ class SearchCscCenterView(BaseHomeView, ListView):
                 state_obj = get_object_or_404(State, state=state_name)
 
             if district_name:
-                district_obj = get_object_or_404(District, district=district_name)
+                district_obj = get_object_or_404(District, district=district_name, state=state_obj)
 
             if block_name:
-                block_obj = get_object_or_404(Block, block=block_name)
+                block_obj = get_object_or_404(Block, block=block_name, district=district_obj, state=state_obj)
 
             location = block_obj or district_obj or state_obj
 
@@ -127,8 +128,8 @@ class SearchCscCenterView(BaseHomeView, ListView):
                 'meta_district': self.encode_parameter(district_obj.district) if district_obj else None,
                 'meta_block': self.encode_parameter(block_obj.block) if block_obj else None,
                 'location': location,
-                'districts': District.objects.filter(state=state_obj) if state_obj else None,
-                'blocks': Block.objects.filter(state=state_obj, district=district_obj) if state_obj and district_obj else None,
+                'districts': District.objects.filter(state=state_obj).exclude(district="nan") if state_obj else None,
+                'blocks': Block.objects.filter(state=state_obj, district=district_obj).exclude(block="nan") if state_obj and district_obj else None,
             })
         except Exception as e:
             logger.exception(f"Error in fetching context data of search csc center view: {e}")
@@ -155,10 +156,10 @@ class SearchCscCenterView(BaseHomeView, ListView):
                     except Http404:
                         continue
             
-            filters = {'is_active': True}
+            filters = {'status': "Approved"}
 
             if pincode:
-                centers = CscCenter.objects.filter(zipcode=pincode, **filters)
+                centers = CscCenter.objects.filter(zipcode=pincode, **filters).exclude(name="nan")
 
                 if services:
                     centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))
@@ -171,14 +172,14 @@ class SearchCscCenterView(BaseHomeView, ListView):
                 filters['state'] = state
 
             if district_name:
-                district = get_object_or_404(District, district=district_name)
+                district = get_object_or_404(District, district=district_name, state = state)
                 filters['district'] = district
 
             if block_name:
-                block = get_object_or_404(Block, block=block_name)
+                block = get_object_or_404(Block, block=block_name, district = district, state = state)
                 filters['block'] = block
 
-            centers = CscCenter.objects.filter(**filters).order_by(listing)
+            centers = CscCenter.objects.filter(**filters).order_by(listing).exclude(name="nan")
 
             if services:
                 centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))
@@ -203,12 +204,11 @@ class NearMeCscCenterView(BaseHomeView, ListView):
         longitude = self.kwargs['longitude']
 
         if latitude and longitude:            
-            api_key = '#'
+            api_key = ''
 
             url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
 
             response = requests.get(url)
-            print(response)
             data = response.json()
 
             if data['results']:
@@ -257,7 +257,7 @@ class NearMeCscCenterView(BaseHomeView, ListView):
                         continue
             
             if county:
-                centers = CscCenter.objects.filter(block__block = county, is_active = True)  
+                centers = CscCenter.objects.filter(block__block = county, status = "Approved").exclude(name = "nan")
 
                 if services:
                     centers = centers.filter(services__in=service_list).annotate(matched_services=Count('services')).filter(matched_services=len(service_list))

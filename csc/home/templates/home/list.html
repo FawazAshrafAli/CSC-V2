@@ -301,7 +301,9 @@
                   <img src="{% if center.logo %} {{center.logo.url}} {% else %} {% static 'w3/images/csc_default.jpeg' %} {% endif %}" alt="" />
                 </div>
                 <h3>{{center.full_name}}</h3>
-                <p>CSC ID : {{center.pk}}</p>
+                {% if center.csc_reg_no %}
+                <p>CSC ID : {{center.csc_reg_no}}</p>
+                {% endif %}
                 <span
                   ><i class="fa fa-map-marker" aria-hidden="true"></i> {{center.partial_address}}</span
                 >
